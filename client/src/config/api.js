@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const API_BASE_URL = 'http://localhost:5000/api';
+
+// Configurazione base per le richieste API
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.barbershop.dcreativo.ch/api';
 
 export const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('token');
