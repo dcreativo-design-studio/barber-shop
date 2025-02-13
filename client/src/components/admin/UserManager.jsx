@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api';
 
 function UserManager() {
   const [users, setUsers] = useState([]);
@@ -14,18 +15,28 @@ function UserManager() {
     role: 'client'
   });
 
+  // Configurazione base per le richieste axios
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/users', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/admin/users`,
+        axiosConfig
+      );
       setUsers(response.data);
       setLoading(false);
     } catch (error) {
+      console.error('Error fetching users:', error);
       setError('Errore nel caricamento degli utenti');
       setLoading(false);
     }
@@ -35,11 +46,9 @@ function UserManager() {
     e.preventDefault();
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/admin/users',
+        `${API_BASE_URL}/admin/users`,
         newUser,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        }
+        axiosConfig
       );
       setUsers([...users, response.data]);
       setNewUser({
@@ -50,6 +59,7 @@ function UserManager() {
         role: 'client'
       });
     } catch (error) {
+      console.error('Error creating user:', error);
       setError('Errore nella creazione dell\'utente');
     }
   };
@@ -57,17 +67,16 @@ function UserManager() {
   const handleUpdateUser = async (id) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/admin/users/${id}`,
+        `${API_BASE_URL}/admin/users/${id}`,
         editingUser,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        }
+        axiosConfig
       );
       setUsers(users.map(user =>
         user._id === id ? response.data : user
       ));
       setEditingUser(null);
     } catch (error) {
+      console.error('Error updating user:', error);
       setError('Errore nell\'aggiornamento dell\'utente');
     }
   };
@@ -76,11 +85,13 @@ function UserManager() {
     if (!window.confirm('Sei sicuro di voler eliminare questo utente?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      await axios.delete(
+        `${API_BASE_URL}/admin/users/${id}`,
+        axiosConfig
+      );
       setUsers(users.filter(user => user._id !== id));
     } catch (error) {
+      console.error('Error deleting user:', error);
       setError('Errore nell\'eliminazione dell\'utente');
     }
   };

@@ -1,6 +1,7 @@
 import { addMinutes, format, parse } from 'date-fns';
 import { Coffee, Palmtree } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api'; // Aggiunta questa importazione
 
 export const generateTimeSlots = (openingTime, closingTime) => {
   if (!openingTime || !closingTime) {
@@ -67,8 +68,9 @@ function TimeSlots({
           barberId: selectedBarber
         });
 
+        // Aggiornato URL
         const response = await fetch(
-          `http://localhost:5000/api/barbers/${selectedBarber}/check-vacation?date=${selectedDate}`
+          `${API_BASE_URL}/barbers/${selectedBarber}/check-vacation?date=${selectedDate}`
         );
 
         if (!response.ok) {
@@ -84,7 +86,6 @@ function TimeSlots({
         if (data.isOnVacation) {
           console.log('Barber is on vacation - blocking slot generation');
           setLocalAvailableSlots([]);
-          // Importante: assicurarsi che nessun altro useEffect possa sovrascrivere questo stato
           return;
         } else {
           console.log('Barber is not on vacation - proceeding with slot generation');
@@ -92,7 +93,6 @@ function TimeSlots({
       } catch (error) {
         console.error('Error checking vacation:', error);
         setError('Errore nel controllo delle vacanze');
-        // In caso di errore, meglio non mostrare slot disponibili
         setLocalAvailableSlots([]);
       }
     };
@@ -118,8 +118,9 @@ function TimeSlots({
 
       setLoading(true);
       try {
+        // Aggiornato primo URL
         const barberResponse = await fetch(
-          `http://localhost:5000/api/appointments/public/barbers/${selectedBarber}`
+          `${API_BASE_URL}/appointments/public/barbers/${selectedBarber}`
         );
 
         if (!barberResponse.ok) {
@@ -138,21 +139,14 @@ function TimeSlots({
 
         setBarberWorkingHours(workingHours);
 
-        if (!workingHours?.isWorking) {
-          // Se il barbiere non lavora in questo giorno
+        if (!workingHours?.isWorking || isBarberOnVacation) {
           setLocalAvailableSlots([]);
           return;
         }
 
-        if (isBarberOnVacation) {
-          // Se il barbiere è in vacanza
-          setLocalAvailableSlots([]);
-          return;
-        }
-
-        // 3. Ottieni gli slot disponibili solo se il barbiere lavora e non è in vacanza
+        // Aggiornato secondo URL
         const slotsResponse = await fetch(
-          `http://localhost:5000/api/appointments/public/available-slots?${new URLSearchParams({
+          `${API_BASE_URL}/appointments/public/available-slots?${new URLSearchParams({
             barberId: selectedBarber,
             date: selectedDate,
             duration: selectedService.duration

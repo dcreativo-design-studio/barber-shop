@@ -1,8 +1,14 @@
 import axios from 'axios';
 
-
 // Configurazione base per le richieste API
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.barbershop.dcreativo.ch/api';
+export const API_BASE_URL = 'https://api.barbershop.dcreativo.ch/api';
+
+// Configurazione di base di axios
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  timeout: 30000, // timeout di 30 secondi
+});
 
 export const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('token');
@@ -17,20 +23,62 @@ export const getHeaders = (isMultipart = false) => {
     headers['Content-Type'] = 'application/json';
   }
 
-  console.log('Request headers:', headers);
   return headers;
 };
 
-// Configura gli interceptors globali di axios
-axios.interceptors.request.use(
+// Configura gli interceptors
+axiosInstance.interceptors.request.use(
   (config) => {
-    // Aggiungi il timezone a tutte le richieste se non è già presente
-    if (!config.headers['x-timezone']) {
-      config.headers['x-timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // Aggiungi headers di default
+    config.headers = {
+      ...config.headers,
+      ...getHeaders(config.data instanceof FormData)
+    };
+
+    // Log in development
+    if (import.meta.env.DEV) {
+      console.log('Request:', {
+        url: config.url,
+        method: config.method,
+        headers: config.headers,
+        data: config.data
+      });
     }
+
     return config;
   },
   (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    if (import.meta.env.DEV) {
+      console.log('Response:', {
+        url: response.config.url,
+        status: response.status,
+        data: response.data
+      });
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+
+    // Log dettagliato dell'errore
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+
     return Promise.reject(error);
   }
 );
@@ -39,264 +87,97 @@ axios.interceptors.request.use(
 export const apiRequest = {
   get: async (endpoint, config = {}) => {
     try {
-      const url = `${API_BASE_URL}${endpoint}`;
-      console.log('Making GET request to:', url, 'with config:', config);
-
-      const response = await axios({
-        method: 'get',
-        url: url,
-        headers: getHeaders(),
-        withCredentials: true,
-        ...config,
-        paramsSerializer: params => {
-          return Object.entries(params)
-            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-            .join('&');
-        }
-      });
-
+      const response = await axiosInstance.get(endpoint, config);
       return response.data;
     } catch (error) {
-      console.error('API Request Error:', {
-        endpoint,
-        error: error.response?.data || error.message
-      });
-      throw error;
+      throw error.response?.data || error;
     }
   },
 
   post: async (endpoint, data, config = {}) => {
     try {
-      const isMultipart = data instanceof FormData;
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, data, {
-        headers: getHeaders(isMultipart),
-        withCredentials: true,
-        ...config
-      });
+      const response = await axiosInstance.post(endpoint, data, config);
       return response.data;
     } catch (error) {
-      console.error('POST Request Error:', {
-        endpoint,
-        error: error.response?.data || error.message
-      });
       throw error.response?.data || error;
     }
   },
 
   put: async (endpoint, data, config = {}) => {
     try {
-      const isMultipart = data instanceof FormData;
-      console.log('Making PUT request:', {
-        url: `${API_BASE_URL}${endpoint}`,
-        isMultipart,
-        dataType: typeof data,
-        isFormData: data instanceof FormData
-      });
-
-      const response = await axios.put(`${API_BASE_URL}${endpoint}`, data, {
-        headers: getHeaders(isMultipart),
-        withCredentials: true,
-        ...config,
-        ...(isMultipart && {
-          transformRequest: (data, headers) => {
-            return data;
-          }
-        })
-      });
-
+      const response = await axiosInstance.put(endpoint, data, config);
       return response.data;
     } catch (error) {
-      console.error('PUT Request Error:', {
-        endpoint,
-        error: error.response?.data || error.message
-      });
       throw error.response?.data || error;
     }
   },
 
   delete: async (endpoint, config = {}) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}${endpoint}`, {
-        headers: getHeaders(),
-        withCredentials: true,
-        ...config
-      });
+      const response = await axiosInstance.delete(endpoint, config);
       return response.data;
     } catch (error) {
-      console.error('DELETE Request Error:', {
-        endpoint,
-        error: error.response?.data || error.message
-      });
       throw error.response?.data || error;
     }
   }
 };
 
-// Nuove API specifiche per i servizi
+// API specifiche per i servizi
 export const servicesApi = {
-  getActiveServices: async () => {
-    try {
-      const response = await apiRequest.get('/services/active');
-      console.log('Fetched active services:', response);
-      return response;
-    } catch (error) {
-      console.error('Error fetching active services:', error);
-      throw error;
-    }
-  },
-
-  validateService: async (serviceName) => {
-    try {
-      const response = await apiRequest.post('/services/validate', { serviceName });
-      console.log('Service validation result:', response);
-      return response.isValid;
-    } catch (error) {
-      console.error('Error validating service:', error);
-      return false;
-    }
-  },
-
-  createService: async (serviceData) => {
-    try {
-      const response = await apiRequest.post('/services', serviceData);
-      console.log('Created new service:', response);
-      return response;
-    } catch (error) {
-      console.error('Error creating service:', error);
-      throw error;
-    }
-  },
-
-  updateService: async (serviceId, serviceData) => {
-    try {
-      const response = await apiRequest.put(`/services/${serviceId}`, serviceData);
-      console.log('Updated service:', response);
-      return response;
-    } catch (error) {
-      console.error('Error updating service:', error);
-      throw error;
-    }
-  }
+  getActiveServices: () => apiRequest.get('/services/active'),
+  validateService: (serviceName) => apiRequest.post('/services/validate', { serviceName }),
+  createService: (serviceData) => apiRequest.post('/services', serviceData),
+  updateService: (serviceId, serviceData) => apiRequest.put(`/services/${serviceId}`, serviceData)
 };
 
-// Nuove API specifiche per i barbieri
+// API specifiche per i barbieri
 export const barberApi = {
-  updateBarberServices: async (barberId, services) => {
-    try {
-      console.log('Updating barber services:', { barberId, services });
-      const response = await apiRequest.put(`/barbers/${barberId}/services`, { services });
-      console.log('Update services response:', response);
-      return response;
-    } catch (error) {
-      console.error('Error updating barber services:', error);
-      throw error;
-    }
-  },
+  updateBarberServices: (barberId, services) =>
+    apiRequest.put(`/barbers/${barberId}/services`, { services }),
 
-  updateBarberWorkingHours: async (barberId, workingHours) => {
-    try {
-      console.log('Updating working hours:', { barberId, workingHours });
-      const response = await apiRequest.put(`/barbers/${barberId}/working-hours`, {
-        workingHours: workingHours.map(hours => ({
-          ...hours,
-          breakStart: hours.hasBreak ? hours.breakStart : null,
-          breakEnd: hours.hasBreak ? hours.breakEnd : null
-        }))
-      });
-      console.log('Update working hours response:', response);
-      return response;
-    } catch (error) {
-      console.error('Error updating working hours:', error);
-      throw error;
-    }
-  },
+  updateBarberWorkingHours: (barberId, workingHours) =>
+    apiRequest.put(`/barbers/${barberId}/working-hours`, {
+      workingHours: workingHours.map(hours => ({
+        ...hours,
+        breakStart: hours.hasBreak ? hours.breakStart : null,
+        breakEnd: hours.hasBreak ? hours.breakEnd : null
+      }))
+    }),
 
   getBarberAvailability: async (barberId, date, duration) => {
-    try {
-      if (!barberId || !date || !duration) {
-        console.error('Missing required parameters:', { barberId, date, duration });
-        throw new Error('Parametri mancanti per la richiesta di disponibilità');
+    if (!barberId || !date || !duration) {
+      throw new Error('Parametri mancanti per la richiesta di disponibilità');
+    }
+
+    const queryParams = new URLSearchParams({
+      barberId: barberId.toString(),
+      date: date.toString(),
+      duration: duration.toString()
+    });
+
+    const [barberResponse, slotsResponse] = await Promise.all([
+      apiRequest.get(`/barbers/${barberId}`),
+      apiRequest.get(`/appointments/public/available-slots?${queryParams}`)
+    ]);
+
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const workingHours = barberResponse.workingHours?.find(h => h.day === dayOfWeek);
+
+    return slotsResponse.map(slot => ({
+      ...slot,
+      workingHours: {
+        hasBreak: workingHours?.hasBreak || false,
+        breakStart: workingHours?.breakStart || null,
+        breakEnd: workingHours?.breakEnd || null
       }
-
-      console.log('Requesting availability with params:', {
-        barberId,
-        date,
-        duration
-      });
-
-      // Ottieni prima i dettagli del barbiere inclusi gli orari di lavoro
-      const barberResponse = await apiRequest.get(`/barbers/${barberId}`);
-
-      // Costruisci query params in modo sicuro
-      const queryParams = new URLSearchParams({
-        barberId: barberId.toString(),
-        date: date.toString(),
-        duration: duration.toString()
-      }).toString();
-
-      // Ottieni gli slot disponibili
-      const slotsResponse = await apiRequest.get(
-        `/appointments/public/available-slots?${queryParams}`
-      );
-
-      // Trova gli orari di lavoro per il giorno selezionato
-      const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-      const workingHours = barberResponse.workingHours?.find(h => h.day === dayOfWeek);
-
-      // Arricchisci gli slot con le informazioni sulla pausa pranzo
-      const enrichedSlots = slotsResponse.map(slot => ({
-        ...slot,
-        workingHours: {
-          hasBreak: workingHours?.hasBreak || false,
-          breakStart: workingHours?.breakStart || null,
-          breakEnd: workingHours?.breakEnd || null
-        }
-      }));
-
-      console.log('Enriched slots with break times:', enrichedSlots);
-      return enrichedSlots;
-
-    } catch (error) {
-      console.error('Error in getBarberAvailability:', error);
-      throw new Error('Errore nel caricamento della disponibilità');
-    }
-  },
-  updateBarberVacations: async (barberId, vacations) => {
-    try {
-      console.log('Updating barber vacations:', { barberId, vacations });
-      const response = await apiRequest.put(`/barbers/${barberId}/vacations`, { vacations });
-      console.log('Update vacations response:', response);
-      return response;
-    } catch (error) {
-      console.error('Error updating barber vacations:', error);
-      throw error;
-    }
+    }));
   },
 
-  checkVacation: async (barberId, date) => {
-    try {
-      const response = await apiRequest.get(`/barbers/${barberId}/check-vacation`, {
-        params: { date }
-      });
-      return response;
-    } catch (error) {
-      console.error('Error checking vacation:', error);
-      throw error;
-    }
-  }
+  updateBarberVacations: (barberId, vacations) =>
+    apiRequest.put(`/barbers/${barberId}/vacations`, { vacations }),
+
+  checkVacation: (barberId, date) =>
+    apiRequest.get(`/barbers/${barberId}/check-vacation`, { params: { date } })
 };
-
-// Aggiungi un interceptor per gestire le risposte e gli errori
-axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Gestisci errori di autenticazione
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
 
 export default apiRequest;

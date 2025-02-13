@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 
 function Register() {
@@ -28,7 +29,7 @@ function Register() {
     }
 
     try {
-      await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -41,8 +42,15 @@ function Register() {
           password: formData.password
         })
       });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Errore durante la registrazione');
+      }
+
       navigate('/login');
     } catch (error) {
+      console.error('Registration error:', error);
       setError(error.message || 'Errore durante la registrazione');
     }
   };

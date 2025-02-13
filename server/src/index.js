@@ -24,22 +24,34 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Configurazione CORS aggiornata con supporto timezone
+// Configurazione CORS dinamica basata sull'ambiente
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL || 'https://barbershop.dcreativo.ch',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
     'Content-Type',
     'Authorization',
-    'x-timezone',  // Aggiunto header per timezone
+    'x-timezone',
     'Access-Control-Allow-Headers'
   ],
-  exposedHeaders: ['x-timezone'] // Espone l'header timezone
+  exposedHeaders: ['x-timezone'],
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Gestisce le richieste preflight
+app.options('*', cors(corsOptions));
+
+// Security headers per produzione
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+  });
+}
 
 // Configura i limiti del body parser
 app.use(express.json({ limit: '50mb' }));
@@ -51,7 +63,7 @@ app.use(express.urlencoded({
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Debug middleware in development
+// Debug middleware solo in development
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
@@ -62,11 +74,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Aggiungi questo log prima della registrazione delle rotte
-console.log('Registering routes...');
-app.use('/api/appointments', appointmentRoutes);
-console.log('Routes registered');
-
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     status: 'success',
@@ -80,11 +88,11 @@ app.get('/', (req, res) => {
       waitingList: '/api/waiting-list',
       services: '/api/services'
     },
-    docs: 'https://api-docs.yourstylebarber.com' // URL placeholder per futura documentazione
+    docs: 'https://docs.barbershop.dcreativo.ch' // Sottodominio aggiornato
   });
 });
 
-// Rotte API
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
@@ -93,11 +101,12 @@ app.use('/api/barbers', barberRoutes);
 app.use('/api/waiting-list', waitingListRoutes);
 app.use('/api/services', serviceRoutes);
 
-// Test route
-app.get('/test', (req, res) => {
-  res.json({ message: 'Server is working' });
-});
-
+// Test route solo in development
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working' });
+  });
+}
 
 // Error handling middleware
 app.use(errorHandler);
@@ -114,43 +123,67 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'production' && status === 500
+    ? 'Internal Server Error'
+    : err.message;
+
   console.error('Global Error Handler:', err);
-  res.status(err.status || 500).json({
+
+  res.status(status).json({
     status: 'error',
-    message: err.message || 'Internal Server Error'
+    message
   });
 });
 
-// Configurazione MongoDB
-const connectDB = async () => {
+// MongoDB connection con retry
+const connectDB = async (retries = 5) => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
     console.log('Connected to MongoDB');
   } catch (err) {
+    if (retries > 0) {
+      console.log(`MongoDB connection failed. Retrying... (${retries} attempts left)`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return connectDB(retries - 1);
+    }
     console.error('MongoDB connection error:', err);
     process.exit(1);
   }
 };
 
-// Avvio del server
+// Server startup con gestione errori migliorata
 const startServer = async () => {
   try {
     await connectDB();
-
-    // Inizializza lo scheduler degli appuntamenti
-    initializeScheduler();
+    await initializeScheduler();
     console.log('Appointment scheduler initialized');
 
     const PORT = process.env.PORT || 5000;
     const server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Server email pronto!`);
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+      console.log(`Frontend URL: ${process.env.FRONTEND_URL}`);
     });
 
-    // Configura Socket.io
+    // Graceful shutdown
+    const shutdown = async () => {
+      console.log('Shutting down gracefully...');
+      server.close(async () => {
+        await mongoose.connection.close();
+        console.log('Server and MongoDB connection closed');
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+
+    // Socket.io setup
     setupSocket(server);
 
   } catch (err) {

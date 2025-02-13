@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { waitingListService } from '../services/waitingListService';
 
@@ -39,7 +40,7 @@ const WaitingList = () => {
   useEffect(() => {
     const fetchBarbers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/barbers/public');
+        const response = await fetch(`${API_BASE_URL}/barbers/public`);
         if (!response.ok) throw new Error('Errore nel caricamento dei barbieri');
         const data = await response.json();
         setBarbers(data);
@@ -51,7 +52,7 @@ const WaitingList = () => {
 
     const fetchServices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/services/active');
+        const response = await fetch(`${API_BASE_URL}/services/active`);
         if (!response.ok) throw new Error('Errore nel caricamento dei servizi');
         const data = await response.json();
         setServices(data);
@@ -106,7 +107,6 @@ const WaitingList = () => {
     }
 
     try {
-      // Debug log per vedere i dati esatti che stiamo inviando
       console.log('Form data before submission:', formData);
 
       const entryData = {
@@ -117,7 +117,6 @@ const WaitingList = () => {
         notes: formData.notes
       };
 
-      // Debug log per verificare l'oggetto da inviare
       console.log('Entry data to be sent:', entryData);
 
       await waitingListService.addEntry(entryData);

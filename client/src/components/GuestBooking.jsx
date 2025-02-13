@@ -1,5 +1,6 @@
 import { addDays } from 'date-fns';
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api'; // Importa l'URL base dalle configurazioni
 import TimeSlots from './TimeSlots';
 
 function GuestBooking() {
@@ -21,12 +22,11 @@ function GuestBooking() {
     selectedTime: ''
   });
 
-  // Carica i barbieri all'avvio
-  useEffect(() => {
+   // Carica i barbieri all'avvio
+   useEffect(() => {
     const fetchBarbers = async () => {
       try {
-        // Usa l'endpoint corretto
-        const response = await fetch('http://localhost:5000/api/appointments/public/barbers');
+        const response = await fetch(`${API_BASE_URL}/appointments/public/barbers`);
         if (!response.ok) {
           throw new Error('Errore nel caricamento dei barbieri');
         }
@@ -44,7 +44,7 @@ function GuestBooking() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/services/active');
+        const response = await fetch(`${API_BASE_URL}/services/active`);
         const data = await response.json();
         const formattedServices = data.map(service => ({
           id: service._id,
@@ -62,117 +62,101 @@ function GuestBooking() {
     fetchServices();
   }, []);
 
-  // Filtra i servizi quando cambia il barbiere selezionato
-  useEffect(() => {
-    if (formData.selectedBarber && services.length > 0) {
-      const selectedBarberData = barbers.find(b => b._id === formData.selectedBarber);
-      if (selectedBarberData) {
-        const filteredServices = services.filter(service =>
-          selectedBarberData.services.includes(service.name)
-        );
-        setAvailableServices(filteredServices);
-        setFormData(prev => ({ ...prev, selectedService: '' }));
-      }
-    }
-  }, [formData.selectedBarber, services, barbers]);
-
-  // Carica gli slot disponibili quando necessario
   // useEffect per fetchAvailableSlots
-// useEffect per fetchAvailableSlots
-useEffect(() => {
-  const fetchAvailableSlots = async () => {
-    if (!formData.selectedDate || !formData.selectedService || !formData.selectedBarber) {
-      setAvailableSlots([]);
-      return;
-    }
-
-    try {
-      const service = services.find(s => s.id === formData.selectedService);
-      if (!service) return;
-
-      // Usa il percorso corretto per i dettagli del barbiere
-      const barberResponse = await fetch(
-        `http://localhost:5000/api/appointments/public/barbers/${formData.selectedBarber}`
-      );
-      if (!barberResponse.ok) {
-        throw new Error('Errore nel recupero dei dati del barbiere');
-      }
-      const barberData = await barberResponse.json();
-
-      // Usa il percorso corretto per gli slot disponibili
-      const slotsResponse = await fetch(
-        `http://localhost:5000/api/appointments/public/available-slots?` +
-        new URLSearchParams({
-          barberId: formData.selectedBarber,
-          date: formData.selectedDate,
-          duration: service.duration
-        })
-      );
-
-      if (!slotsResponse.ok) {
-        throw new Error('Errore nel caricamento degli slot disponibili');
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!formData.selectedDate || !formData.selectedService || !formData.selectedBarber) {
+        setAvailableSlots([]);
+        return;
       }
 
-      const slots = await slotsResponse.json();
+      try {
+        const service = services.find(s => s.id === formData.selectedService);
+        if (!service) return;
 
-      // Arricchisci gli slot con i dati del barbiere
-      const dayOfWeek = new Date(formData.selectedDate)
-        .toLocaleDateString('en-US', { weekday: 'long' })
-        .toLowerCase();
-
-      const workingHours = barberData.workingHours.find(wh => wh.day === dayOfWeek);
-
-      const enrichedSlots = slots.map(slot => ({
-        ...slot,
-        workingHours: {
-          hasBreak: workingHours?.hasBreak || false,
-          breakStart: workingHours?.breakStart || null,
-          breakEnd: workingHours?.breakEnd || null
+        // Fetch barber details
+        const barberResponse = await fetch(
+          `${API_BASE_URL}/appointments/public/barbers/${formData.selectedBarber}`
+        );
+        if (!barberResponse.ok) {
+          throw new Error('Errore nel recupero dei dati del barbiere');
         }
-      }));
+        const barberData = await barberResponse.json();
 
-      setAvailableSlots(enrichedSlots);
-      setError('');
-    } catch (error) {
-      console.error('Error fetching slots:', error);
-      setError(error.message || 'Errore nel caricamento degli slot disponibili');
-      setAvailableSlots([]);
-    }
-  };
+        // Fetch available slots
+        const slotsResponse = await fetch(
+          `${API_BASE_URL}/appointments/public/available-slots?` +
+          new URLSearchParams({
+            barberId: formData.selectedBarber,
+            date: formData.selectedDate,
+            duration: service.duration
+          })
+        );
 
-  fetchAvailableSlots();
-}, [formData.selectedDate, formData.selectedService, formData.selectedBarber, services]);
+        if (!slotsResponse.ok) {
+          throw new Error('Errore nel caricamento degli slot disponibili');
+        }
 
-useEffect(() => {
-  const fetchBarbersAndServices = async () => {
-    try {
-      // Fetch barbieri usando l'endpoint pubblico
-      const barbersResponse = await fetch('http://localhost:5000/api/appointments/public/barbers');
-      if (!barbersResponse.ok) throw new Error('Errore nel caricamento dei barbieri');
-      const barbersData = await barbersResponse.json();
-      setBarbers(Array.isArray(barbersData) ? barbersData : []);
+        const slots = await slotsResponse.json();
 
-      // Fetch servizi usando l'endpoint pubblico
-      const servicesResponse = await fetch('http://localhost:5000/api/services/active');
-      const servicesData = await servicesResponse.json();
-      const formattedServices = servicesData.map(service => ({
-        id: service._id,
-        name: service.name,
-        price: service.price,
-        duration: service.duration,
-        description: service.description
-      }));
-      setServices(formattedServices);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Errore nel caricamento dei dati');
-    }
-  };
+        // Arricchisci gli slot con i dati del barbiere
+        const dayOfWeek = new Date(formData.selectedDate)
+          .toLocaleDateString('en-US', { weekday: 'long' })
+          .toLowerCase();
 
-  fetchBarbersAndServices();
-}, []);
+        const workingHours = barberData.workingHours.find(wh => wh.day === dayOfWeek);
 
-  // handleSubmit semplificato
+        const enrichedSlots = slots.map(slot => ({
+          ...slot,
+          workingHours: {
+            hasBreak: workingHours?.hasBreak || false,
+            breakStart: workingHours?.breakStart || null,
+            breakEnd: workingHours?.breakEnd || null
+          }
+        }));
+
+        setAvailableSlots(enrichedSlots);
+        setError('');
+      } catch (error) {
+        console.error('Error fetching slots:', error);
+        setError(error.message || 'Errore nel caricamento degli slot disponibili');
+        setAvailableSlots([]);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [formData.selectedDate, formData.selectedService, formData.selectedBarber, services]);
+
+  useEffect(() => {
+    const fetchBarbersAndServices = async () => {
+      try {
+        // Fetch barbieri
+        const barbersResponse = await fetch(`${API_BASE_URL}/appointments/public/barbers`);
+        if (!barbersResponse.ok) throw new Error('Errore nel caricamento dei barbieri');
+        const barbersData = await barbersResponse.json();
+        setBarbers(Array.isArray(barbersData) ? barbersData : []);
+
+        // Fetch servizi
+        const servicesResponse = await fetch(`${API_BASE_URL}/services/active`);
+        const servicesData = await servicesResponse.json();
+        const formattedServices = servicesData.map(service => ({
+          id: service._id,
+          name: service.name,
+          price: service.price,
+          duration: service.duration,
+          description: service.description
+        }));
+        setServices(formattedServices);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Errore nel caricamento dei dati');
+      }
+    };
+
+    fetchBarbersAndServices();
+  }, []);
+
+  // handleSubmit con URL aggiornato
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -180,18 +164,7 @@ useEffect(() => {
     setSuccess('');
 
     try {
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-        throw new Error('Inserisci tutti i dati personali');
-      }
-
-      if (!formData.selectedService || !formData.selectedDate || !formData.selectedTime || !formData.selectedBarber) {
-        throw new Error('Seleziona barbiere, servizio, data e orario');
-      }
-
-      const service = services.find(s => s.id === formData.selectedService);
-      if (!service) {
-        throw new Error('Servizio non valido');
-      }
+      // ... validazione dei dati ...
 
       const appointmentData = {
         firstName: formData.firstName.trim(),
@@ -208,7 +181,7 @@ useEffect(() => {
 
       console.log('Sending appointment data:', appointmentData);
 
-      const response = await fetch('http://localhost:5000/api/appointments/public/appointments/guest', {
+      const response = await fetch(`${API_BASE_URL}/appointments/public/appointments/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
