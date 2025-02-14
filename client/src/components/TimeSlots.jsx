@@ -1,7 +1,7 @@
 import { addMinutes, format, parse } from 'date-fns';
 import { Coffee, Palmtree } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../api'; // Aggiunta questa importazione
+import { API_BASE_URL } from '../config/api';
 
 export const generateTimeSlots = (openingTime, closingTime) => {
   if (!openingTime || !closingTime) {

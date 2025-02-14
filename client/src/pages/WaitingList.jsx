@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../api';
+import { API_BASE_URL } from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { waitingListService } from '../services/waitingListService';
 

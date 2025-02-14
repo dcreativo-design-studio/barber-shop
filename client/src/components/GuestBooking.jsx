@@ -1,6 +1,6 @@
 import { addDays } from 'date-fns';
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../api'; // Importa l'URL base dalle configurazioni
+import { API_BASE_URL } from '../config/api.js';
 import TimeSlots from './TimeSlots';
 
 function GuestBooking() {
