@@ -3,7 +3,7 @@ import { apiRequest } from './api';
 export const adminApi = {
   getStats: async (timeframe = 'month') => {
     try {
-      const response = await apiRequest.get('/admin/stats', {
+      const response = await apiRequest.get('/api/admin/stats', { // Aggiungi /api/
         params: { timeframe }
       });
       console.log('Stats response:', response);
