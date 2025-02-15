@@ -1,10 +1,10 @@
-import bcryptjs from 'bcryptjs';
+import bcryptjs from 'bcryptjs'; // Cambiato da bcrypt a bcryptjs
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const generateToken = (id, role) => {  // Cambiato da userId a id
+const generateToken = (userId, role) => {
   return jwt.sign(
-    { id, role },  // Cambiato da userId a id
+    { userId, role },
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );
@@ -17,9 +17,11 @@ export const authService = {
       throw new Error('Email already registered');
     }
 
+    // Hash della password prima di salvare l'utente
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(userData.password, salt);
 
+    // Crea un nuovo utente con la password hashata
     const user = new User({
       ...userData,
       password: hashedPassword
@@ -40,11 +42,17 @@ export const authService = {
       throw new Error('Email o password non validi');
     }
 
+    // Log per debug
     console.log('Found user, verifying password');
     console.log('Stored password hash:', user.password);
+    console.log('Attempting to compare with provided password');
 
     const isMatch = await bcryptjs.compare(password, user.password);
+
     console.log('Password comparison result:', isMatch);
+    console.log('bcryptjs.compare parameters:');
+    console.log('- Provided password:', password);
+    console.log('- Stored hash:', user.password);
 
     if (!isMatch) {
       console.log('Password mismatch for user:', email);
@@ -56,7 +64,7 @@ export const authService = {
 
     console.log('Login successful:', {
       email,
-      id: user._id,  // Cambiato da userId a id
+      userId: user._id,
       role: user.role
     });
 
@@ -66,10 +74,7 @@ export const authService = {
   async verifyToken(token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // Supporta sia id che userId per retrocompatibilità
-      const userId = decoded.id || decoded.userId;
-      const user = await User.findById(userId).select('-password');
-
+      const user = await User.findById(decoded.userId).select('-password');
       if (!user) {
         throw new Error('Utente non trovato');
       }
