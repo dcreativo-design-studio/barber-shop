@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configurazione base per le richieste API
-export const API_BASE_URL = 'https://api.barbershop.dcreativo.ch/api';
+export const API_BASE_URL = 'https://api.barbershop.dcreativo.ch';
 
 // Configurazione di base di axios
 const axiosInstance = axios.create({
