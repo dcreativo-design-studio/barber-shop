@@ -16,6 +16,7 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import waitingListRoutes from './routes/waitingListRoutes.js';
 import { initializeScheduler } from './services/appointmentScheduler.js';
+import { verifyEmailConfig } from './services/emailService.js';
 import setupSocket from './services/socket.js';
 
 // Carica le variabili d'ambiente
@@ -199,6 +200,15 @@ const connectDB = async (retries = 5) => {
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Verifica la configurazione email
+    const emailConfigValid = await verifyEmailConfig();
+    if (emailConfigValid) {
+      console.log('✅ Email configuration verified successfully');
+    } else {
+      console.warn('⚠️ Email configuration verification failed - email features may not work');
+    }
+
     await initializeScheduler();
     console.log('✅ Appointment scheduler initialized');
 

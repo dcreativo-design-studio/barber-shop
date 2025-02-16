@@ -1,27 +1,43 @@
-import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
-dotenv.config();
-
 export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: true,
+  service: 'gmail',  // Usa il servizio predefinito Gmail invece di configurare host e port
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD
   },
+  tls: {
+    rejectUnauthorized: false
+  },
   debug: true
 });
 
-// Correzione qui: da emailTransporter a transporter
-transporter.verify(function(error, success) {
-  if (error) {
-    console.log('Errore configurazione email:', error);
-  } else {
-    console.log('Server email pronto!');
+// Funzione di verifica migliorata
+export const verifyEmailConfig = async () => {
+  try {
+    await transporter.verify();
+    console.log('✅ Email configuration verified successfully');
+
+    // Test email di verifica
+    const testResult = await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.SMTP_USER,
+      subject: 'Test Email Configuration',
+      text: 'If you receive this email, the SMTP configuration is working correctly.'
+    });
+
+    console.log('✅ Test email sent successfully:', testResult.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Email configuration error:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+    return false;
   }
-});
+};
 
 // Funzione generale per l'invio di email
 export const sendEmail = async ({ to, subject, text, html }) => {
@@ -44,29 +60,41 @@ export const sendEmail = async ({ to, subject, text, html }) => {
 };
 
 export const sendRegistrationEmail = async ({ to, user }) => {
- const mailOptions = {
-   from: process.env.SMTP_USER,
-   to: to,
-   subject: 'Benvenuto in Your Style Barber Studio',
-   html: `
-     <h2>Registrazione completata con successo!</h2>
-     <p>Ciao ${user.firstName},</p>
-     <p>Grazie per esserti registrato. Ecco le tue credenziali di accesso:</p>
-     <ul>
-       <li><strong>Email:</strong> ${user.email}</li>
-       <li><strong>Password:</strong> ${user.password}</li>
-     </ul>
-     <p>Accedi per prenotare il tuo appuntamento.</p>
-   `
- };
+  const mailOptions = {
+    from: {
+      name: 'Your Style Barber Studio',
+      address: process.env.SMTP_USER
+    },
+    to: to,
+    subject: 'Benvenuto in Your Style Barber Studio',
+    html: `
+      <h2>Registrazione completata con successo!</h2>
+      <p>Ciao ${user.firstName},</p>
+      <p>Grazie per esserti registrato. Ecco le tue credenziali di accesso:</p>
+      <ul>
+        <li><strong>Email:</strong> ${user.email}</li>
+        <li><strong>Password:</strong> ${user.password}</li>
+      </ul>
+      <p>Accedi per prenotare il tuo appuntamento.</p>
+    `
+  };
 
- try {
-   await transporter.sendMail(mailOptions);
-   console.log('Email di registrazione inviata con successo');
- } catch (error) {
-   console.error('Errore invio email registrazione:', error);
-   throw new Error('Errore invio email registrazione');
- }
+  try {
+    console.log('Attempting to send registration email to:', to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Registration email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending registration email:', {
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+
+    // Non bloccare il processo di registrazione se l'invio dell'email fallisce
+    return false;
+  }
 };
 
 export const sendBookingConfirmation = async ({ appointment, user }) => {
