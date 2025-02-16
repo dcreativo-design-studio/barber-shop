@@ -1,3 +1,4 @@
+import bcryptjs from 'bcryptjs';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -6,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { testCloudinaryConnection } from './config/cloudinary.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
+import User from './models/User.js';
 import adminRoutes from './routes/adminRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -88,7 +90,7 @@ app.get('/', (req, res) => {
       waitingList: '/api/waiting-list',
       services: '/api/services'
     },
-    docs: 'https://docs.barbershop.dcreativo.ch' // Sottodominio aggiornato
+    docs: 'https://docs.barbershop.dcreativo.ch'
   });
 });
 
@@ -136,6 +138,38 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Funzione per inizializzare l'admin
+const initializeAdmin = async () => {
+  try {
+    const existingAdmin = await User.findOne({ email: 'timm81379@gmail.com' });
+
+    if (!existingAdmin) {
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash('Admin123!', salt);
+
+      const adminUser = new User({
+        email: 'timm81379@gmail.com',
+        password: hashedPassword,
+        firstName: 'Domenico',
+        lastName: 'Riccio',
+        phone: '0767810194',
+        role: 'admin'
+      });
+
+      await adminUser.save();
+      console.log('✅ Admin user created successfully');
+    } else if (existingAdmin.role !== 'admin') {
+      existingAdmin.role = 'admin';
+      await existingAdmin.save();
+      console.log('✅ Existing user updated to admin role');
+    } else {
+      console.log('✅ Admin user already exists');
+    }
+  } catch (error) {
+    console.error('❌ Error initializing admin user:', error);
+  }
+};
+
 // MongoDB connection con retry
 const connectDB = async (retries = 5) => {
   try {
@@ -145,14 +179,18 @@ const connectDB = async (retries = 5) => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
-    console.log('Connected to MongoDB');
+    console.log('✅ Connected to MongoDB');
+
+    // Inizializza l'admin dopo la connessione
+    await initializeAdmin();
+
   } catch (err) {
     if (retries > 0) {
-      console.log(`MongoDB connection failed. Retrying... (${retries} attempts left)`);
+      console.log(`❌ MongoDB connection failed. Retrying... (${retries} attempts left)`);
       await new Promise(resolve => setTimeout(resolve, 5000));
       return connectDB(retries - 1);
     }
-    console.error('MongoDB connection error:', err);
+    console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   }
 };
@@ -162,12 +200,12 @@ const startServer = async () => {
   try {
     await connectDB();
     await initializeScheduler();
-    console.log('Appointment scheduler initialized');
+    console.log('✅ Appointment scheduler initialized');
 
     const PORT = process.env.PORT || 5000;
     const server = app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-      console.log(`Frontend URL: ${process.env.FRONTEND_URL}`);
+      console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+      console.log(`✅ Frontend URL: ${process.env.FRONTEND_URL}`);
     });
 
     // Graceful shutdown
@@ -187,7 +225,7 @@ const startServer = async () => {
     setupSocket(server);
 
   } catch (err) {
-    console.error('Server startup error:', err);
+    console.error('❌ Server startup error:', err);
     process.exit(1);
   }
 };
