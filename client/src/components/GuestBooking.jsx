@@ -1,4 +1,5 @@
 import { addDays } from 'date-fns';
+import { Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api.js';
 import TimeSlots from './TimeSlots';
@@ -22,8 +23,8 @@ function GuestBooking() {
     selectedTime: ''
   });
 
-   // Carica i barbieri all'avvio
-   useEffect(() => {
+  // Carica i barbieri all'avvio
+  useEffect(() => {
     const fetchBarbers = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/appointments/public/barbers`);
@@ -62,7 +63,24 @@ function GuestBooking() {
     fetchServices();
   }, []);
 
-  // useEffect per fetchAvailableSlots
+  // Filtra i servizi quando cambia il barbiere selezionato
+  useEffect(() => {
+    if (formData.selectedBarber && services.length > 0) {
+      const selectedBarberData = barbers.find(b => b._id === formData.selectedBarber);
+      if (selectedBarberData) {
+        const filteredServices = services.filter(service =>
+          selectedBarberData.services.includes(service.name)
+        );
+        setAvailableServices(filteredServices);
+        // Reset servizio selezionato quando cambia il barbiere
+        setFormData(prev => ({ ...prev, selectedService: '' }));
+      }
+    } else {
+      setAvailableServices([]);
+    }
+  }, [formData.selectedBarber, services, barbers]);
+
+  // Fetch degli slot disponibili
   useEffect(() => {
     const fetchAvailableSlots = async () => {
       if (!formData.selectedDate || !formData.selectedService || !formData.selectedBarber) {
@@ -74,7 +92,6 @@ function GuestBooking() {
         const service = services.find(s => s.id === formData.selectedService);
         if (!service) return;
 
-        // Fetch barber details
         const barberResponse = await fetch(
           `${API_BASE_URL}/appointments/public/barbers/${formData.selectedBarber}`
         );
@@ -83,7 +100,6 @@ function GuestBooking() {
         }
         const barberData = await barberResponse.json();
 
-        // Fetch available slots
         const slotsResponse = await fetch(
           `${API_BASE_URL}/appointments/public/available-slots?` +
           new URLSearchParams({
@@ -98,14 +114,11 @@ function GuestBooking() {
         }
 
         const slots = await slotsResponse.json();
-
-        // Arricchisci gli slot con i dati del barbiere
         const dayOfWeek = new Date(formData.selectedDate)
           .toLocaleDateString('en-US', { weekday: 'long' })
           .toLowerCase();
 
         const workingHours = barberData.workingHours.find(wh => wh.day === dayOfWeek);
-
         const enrichedSlots = slots.map(slot => ({
           ...slot,
           workingHours: {
@@ -127,36 +140,6 @@ function GuestBooking() {
     fetchAvailableSlots();
   }, [formData.selectedDate, formData.selectedService, formData.selectedBarber, services]);
 
-  useEffect(() => {
-    const fetchBarbersAndServices = async () => {
-      try {
-        // Fetch barbieri
-        const barbersResponse = await fetch(`${API_BASE_URL}/appointments/public/barbers`);
-        if (!barbersResponse.ok) throw new Error('Errore nel caricamento dei barbieri');
-        const barbersData = await barbersResponse.json();
-        setBarbers(Array.isArray(barbersData) ? barbersData : []);
-
-        // Fetch servizi
-        const servicesResponse = await fetch(`${API_BASE_URL}/services/active`);
-        const servicesData = await servicesResponse.json();
-        const formattedServices = servicesData.map(service => ({
-          id: service._id,
-          name: service.name,
-          price: service.price,
-          duration: service.duration,
-          description: service.description
-        }));
-        setServices(formattedServices);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Errore nel caricamento dei dati');
-      }
-    };
-
-    fetchBarbersAndServices();
-  }, []);
-
-  // handleSubmit con URL aggiornato
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -164,7 +147,8 @@ function GuestBooking() {
     setSuccess('');
 
     try {
-      // ... validazione dei dati ...
+      const service = services.find(s => s.id === formData.selectedService);
+      if (!service) throw new Error('Servizio non trovato');
 
       const appointmentData = {
         firstName: formData.firstName.trim(),
@@ -178,8 +162,6 @@ function GuestBooking() {
         duration: service.duration,
         price: service.price
       };
-
-      console.log('Sending appointment data:', appointmentData);
 
       const response = await fetch(`${API_BASE_URL}/appointments/public/appointments/guest`, {
         method: 'POST',
@@ -215,25 +197,24 @@ function GuestBooking() {
     }
   };
 
-  // Date limits
   const minDate = new Date().toISOString().split('T')[0];
   const maxDate = addDays(new Date(), 30).toISOString().split('T')[0];
 
   return (
     <div className="max-w-4xl mx-auto px-4 pt-20">
-      <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-xl">
+      <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-xl animate-slide-in">
         <h2 className="text-2xl font-bold mb-6 text-center text-[var(--accent)]">
           Prenota come ospite
         </h2>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500 text-white rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500 text-red-500 rounded-lg animate-shake">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-500 text-white rounded-lg">
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500 text-green-500 rounded-lg animate-fade-in">
             {success}
           </div>
         )}
@@ -289,46 +270,46 @@ function GuestBooking() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-[var(--accent)] mb-2">Barbiere</label>
-            <select
-              value={formData.selectedBarber}
-              onChange={(e) => setFormData({...formData, selectedBarber: e.target.value})}
-              required
-              className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
-            >
-              <option value="">Seleziona un barbiere</option>
-              {barbers.map(barber => (
-                <option key={barber._id} value={barber._id}>
-                  {barber.firstName} {barber.lastName}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[var(--accent)] mb-2">Barbiere</label>
+              <select
+                value={formData.selectedBarber}
+                onChange={(e) => setFormData({...formData, selectedBarber: e.target.value})}
+                required
+                className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)] hover-glow"
+              >
+                <option value="">Seleziona un barbiere</option>
+                {barbers.map(barber => (
+                  <option key={barber._id} value={barber._id}>
+                    {barber.firstName} {barber.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Select per i servizi */}
-<div>
-  <label className="block text-[var(--accent)] mb-2">Servizio</label>
-  <select
-    value={formData.selectedService}
-    onChange={(e) => setFormData({...formData, selectedService: e.target.value})}
-    required
-    disabled={!formData.selectedBarber}
-    className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
-  >
-    <option value="">Seleziona un servizio</option>
-    {availableServices.map(service => (
-      <option key={service.id} value={service.id}>
-        {service.name} - CHF{service.price} ({service.duration} min)
-      </option>
-    ))}
-  </select>
-  {!formData.selectedBarber && (
-    <p className="text-sm text-[var(--accent)] mt-1">
-      Seleziona prima un barbiere per vedere i servizi disponibili
-    </p>
-  )}
-</div>
+            <div>
+              <label className="block text-[var(--accent)] mb-2">Servizio</label>
+              <select
+                value={formData.selectedService}
+                onChange={(e) => setFormData({...formData, selectedService: e.target.value})}
+                required
+                disabled={!formData.selectedBarber}
+                className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)] hover-glow disabled:opacity-50"
+              >
+                <option value="">Seleziona un servizio</option>
+                {availableServices.map(service => (
+                  <option key={service.id} value={service.id}>
+                    {service.name} - CHF{service.price} ({service.duration} min)
+                  </option>
+                ))}
+              </select>
+              {!formData.selectedBarber && (
+                <p className="text-sm text-[var(--accent)] mt-1 animate-fade-in">
+                  Seleziona prima un barbiere per vedere i servizi disponibili
+                </p>
+              )}
+            </div>
 
           <div>
             <label className="block text-[var(--accent)] mb-2">Data</label>
@@ -357,13 +338,21 @@ function GuestBooking() {
               />
             </div>
           )}
+          </div>
 
           <button
             type="submit"
             disabled={loading || !formData.selectedTime}
-            className="w-full bg-[var(--accent)] text-white font-bold py-3 px-4 rounded transition-all duration-300 hover:opacity-90 disabled:opacity-50"
+            className="w-full bg-[var(--accent)] text-white font-bold py-3 px-4 rounded transition-all duration-300 hover:opacity-90 disabled:opacity-50 hover-glow flex items-center justify-center"
           >
-            {loading ? 'Prenotazione in corso...' : 'Prenota'}
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <span>Prenotazione in corso...</span>
+              </>
+            ) : (
+              'Prenota'
+            )}
           </button>
         </form>
       </div>
