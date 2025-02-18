@@ -59,24 +59,30 @@ function BookingCalendar() {
     fetchBarbers();
   }, []);
 
-  // Nuovo useEffect per gestire il filtraggio dei servizi quando cambia il barbiere selezionato
-  useEffect(() => {
-    if (selectedBarber && services.length > 0) {
-      const selectedBarberData = barbers.find(b => b._id === selectedBarber);
-      if (selectedBarberData) {
-        // Filtra i servizi in base ai servizi offerti dal barbiere
-        const filteredServices = services.filter(service =>
-          selectedBarberData.services.includes(service.name)
-        );
-        setAvailableServices(filteredServices);
-        // Reset service selection when barber changes
-        setSelectedService('');
-        setSelectedTime('');
-      }
+ // Modifica l'useEffect per i servizi del barbiere
+useEffect(() => {
+  if (selectedBarber && services.length > 0) {
+    // Trova il barbiere selezionato
+    const selectedBarberData = barbers.find(b => b._id === selectedBarber);
+    if (selectedBarberData && selectedBarberData.services) {
+      // Filtra i servizi basandosi sui servizi offerti dal barbiere
+      const filteredServices = services.filter(service =>
+        selectedBarberData.services.includes(service.name)
+      );
+      console.log('Filtered services for barber:', filteredServices);
+      setAvailableServices(filteredServices);
+
+      // Reset della selezione del servizio quando cambia il barbiere
+      setSelectedService('');
+      setSelectedTime('');
     } else {
+      console.log('No services found for barber');
       setAvailableServices([]);
     }
-  }, [selectedBarber, services, barbers]);
+  } else {
+    setAvailableServices([]);
+  }
+}, [selectedBarber, services, barbers]);
 
 
 
@@ -193,24 +199,25 @@ function BookingCalendar() {
   }, [selectedDate, selectedBarber, selectedService, services]);
 
   // Funzione per caricare i servizi
-  const fetchServices = async () => {
-    try {
-      console.log('Fetching services from API');
-      const response = await apiRequest.get('/services/active');  // Nuovo endpoint
-      const formattedServices = response.map(service => ({
-        id: service._id,
-        name: service.name,
-        price: service.price,
-        duration: service.duration,
-        description: service.description
-      }));
-      console.log('Formatted services:', formattedServices);
-      setServices(formattedServices);
-    } catch (error) {
-      console.error('Error fetching services:', error);
-      setError('Errore nel caricamento dei servizi');
-    }
-  };
+  // Aggiorno il modo in cui vengono caricati i servizi iniziali
+const fetchServices = async () => {
+  try {
+    console.log('Fetching services from API');
+    const response = await apiRequest.get('/services/active');
+    const formattedServices = response.map(service => ({
+      id: service._id,
+      name: service.name,
+      price: service.price,
+      duration: service.duration,
+      description: service.description
+    }));
+    console.log('All available services:', formattedServices);
+    setServices(formattedServices);
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    setError('Errore nel caricamento dei servizi');
+  }
+};
 
 
 
@@ -524,23 +531,28 @@ function BookingCalendar() {
           </div>
 
           {/* Servizio */}
-            <div>
-              <label className="block text-[var(--accent)] mb-2">Servizio</label>
-              <select
-                value={selectedService}
-                onChange={(e) => setSelectedService(e.target.value)}
-                required
-                disabled={!selectedBarber}
-                className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
-              >
-                <option value="">Seleziona un servizio</option>
-                {availableServices.map(service => (
-                  <option key={service.id} value={service.id}>
-                    {service.name} - CHF{service.price} ({service.duration} min)
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-[var(--accent)] mb-2">Servizio</label>
+            <select
+              value={selectedService}
+              onChange={(e) => setSelectedService(e.target.value)}
+              required
+              disabled={!selectedBarber}
+              className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
+            >
+              <option value="">Seleziona un servizio</option>
+              {availableServices.map(service => (
+                <option key={service.id} value={service.id}>
+                  {service.name} - CHF{service.price} ({service.duration} min)
+                </option>
+              ))}
+            </select>
+            {!selectedBarber && (
+              <p className="text-sm text-[var(--accent)] mt-1">
+                Seleziona prima un barbiere per vedere i servizi disponibili
+              </p>
+            )}
+          </div>
 
           {/* Data */}
           <div>
