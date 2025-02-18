@@ -22,8 +22,7 @@
   @apply transition-all duration-200;
 }
 
-
-/* Animazioni */
+/* Animazioni base */
 @keyframes slideIn {
   from { transform: translateY(-10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -34,6 +33,23 @@
   to { opacity: 1; }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Classi di animazione */
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
 }
@@ -42,6 +58,19 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-bounce-custom {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-spin-custom {
+  animation: spin 1s linear infinite;
+}
+
+/* Effetti hover */
 .hover-scale {
   @apply transition-transform duration-200 hover:scale-105;
 }
@@ -49,21 +78,95 @@
 .hover-glow {
   @apply transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/20;
 }
+
+/* Input e form styling */
 .date-input {
   background-color: rgba(252, 251, 255, 0.14);
-  color: black;
+  color: var(--text-primary);
   padding: 0.5rem;
   border-radius: 0.375rem;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   width: 100%;
+  transition: all 0.2s ease;
 }
+
 .date-input::-webkit-calendar-picker-indicator {
   opacity: 1;
   cursor: pointer;
+  filter: invert(var(--calendar-invert));
 }
 
 .date-input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  background-color: rgba(252, 251, 255, 0.18);
+}
+
+/* Login specifico */
+.login-input {
+  @apply w-full p-3 rounded bg-opacity-20 border transition-all duration-200;
+  @apply focus:ring-2 focus:ring-opacity-50 focus:ring-cyan-400;
+  background-color: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.login-button {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.login-button::after {
+  content: '';
+  @apply absolute inset-0 bg-white opacity-0 transition-opacity duration-300;
+}
+
+.login-button:hover::after {
+  @apply opacity-10;
+}
+
+/* Success animation */
+.success-animation {
+  @apply fixed inset-0 flex items-center justify-center z-50;
+  background: rgba(6, 78, 59, 0.2);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.success-icon {
+  @apply text-green-500;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+/* Error animation */
+.error-message {
+  @apply bg-red-500/10 border border-red-500 text-red-500 p-3 rounded;
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Loading states */
+.loading-spinner {
+  @apply animate-spin text-cyan-400;
+}
+
+.loading-overlay {
+  @apply absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center;
+  backdrop-filter: blur(4px);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+[data-theme='light'] {
+  --calendar-invert: 0;
+}
+
+[data-theme='dark'] {
+  --calendar-invert: 1;
 }
