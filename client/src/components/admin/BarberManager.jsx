@@ -353,14 +353,14 @@ const validateWorkingHours = (workingHours) => {
 
 const handleUpdateBarber = async (e) => {
   e.preventDefault();
+  setLoading(true);
   try {
-    // Validazione dei servizi
+    // Validazione
     if (editingBarber.services.length === 0) {
       setError('Seleziona almeno un servizio');
       return;
     }
 
-    // Validazione degli orari
     try {
       validateWorkingHours(editingBarber.workingHours);
     } catch (validationError) {
@@ -368,8 +368,7 @@ const handleUpdateBarber = async (e) => {
       return;
     }
 
-    // Validazione delle vacanze
-    // Validazione e formattazione delle vacanze
+    // Formattazione dati
     const formattedVacations = (editingBarber.vacations || [])
       .map(vacation => ({
         startDate: formatDateForAPI(vacation.startDate),
@@ -377,50 +376,57 @@ const handleUpdateBarber = async (e) => {
       }))
       .filter(vacation => vacation.startDate && vacation.endDate);
 
-    // Formatta gli orari di lavoro prima dell'invio
     const formattedWorkingHours = editingBarber.workingHours.map(hours => ({
       ...hours,
       breakStart: hours.hasBreak ? hours.breakStart : null,
       breakEnd: hours.hasBreak ? hours.breakEnd : null
     }));
 
-    // Log per debug
-    console.log('Sending updates:', {
-      workingHours: formattedWorkingHours,
-      vacations: formattedVacations
-    });
+    // Esegui gli aggiornamenti in sequenza
+    const updates = [];
 
-    // Invia gli aggiornamenti al server
-    await Promise.all([
-      barberApi.updateBarberServices(editingBarber._id, editingBarber.services),
-      barberApi.updateBarberWorkingHours(editingBarber._id, formattedWorkingHours),
-      barberApi.updateBarberVacations(editingBarber._id, formattedVacations)
-    ]);
-
-    // Aggiorna immediatamente lo stato locale
-    setBarbers(prevBarbers =>
-      prevBarbers.map(barber =>
-        barber._id === editingBarber._id
-          ? {
-              ...barber,
-              services: editingBarber.services,
-              workingHours: formattedWorkingHours,
-              vacations: formattedVacations
-            }
-          : barber
-      )
+    // Aggiorna i servizi
+    updates.push(
+      barberApi.updateBarberServices(editingBarber._id, editingBarber.services)
+        .then(response => {
+          console.log('Services updated:', response);
+          return response;
+        })
     );
 
-    // Ricarica i dati dal server
-    await fetchBarbers();
+    // Aggiorna gli orari di lavoro
+    updates.push(
+      barberApi.updateBarberWorkingHours(editingBarber._id, formattedWorkingHours)
+        .then(response => {
+          console.log('Working hours updated:', response);
+          return response;
+        })
+    );
 
-    // Chiudi il modale
+    // Aggiorna le vacanze
+    updates.push(
+      barberApi.updateBarberVacations(editingBarber._id, formattedVacations)
+        .then(response => {
+          console.log('Vacations updated:', response);
+          return response;
+        })
+    );
+
+    // Attendi che tutti gli aggiornamenti siano completati
+    await Promise.all(updates);
+
+    // Aggiorna lo stato locale e chiudi il modale
     setShowEditModal(false);
     setEditingBarber(null);
     setError('');
+
+    // Ricarica i dati aggiornati
+    await fetchBarbers();
   } catch (error) {
     console.error('Error updating barber:', error);
-    setError(error.response?.data?.message || 'Errore nella modifica del barbiere');
+    setError('Errore durante il salvataggio delle modifiche. Riprova.');
+  } finally {
+    setLoading(false);
   }
 };
 

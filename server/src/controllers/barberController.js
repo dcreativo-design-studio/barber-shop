@@ -162,34 +162,24 @@ export const barberController = {
       const { id } = req.params;
       const { services } = req.body;
 
-      console.log('Updating services for barber:', { id, services });
+      const updatedBarber = await Barber.findOneAndUpdate(
+        { _id: id },
+        { $set: { services } },
+        { new: true }
+      );
 
-      if (!Array.isArray(services)) {
-        return res.status(400).json({
-          success: false,
-          message: 'I servizi devono essere un array'
-        });
-      }
-
-      const barber = await Barber.findById(id);
-      if (!barber) {
+      if (!updatedBarber) {
         return res.status(404).json({
           success: false,
           message: 'Barbiere non trovato'
         });
       }
 
-      barber.services = services;
-      await barber.save();
-
-      console.log('Services updated successfully:', barber.services);
-
       return res.json({
         success: true,
         message: 'Servizi aggiornati con successo',
-        services: barber.services
+        services: updatedBarber.services
       });
-
     } catch (error) {
       console.error('Error updating barber services:', error);
       return res.status(500).json({
@@ -248,41 +238,24 @@ export const barberController = {
       const { id } = req.params;
       const { workingHours } = req.body;
 
-      console.log('Updating working hours for barber:', { id, workingHours });
+      const updatedBarber = await Barber.findOneAndUpdate(
+        { _id: id },
+        { $set: { workingHours } },
+        { new: true }
+      );
 
-      if (!Array.isArray(workingHours)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Gli orari di lavoro devono essere un array'
-        });
-      }
-
-      const barber = await Barber.findById(id);
-      if (!barber) {
+      if (!updatedBarber) {
         return res.status(404).json({
           success: false,
           message: 'Barbiere non trovato'
         });
       }
 
-      // Normalizza gli orari prima del salvataggio
-      const normalizedHours = workingHours.map(hours => ({
-        ...hours,
-        breakStart: hours.hasBreak && hours.isWorking ? hours.breakStart : null,
-        breakEnd: hours.hasBreak && hours.isWorking ? hours.breakEnd : null
-      }));
-
-      barber.workingHours = normalizedHours;
-      await barber.save();
-
-      console.log('Working hours updated successfully:', barber.workingHours);
-
       return res.json({
         success: true,
         message: 'Orari di lavoro aggiornati con successo',
-        workingHours: barber.workingHours
+        workingHours: updatedBarber.workingHours
       });
-
     } catch (error) {
       console.error('Error updating working hours:', error);
       return res.status(500).json({
@@ -297,38 +270,28 @@ export const barberController = {
       const { id } = req.params;
       const { vacations } = req.body;
 
-      // Validazione delle date
-      for (const vacation of vacations) {
-        const startDate = new Date(vacation.startDate);
-        const endDate = new Date(vacation.endDate);
+      const updatedBarber = await Barber.findOneAndUpdate(
+        { _id: id },
+        { $set: { vacations } },
+        { new: true }
+      );
 
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          return res.status(400).json({ message: 'Date non valide' });
-        }
-
-        if (endDate < startDate) {
-          return res.status(400).json({
-            message: 'La data di fine vacanza deve essere successiva alla data di inizio'
-          });
-        }
+      if (!updatedBarber) {
+        return res.status(404).json({
+          success: false,
+          message: 'Barbiere non trovato'
+        });
       }
 
-      const barber = await Barber.findById(id);
-      if (!barber) {
-        return res.status(404).json({ message: 'Barbiere non trovato' });
-      }
-
-      barber.vacations = vacations;
-      await barber.save();
-
-      res.json({
+      return res.json({
         success: true,
         message: 'Vacanze aggiornate con successo',
-        vacations: barber.vacations
+        vacations: updatedBarber.vacations
       });
     } catch (error) {
       console.error('Error updating vacations:', error);
-      res.status(500).json({
+      return res.status(500).json({
+        success: false,
         message: 'Errore nell\'aggiornamento delle vacanze',
         error: error.message
       });
