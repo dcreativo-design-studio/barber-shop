@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +10,9 @@ const WaitingList = () => {
   const { user } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [barbers, setBarbers] = useState([]);
   const [services, setServices] = useState([]);
@@ -20,6 +23,7 @@ const WaitingList = () => {
     preferredTimeSlots: [],
     notes: ''
   });
+  const [deletingId, setDeletingId] = useState(null);
 
   const timeSlots = [
     { id: 'morning', label: 'Mattina (9:00 - 12:00)' },
@@ -96,18 +100,20 @@ const WaitingList = () => {
   useEffect(() => {
     fetchWaitingList();
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
     if (!formData.selectedBarber) {
       setError('Seleziona un barbiere');
       return;
     }
 
+    if (submitting) return; // Previene invii multipli
+
     try {
-      console.log('Form data before submission:', formData);
+      setSubmitting(true);
 
       const entryData = {
         preferredBarber: formData.selectedBarber,
@@ -117,31 +123,63 @@ const WaitingList = () => {
         notes: formData.notes
       };
 
-      console.log('Entry data to be sent:', entryData);
-
       await waitingListService.addEntry(entryData);
       await fetchWaitingList();
-      setShowForm(false);
-      setFormData({
-        selectedBarber: '',
-        service: '',
-        preferredDays: [],
-        preferredTimeSlots: [],
-        notes: ''
-      });
+      setSuccessMessage('Richiesta aggiunta con successo alla lista d\'attesa');
+
+      // Resetta il form dopo 2 secondi per dare feedback visivo all'utente
+      setTimeout(() => {
+        setShowForm(false);
+        setFormData({
+          selectedBarber: '',
+          service: '',
+          preferredDays: [],
+          preferredTimeSlots: [],
+          notes: ''
+        });
+        setSuccessMessage('');
+      }, 2000);
     } catch (error) {
       console.error('Error submitting form:', error);
       setError(error.message || 'Errore nell\'aggiunta alla lista d\'attesa');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (!user) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <p>Devi effettuare l'accesso per vedere la lista d'attesa.</p>
-      </div>
-    );
-  }
+  const handleDelete = async (entryId) => {
+    if (!confirm('Sei sicuro di voler rimuovere questa richiesta dalla lista d\'attesa?')) {
+      return;
+    }
+
+    try {
+      setDeletingId(entryId);
+      setError('');
+
+      const response = await fetch(`${API_BASE_URL}/waiting-list/${entryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nella rimozione dalla lista d\'attesa');
+      }
+
+      await fetchWaitingList();
+      setSuccessMessage('Richiesta rimossa con successo');
+
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 2000);
+    } catch (error) {
+      setError(error.message || 'Errore durante l\'eliminazione della richiesta');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     // Aggiungiamo pt-20 per lo spazio dall'header
@@ -159,16 +197,21 @@ const WaitingList = () => {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 flex items-center">
+          <AlertCircle className="w-5 h-5 mr-2" />
+          <span>{error}</span>
         </div>
       )}
 
-{showForm && (
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+          {successMessage}
+        </div>
+      )}
+
+      {showForm && (
         <div className="bg-[var(--bg-secondary)] rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">
-            Richiedi posto in lista d'attesa
-          </h2>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Selezione Barbiere */}
             <div>
@@ -275,15 +318,24 @@ const WaitingList = () => {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+                disabled={submitting}
+                className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 Annulla
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded bg-[var(--accent)] text-white hover:opacity-90 transition-colors"
+                disabled={submitting}
+                className="px-4 py-2 rounded bg-[var(--accent)] text-white hover:opacity-90 transition-colors disabled:opacity-50 flex items-center"
               >
-                Invia richiesta
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Invio in corso...
+                  </>
+                ) : (
+                  'Invia richiesta'
+                )}
               </button>
             </div>
           </form>
@@ -292,6 +344,7 @@ const WaitingList = () => {
 
       {loading ? (
         <div className="text-center py-8 text-[var(--text-primary)]">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
           Caricamento...
         </div>
       ) : entries.length > 0 ? (
@@ -367,31 +420,24 @@ const WaitingList = () => {
                   </div>
                 )}
 
-                <div className="md:col-span-2 flex justify-end">
-                  <button
-                    onClick={async () => {
-                      if (confirm('Sei sicuro di voler rimuovere questa richiesta dalla lista d\'attesa?')) {
-                        try {
-                          const response = await fetch(`/api/waiting-list/${entry._id}`, {
-                            method: 'DELETE'
-                          });
-                          if (response.ok) {
-                            fetchWaitingList();
-                          } else {
-                            throw new Error('Errore nella rimozione dalla lista d\'attesa');
-                          }
-                        } catch (error) {
-                          setError(error.message);
-                        }
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    Rimuovi dalla lista
-                  </button>
-                </div>
               </div>
+              <div className="md:col-span-2 flex justify-end">
+                <button
+                  onClick={() => handleDelete(entry._id)}
+                  disabled={deletingId === entry._id}
+                  className="text-red-600 hover:text-red-800 disabled:opacity-50 flex items-center"
+                >
+                  {deletingId === entry._id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Rimozione in corso...
+                    </>
+                  ) : (
+                    'Rimuovi dalla lista'
+                  )}
+                </button>
               </div>
+            </div>
           ))}
         </div>
       ) : (
