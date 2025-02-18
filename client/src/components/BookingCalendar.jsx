@@ -49,10 +49,9 @@ function BookingCalendar() {
     const fetchBarbers = async () => {
       try {
         const response = await apiRequest.get('/barbers');
-        console.log('Loaded barbers:', response);
         setBarbers(response);
       } catch (error) {
-        console.error('Error loading barbers:', error);
+        console.error('Errore nel caricamento dei barbieri:', error);
         setError('Errore nel caricamento dei barbieri');
       }
     };
@@ -60,44 +59,29 @@ function BookingCalendar() {
     fetchBarbers();
   }, []);
 
-    // Carica i servizi all'avvio
-    useEffect(() => {
-      fetchServices();
-    }, []);
+   // Carica i servizi all'avvio
+   useEffect(() => {
+    fetchServices();
+  }, []);
 
- // Modifica l'useEffect per i servizi del barbiere
- useEffect(() => {
-  if (selectedBarber && services.length > 0) {
-    console.log('Current selected barber ID:', selectedBarber);
-    console.log('Available services:', services);
-
-    const selectedBarberData = barbers.find(b => b._id === selectedBarber);
-    console.log('Selected barber data:', selectedBarberData);
-
-    if (selectedBarberData && selectedBarberData.services) {
-      console.log('Barber services:', selectedBarberData.services);
-
-      const filteredServices = services.filter(service => {
-        const isIncluded = selectedBarberData.services.includes(service.name);
-        console.log(`Service ${service.name} included: ${isIncluded}`);
-        return isIncluded;
-      });
-
-      console.log('Filtered services:', filteredServices);
-      setAvailableServices(filteredServices);
-
-      // Reset selections
-      setSelectedService('');
-      setSelectedTime('');
+  // Nuovo useEffect per gestire il filtraggio dei servizi quando cambia il barbiere selezionato
+  useEffect(() => {
+    if (selectedBarber && services.length > 0) {
+      const selectedBarberData = barbers.find(b => b._id === selectedBarber);
+      if (selectedBarberData) {
+        // Filtra i servizi in base ai servizi offerti dal barbiere
+        const filteredServices = services.filter(service =>
+          selectedBarberData.services.includes(service.name)
+        );
+        setAvailableServices(filteredServices);
+        // Reset service selection when barber changes
+        setSelectedService('');
+        setSelectedTime('');
+      }
     } else {
-      console.log('No services found for barber or invalid barber data');
       setAvailableServices([]);
     }
-  } else {
-    console.log('No barber selected or no services available');
-    setAvailableServices([]);
-  }
-}, [selectedBarber, services, barbers]);
+  }, [selectedBarber, services, barbers]);
 
 
 
@@ -211,13 +195,10 @@ function BookingCalendar() {
   }, [selectedDate, selectedBarber, selectedService, services]);
 
   // Funzione per caricare i servizi
-  // Aggiorno il modo in cui vengono caricati i servizi iniziali
   const fetchServices = async () => {
     try {
       console.log('Fetching services from API');
-      const response = await apiRequest.get('/services/active');
-      console.log('Raw services response:', response);
-
+      const response = await apiRequest.get('/services/active');  // Nuovo endpoint
       const formattedServices = response.map(service => ({
         id: service._id,
         name: service.name,
@@ -225,7 +206,6 @@ function BookingCalendar() {
         duration: service.duration,
         description: service.description
       }));
-
       console.log('Formatted services:', formattedServices);
       setServices(formattedServices);
     } catch (error) {
@@ -545,23 +525,12 @@ function BookingCalendar() {
             </select>
           </div>
 
-          {/* Servizio */}
+         {/* Servizio */}
 <div>
   <label className="block text-[var(--accent)] mb-2">Servizio</label>
-  {/* Debug info */}
-  {process.env.NODE_ENV !== 'production' && (
-    <div className="text-xs text-gray-500 mb-2">
-      <div>Selected Barber: {selectedBarber}</div>
-      <div>Available Services: {availableServices.length}</div>
-      <div>All Services: {services.length}</div>
-    </div>
-  )}
   <select
     value={selectedService}
-    onChange={(e) => {
-      console.log('Selected service:', e.target.value);
-      setSelectedService(e.target.value);
-    }}
+    onChange={(e) => setSelectedService(e.target.value)}
     required
     disabled={!selectedBarber}
     className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
@@ -576,11 +545,6 @@ function BookingCalendar() {
   {!selectedBarber && (
     <p className="text-sm text-[var(--accent)] mt-1">
       Seleziona prima un barbiere per vedere i servizi disponibili
-    </p>
-  )}
-  {selectedBarber && availableServices.length === 0 && (
-    <p className="text-sm text-[var(--accent)] mt-1">
-      Nessun servizio disponibile per questo barbiere
     </p>
   )}
 </div>

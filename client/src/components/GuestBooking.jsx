@@ -40,43 +40,27 @@ function GuestBooking() {
     fetchBarbers();
   }, []);
 
-  // Aggiorna l'effetto per i servizi
-useEffect(() => {
-  const fetchServices = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/services/active`);
-      const data = await response.json();
-
-      // Formatta i servizi e aggiornali sia in services che in availableServices
-      const formattedServices = data.map(service => ({
-        id: service._id,
-        name: service.name,
-        price: service.price,
-        duration: service.duration,
-        description: service.description
-      }));
-
-      setServices(formattedServices);
-      setAvailableServices(formattedServices); // Aggiungi questa riga
-    } catch (error) {
-      console.error('Error fetching services:', error);
-      setError('Errore nel caricamento dei servizi');
-    }
-  };
-
-  fetchServices();
-}, []);
-
-// Aggiorna useEffect per aggiornare i servizi disponibili quando cambia il barbiere
-useEffect(() => {
-  if (formData.selectedBarber) {
-    // Quando viene selezionato un barbiere, mostra tutti i servizi disponibili
-    setAvailableServices(services);
-  } else {
-    // Quando non c'è un barbiere selezionato, resetta i servizi disponibili
-    setAvailableServices([]);
-  }
-}, [formData.selectedBarber, services]);
+  // Carica i servizi all'avvio
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/services/active`);
+        const data = await response.json();
+        const formattedServices = data.map(service => ({
+          id: service._id,
+          name: service.name,
+          price: service.price,
+          duration: service.duration,
+          description: service.description
+        }));
+        setServices(formattedServices);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setError('Errore nel caricamento dei servizi');
+      }
+    };
+    fetchServices();
+  }, []);
 
   // useEffect per fetchAvailableSlots
   useEffect(() => {
@@ -323,29 +307,28 @@ useEffect(() => {
           </div>
 
           {/* Select per i servizi */}
-          <div>
-            <label className="block text-[var(--accent)] mb-2">Servizio</label>
-            <select
-              value={formData.selectedService}
-              onChange={(e) => setFormData({...formData, selectedService: e.target.value})}
-              required
-              disabled={!formData.selectedBarber}
-              className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
-            >
-              <option value="">Seleziona un servizio</option>
-              {availableServices.map(service => (
-                <option key={service.id} value={service.id}>
-                  {service.name} - CHF{service.price} ({service.duration} min)
-                </option>
-              ))}
-            </select>
-            {!formData.selectedBarber && (
-              <p className="text-sm text-[var(--accent)] mt-1">
-                Seleziona prima un barbiere per vedere i servizi disponibili
-              </p>
-            )}
-          </div>
-
+<div>
+  <label className="block text-[var(--accent)] mb-2">Servizio</label>
+  <select
+    value={formData.selectedService}
+    onChange={(e) => setFormData({...formData, selectedService: e.target.value})}
+    required
+    disabled={!formData.selectedBarber}
+    className="w-full p-3 rounded bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent)]"
+  >
+    <option value="">Seleziona un servizio</option>
+    {availableServices.map(service => (
+      <option key={service.id} value={service.id}>
+        {service.name} - CHF{service.price} ({service.duration} min)
+      </option>
+    ))}
+  </select>
+  {!formData.selectedBarber && (
+    <p className="text-sm text-[var(--accent)] mt-1">
+      Seleziona prima un barbiere per vedere i servizi disponibili
+    </p>
+  )}
+</div>
 
           <div>
             <label className="block text-[var(--accent)] mb-2">Data</label>
