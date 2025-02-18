@@ -16,6 +16,7 @@ const WaitingList = () => {
   const [showForm, setShowForm] = useState(false);
   const [barbers, setBarbers] = useState([]);
   const [services, setServices] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
   const [formData, setFormData] = useState({
     selectedBarber: '',
     service: '',
@@ -23,7 +24,6 @@ const WaitingList = () => {
     preferredTimeSlots: [],
     notes: ''
   });
-  const [deletingId, setDeletingId] = useState(null);
 
   const timeSlots = [
     { id: 'morning', label: 'Mattina (9:00 - 12:00)' },
@@ -90,6 +90,7 @@ const WaitingList = () => {
       const data = await waitingListService.getUserEntries();
       setEntries(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error('Error fetching entries:', error);
       setError(error.message || 'Errore nel caricamento della lista d\'attesa');
       setEntries([]);
     } finally {
@@ -100,6 +101,7 @@ const WaitingList = () => {
   useEffect(() => {
     fetchWaitingList();
   }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -156,33 +158,50 @@ const WaitingList = () => {
       setDeletingId(entryId);
       setError('');
 
-      const response = await fetch(`${API_BASE_URL}/waiting-list/${entryId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
+      console.log('Tentativo di rimozione entry:', entryId);
+      await waitingListService.removeEntry(entryId);
 
-      if (!response.ok) {
-        throw new Error('Errore nella rimozione dalla lista d\'attesa');
-      }
-
-      await fetchWaitingList();
+      console.log('Entry rimossa con successo');
       setSuccessMessage('Richiesta rimossa con successo');
+      await fetchWaitingList();
 
       setTimeout(() => {
         setSuccessMessage('');
       }, 2000);
     } catch (error) {
-      setError(error.message || 'Errore durante l\'eliminazione della richiesta');
+      console.error('Delete error:', error);
+
+      if (error.response) {
+        switch (error.response.status) {
+          case 403:
+            setError('Non hai i permessi per eliminare questa richiesta');
+            break;
+          case 404:
+            setError('Richiesta non trovata');
+            break;
+          case 405:
+            setError('Operazione non permessa. Contatta l\'assistenza.');
+            break;
+          default:
+            setError(error.response.data?.message || 'Errore durante l\'eliminazione della richiesta');
+        }
+      } else {
+        setError(error.message || 'Errore durante l\'eliminazione della richiesta');
+      }
     } finally {
       setDeletingId(null);
     }
   };
 
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <p>Devi effettuare l'accesso per vedere la lista d'attesa.</p>
+      </div>
+    );
+  }
+
   return (
-    // Aggiungiamo pt-20 per lo spazio dall'header
     <div className="max-w-4xl mx-auto p-6 pt-20">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-[var(--accent)]">Lista d'attesa</h1>
@@ -211,7 +230,6 @@ const WaitingList = () => {
 
       {showForm && (
         <div className="bg-[var(--bg-secondary)] rounded-lg shadow p-6 mb-6">
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Selezione Barbiere */}
             <div>
@@ -342,7 +360,7 @@ const WaitingList = () => {
         </div>
       )}
 
-      {loading ? (
+{loading ? (
         <div className="text-center py-8 text-[var(--text-primary)]">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
           Caricamento...
@@ -419,9 +437,8 @@ const WaitingList = () => {
                     </p>
                   </div>
                 )}
-
               </div>
-              <div className="md:col-span-2 flex justify-end">
+              <div className="md:col-span-2 flex justify-end mt-4">
                 <button
                   onClick={() => handleDelete(entry._id)}
                   disabled={deletingId === entry._id}
