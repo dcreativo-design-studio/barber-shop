@@ -165,6 +165,11 @@ export const userController = {
       }
 
       console.log('Processing file:', req.file);
+      console.log('Cloudinary config check before upload:', {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? 'present' : 'missing',
+        api_key: process.env.CLOUDINARY_API_KEY ? 'present' : 'missing',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? 'present' : 'missing'
+      });
 
       const userId = req.user._id;
       const user = await User.findById(userId);
@@ -182,11 +187,8 @@ export const userController = {
         }
       }
 
-      // Converti il buffer in base64
-      const base64Image = req.file.buffer.toString('base64');
-      const dataURI = `data:${req.file.mimetype};base64,${base64Image}`;
-
-      const result = await uploadImage(dataURI);
+      // MODIFICA: Passa direttamente il buffer invece di convertirlo in base64
+      const result = await uploadImage(req.file.buffer);
 
       user.profileImage = {
         url: result.secure_url,

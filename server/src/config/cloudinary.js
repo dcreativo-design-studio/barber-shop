@@ -9,18 +9,47 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export const uploadImage = async (file) => {
+export const uploadImage = async (fileData) => {
   try {
-    const result = await cloudinary.uploader.upload(file, {
-      folder: 'profile-images',
-      transformation: [
-        { width: 400, height: 400, crop: "fill" },
-        { quality: 'auto' }
-      ]
+    console.log('Upload initiated with Cloudinary config:', {
+      cloud_name: cloudinary.config().cloud_name ? 'configured' : 'missing',
+      api_key: cloudinary.config().api_key ? 'configured' : 'missing'
     });
-    return result;
+
+    // Se è un buffer, carica usando promise e stream
+    if (Buffer.isBuffer(fileData)) {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'profile-images',
+            transformation: [
+              { width: 400, height: 400, crop: "fill" },
+              { quality: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload stream error:', error);
+              return reject(error);
+            }
+            resolve(result);
+          }
+        );
+        uploadStream.end(fileData);
+      });
+    }
+    // Se è una stringa (URL o data URI), usa il metodo standard
+    else {
+      return await cloudinary.uploader.upload(fileData, {
+        folder: 'profile-images',
+        transformation: [
+          { width: 400, height: 400, crop: "fill" },
+          { quality: 'auto' }
+        ]
+      });
+    }
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading image to Cloudinary:', error);
     throw error;
   }
 };
