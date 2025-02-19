@@ -142,18 +142,18 @@ app.use((err, req, res, next) => {
 // Funzione per inizializzare l'admin
 const initializeAdmin = async () => {
   try {
-    const existingAdmin = await User.findOne({ email: 'timm81379@gmail.com' });
+    const existingAdmin = await User.findOne({ email: 'info@dcreativo.ch' });
 
     if (!existingAdmin) {
       const salt = await bcryptjs.genSalt(10);
       const hashedPassword = await bcryptjs.hash('Admin123!', salt);
 
       const adminUser = new User({
-        email: 'timm81379@gmail.com',
+        email: 'info@dcreativo.ch',
         password: hashedPassword,
-        firstName: 'Domenico',
-        lastName: 'Riccio',
-        phone: '0767810194',
+        firstName: 'Admin',
+        lastName: 'Administrator',
+        phone: '0767778190',
         role: 'admin'
       });
 
