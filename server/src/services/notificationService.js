@@ -4,6 +4,15 @@ import twilio from 'twilio';
 import Appointment from '../models/Appointment.js';
 import { sendCancellationEmailToAdmin, sendCancellationEmailToClient, transporter } from './emailService.js';
 
+// Debug delle variabili d'ambiente Twilio
+console.log('Twilio environment variables check:', {
+  ACCOUNT_SID_EXISTS: !!process.env.TWILIO_ACCOUNT_SID,
+  ACCOUNT_SID_LENGTH: process.env.TWILIO_ACCOUNT_SID?.length,
+  AUTH_TOKEN_EXISTS: !!process.env.TWILIO_AUTH_TOKEN,
+  AUTH_TOKEN_LENGTH: process.env.TWILIO_AUTH_TOKEN?.length,
+  PHONE_NUMBER_EXISTS: !!process.env.TWILIO_PHONE_NUMBER,
+  WHATSAPP_NUMBER_EXISTS: !!process.env.TWILIO_WHATSAPP_NUMBER,
+});
 // Funzione helper per formattare i numeri di telefono svizzeri
 const formatPhoneNumber = (phoneNumber) => {
   let cleaned = phoneNumber.replace(/\D/g, '');
