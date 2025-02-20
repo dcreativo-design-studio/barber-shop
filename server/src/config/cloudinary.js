@@ -3,24 +3,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Non configurare qui Cloudinary, ma in ogni funzione
+// Non serve configurare manualmente - la stringa CLOUDINARY_URL contiene già tutto
+// cloudinary.config viene chiamato automaticamente quando trova CLOUDINARY_URL
 
 export const uploadImage = async (fileData) => {
   try {
-    // Configura Cloudinary direttamente nella funzione
-    const cloudConfig = {
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET
-    };
-
-    console.log('Configuring Cloudinary for upload with:', {
-      cloud_name: cloudConfig.cloud_name ? 'present' : 'missing',
-      api_key: cloudConfig.api_key ? 'present' : 'missing',
-      api_secret: cloudConfig.api_secret ? 'present' : 'missing'
+    console.log('Cloudinary configuration check:', {
+      url_exists: !!process.env.CLOUDINARY_URL,
+      configured: !!cloudinary.config().cloud_name
     });
-
-    cloudinary.config(cloudConfig);
 
     // Se è un buffer, carica usando promise e stream
     if (Buffer.isBuffer(fileData)) {
@@ -38,6 +29,10 @@ export const uploadImage = async (fileData) => {
               console.error('Cloudinary upload stream error:', error);
               return reject(error);
             }
+            console.log('Upload successful:', {
+              public_id: result.public_id,
+              url: result.secure_url
+            });
             resolve(result);
           }
         );
@@ -46,13 +41,20 @@ export const uploadImage = async (fileData) => {
     }
     // Se è una stringa (URL o data URI), usa il metodo standard
     else {
-      return await cloudinary.uploader.upload(fileData, {
+      const result = await cloudinary.uploader.upload(fileData, {
         folder: 'profile-images',
         transformation: [
           { width: 400, height: 400, crop: "fill" },
           { quality: 'auto' }
         ]
       });
+
+      console.log('Upload successful:', {
+        public_id: result.public_id,
+        url: result.secure_url
+      });
+
+      return result;
     }
   } catch (error) {
     console.error('Error uploading image to Cloudinary:', error);
@@ -62,28 +64,23 @@ export const uploadImage = async (fileData) => {
 
 export const deleteImage = async (publicId) => {
   try {
-    // Configura Cloudinary direttamente nella funzione
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-
     if (publicId) {
+      console.log('Attempting to delete image:', publicId);
       await cloudinary.uploader.destroy(publicId);
+      console.log('Image deleted successfully:', publicId);
     }
   } catch (error) {
     console.error('Error deleting image:', error);
+    throw error;
   }
 };
 
+// Funzione di test
 export const testCloudinaryConnection = async () => {
   try {
-    // Configura Cloudinary direttamente nella funzione
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET
+    console.log('Testing Cloudinary connection with config:', {
+      url_exists: !!process.env.CLOUDINARY_URL,
+      cloud_name: cloudinary.config().cloud_name || 'not set'
     });
 
     const result = await cloudinary.api.ping();
