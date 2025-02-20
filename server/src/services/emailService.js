@@ -336,6 +336,77 @@ export const sendPasswordChangeEmail = async (user) => {
   }
 };
 
+export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
+  const mailOptions = {
+    from: {
+      name: 'Your Style Barber Studio',
+      address: process.env.SMTP_USER
+    },
+    to: to,
+    subject: 'Benvenuto in Your Style Barber Studio - Credenziali di accesso',
+    html: `
+      <h2>Benvenuto in Your Style Barber Studio!</h2>
+      <p>Ciao ${barber.firstName},</p>
+      <p>Sei stato registrato come barbiere nel nostro sistema.</p>
+      <p>Ecco le tue credenziali di accesso:</p>
+      <ul>
+        <li><strong>Email:</strong> ${barber.email}</li>
+        <li><strong>Password:</strong> ${password}</li>
+      </ul>
+      <p>Puoi accedere al tuo pannello personale visitando il nostro sito web e cliccando su "Login".</p>
+      <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
+      <p>Nel tuo pannello personale potrai:</p>
+      <ul>
+        <li>Visualizzare e gestire i tuoi appuntamenti</li>
+        <li>Modificare i tuoi orari di lavoro</li>
+        <li>Impostare periodi di ferie o vacanza</li>
+        <li>Gestire i servizi che offri</li>
+      </ul>
+      <p>Per qualsiasi domanda, non esitare a contattarci.</p>
+      <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
+    `
+  };
+
+  try {
+    console.log('Attempting to send barber registration email to:', to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Barber registration email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending barber registration email:', {
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+    return false;
+  }
+};
+
+export const sendBarberScheduleUpdateEmail = async (barber) => {
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: process.env.ADMIN_EMAIL,
+    subject: 'Aggiornamento Orari Barbiere - Your Style Barber',
+    html: `
+      <h2>Aggiornamento Orari Barbiere</h2>
+      <p>Il barbiere ${barber.firstName} ${barber.lastName} ha aggiornato i suoi orari di lavoro o periodi di vacanza.</p>
+      <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
+      <p>Cordiali saluti,<br/>Il sistema Your Style Barber Studio</p>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Schedule update notification email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending schedule update notification email:', error);
+    return false;
+  }
+};
+
+
 export default {
   sendEmail,
   sendRegistrationEmail,
@@ -345,5 +416,7 @@ export default {
   sendCancellationNotification,
   sendReminderEmail,
   testEmailConfiguration,
-  sendPasswordChangeEmail
+  sendPasswordChangeEmail,
+  sendBarberRegistrationEmail,
+  sendBarberScheduleUpdateEmail
 };

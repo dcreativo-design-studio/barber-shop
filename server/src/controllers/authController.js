@@ -178,5 +178,59 @@ export const authController = {
       console.error('Error in me endpoint:', error);
       res.status(500).json({ message: 'Errore nel recupero dati utente' });
     }
+  },
+
+  // Aggiungi qui la nuova funzione changePassword
+  async changePassword(req, res) {
+    try {
+      const { userId, currentPassword, newPassword } = req.body;
+
+      // Validazione
+      if (!userId || !currentPassword || !newPassword) {
+        return res.status(400).json({
+          message: 'UserId, password attuale e nuova password sono richiesti'
+        });
+      }
+
+      // Trova l'utente
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Utente non trovato' });
+      }
+
+      // Verifica la password attuale
+      const isMatch = await bcryptjs.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Password attuale non corretta' });
+      }
+
+      // Genera hash della nuova password
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(newPassword, salt);
+
+      // Aggiorna la password dell'utente
+      user.password = hashedPassword;
+      user.updatedAt = new Date();
+      await user.save();
+
+      // Invia email di conferma
+      try {
+        await sendPasswordChangeEmail(user);
+      } catch (emailError) {
+        console.error('Error sending password change confirmation email:', emailError);
+        // Non blocchiamo il flusso se l'email fallisce
+      }
+
+      res.json({
+        success: true,
+        message: 'Password cambiata con successo'
+      });
+    } catch (error) {
+      console.error('Error in changePassword:', error);
+      res.status(500).json({
+        message: 'Errore nel cambio password',
+        error: error.message
+      });
+    }
   }
 };

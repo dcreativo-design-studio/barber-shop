@@ -17,4 +17,7 @@ router.get('/profile', authenticateUser, authController.getProfile);
 router.post('/refresh-token', authenticateUser, authController.refreshToken);
 router.get('/me', authenticateUser, authController.me);
 
+// Nuova rotta per il cambio password
+router.post('/change-password', authenticateUser, authController.changePassword);
+
 export default router;

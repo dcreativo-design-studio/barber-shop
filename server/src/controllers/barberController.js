@@ -1,7 +1,10 @@
+import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import Appointment from '../models/Appointment.js';
 import Barber from '../models/Barber.js';
 import Service from '../models/Service.js';
+import User from '../models/User.js';
+import { sendEmail } from '../services/emailService.js';
 import { generateAvailableSlots } from '../utils/slotGenerator.js';
 
 export const barberController = {
@@ -43,6 +46,7 @@ export const barberController = {
         { day: 'sunday', isWorking: false, startTime: '09:00', endTime: '19:00' }
       ];
 
+      // Crea il barbiere
       const barber = new Barber({
         ...req.body,
         workingHours: req.body.workingHours || defaultWorkingHours,
@@ -50,8 +54,60 @@ export const barberController = {
       });
 
       await barber.save();
-      res.status(201).json(barber);
+
+      // Genera una password casuale per il barbiere
+      const generatePassword = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+        for (let i = 0; i < 10; i++) {
+          password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+      };
+
+      const plainPassword = generatePassword();
+
+      // Crea un account utente per il barbiere
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(plainPassword, salt);
+
+      const barberUser = new User({
+        firstName: barber.firstName,
+        lastName: barber.lastName,
+        email: barber.email,
+        phone: barber.phone,
+        password: hashedPassword,
+        role: 'barber',
+        barberId: barber._id
+      });
+
+      await barberUser.save();
+
+      // Invia email con le credenziali al barbiere
+      await sendEmail({
+        to: barber.email,
+        subject: 'Your Style Barber Studio - Credenziali di accesso',
+        html: `
+          <h2>Benvenuto in Your Style Barber Studio!</h2>
+          <p>Ciao ${barber.firstName},</p>
+          <p>Sei stato registrato come barbiere nel nostro sistema.</p>
+          <p>Ecco le tue credenziali di accesso:</p>
+          <ul>
+            <li><strong>Email:</strong> ${barber.email}</li>
+            <li><strong>Password:</strong> ${plainPassword}</li>
+          </ul>
+          <p>Puoi accedere al tuo pannello personale cliccando <a href="${process.env.FRONTEND_URL}/login">qui</a>.</p>
+          <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
+          <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
+        `
+      });
+
+      res.status(201).json({
+        ...barber.toObject(),
+        message: 'Barbiere creato con successo e credenziali inviate via email'
+      });
     } catch (error) {
+      console.error('Error creating barber:', error);
       res.status(400).json({ message: error.message });
     }
   },

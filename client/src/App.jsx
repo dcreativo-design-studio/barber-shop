@@ -3,6 +3,7 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import BarberDashboard from './components/barber/BarberDashboard'; // Nuovo import
 import BookingCalendar from './components/BookingCalendar';
 import GuestBooking from './components/GuestBooking';
 import Navbar from './components/Navbar';
@@ -45,6 +46,15 @@ function App() {
         path="/admin"
         element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace />}
       />
+      {/* Nuova rotta per il pannello barbiere */}
+      <Route
+        path="/barber"
+        element={
+          user?.role === 'barber' || user?.role === 'admin'
+            ? <BarberDashboard />
+            : <Navigate to="/" replace />
+        }
+      />
       <Route
         path="/profile"
         element={user ? <UserProfile /> : <Navigate to="/login" replace />}
@@ -70,6 +80,13 @@ function App() {
                     className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
                   >
                     Dashboard Admin
+                  </Link>
+                ) : user.role === 'barber' ? (
+                  <Link
+                    to="/barber"
+                    className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+                  >
+                    Pannello Barbiere
                   </Link>
                 ) : (
                   <BookingCalendar />

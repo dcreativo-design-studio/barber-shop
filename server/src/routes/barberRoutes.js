@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { barberController } from '../controllers/barberController.js';
 import { authenticateUser, requireAdmin } from '../middleware/authMiddleware.js';
+import Barber from '../models/Barber.js';
 
 const router = Router();
 
@@ -8,6 +9,32 @@ const router = Router();
 router.get('/public', barberController.getActiveBarbers);
 router.get('/public/:id', barberController.getPublicBarberDetails);
 router.get('/:id/check-vacation', barberController.checkVacation);
+
+// Rotta pubblica per trovare un barbiere tramite email
+router.get('/find-by-email', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email richiesta' });
+    }
+
+    const barber = await Barber.findOne({
+      email: email.toLowerCase(),
+      isActive: true
+    }).select('_id firstName lastName email services workingHours');
+
+    if (!barber) {
+      return res.status(404).json({ message: 'Barbiere non trovato' });
+    }
+
+    res.json(barber);
+  } catch (error) {
+    console.error('Error finding barber by email:', error);
+    res.status(500).json({ message: 'Errore server' });
+  }
+});
+
 // Rotte che richiedono autenticazione
 router.use(authenticateUser);
 

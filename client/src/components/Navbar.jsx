@@ -78,6 +78,23 @@ function Navbar({ onThemeToggle, isDark }) {
                       >
                         Profilo
                       </Link>
+                      {user?.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          className="text-[var(--text-primary)] hover:text-[var(--accent)] text-sm transition-colors"
+                        >
+                          Pannello Admin
+                        </Link>
+                      )}
+
+                      {user?.role === 'barber' && (
+                        <Link
+                          to="/barber"
+                          className="text-[var(--text-primary)] hover:text-[var(--accent)] text-sm transition-colors"
+                        >
+                          Pannello Barbiere
+                        </Link>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1.5 rounded hover-glow"
@@ -138,6 +155,23 @@ function Navbar({ onThemeToggle, isDark }) {
                 >
                   Profilo
                 </Link>
+                {user?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      Pannello Admin
+                    </Link>
+                  )}
+
+                  {user?.role === 'barber' && (
+                    <Link
+                      to="/barber"
+                      className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      Pannello Barbiere
+                    </Link>
+                  )}
                 <button
                   onClick={handleLogout}
                   className="w-full text-left py-2 text-red-500 hover:text-red-400 transition-colors"
