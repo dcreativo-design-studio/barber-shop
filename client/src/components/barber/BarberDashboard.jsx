@@ -1,5 +1,6 @@
 import { Calendar, Clipboard, Clock, Scissors, Settings } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { barberApi } from '../../config/barberApi';
 import { useAuth } from '../../context/AuthContext';
 import BarberAppointments from './BarberAppointments';
 import BarberProfile from './BarberProfile';
@@ -18,7 +19,14 @@ function BarberDashboard() {
     const fetchBarberDetails = async () => {
       try {
         setLoading(true);
+        setError('');
+
         // Verifica che l'utente sia un barbiere
+        if (!user) {
+          setError('Utente non autenticato.');
+          return;
+        }
+
         if (user?.role !== 'barber') {
           setError('Accesso non autorizzato. Questa pagina è riservata ai barbieri.');
           return;
@@ -31,17 +39,23 @@ function BarberDashboard() {
           // Se il barberId non è ancora collegato all'utente, cerca il barbiere per email
           console.log("Cercando barbiere per email:", user.email);
           try {
-            // Usa barberApi invece di fetch
             const data = await barberApi.findBarberByEmail(user.email);
             console.log("Risposta findBarberByEmail:", data);
-            if (data?._id) {
-              setBarberId(data._id);
+
+            if (data?._id || data?.id) {
+              setBarberId(data._id || data.id);
             } else {
+              console.error('Nessun ID barbiere trovato nella risposta:', data);
               setError('Impossibile trovare il profilo barbiere associato a questo account.');
             }
           } catch (findError) {
             console.error('Error in findBarberByEmail:', findError);
-            setError('Errore nel recupero dei dati del barbiere per email.');
+            if (findError.response) {
+              console.error('Response error:', findError.response.data);
+              setError(`Errore nel recupero dei dati del barbiere: ${findError.response.data.message || findError.message}`);
+            } else {
+              setError('Errore nel recupero dei dati del barbiere per email.');
+            }
           }
         }
       } catch (err) {

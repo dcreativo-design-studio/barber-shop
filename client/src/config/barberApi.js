@@ -12,6 +12,19 @@ export const barberApi = {
     }
   },
 
+  // Trova un barbiere per email
+  findBarberByEmail: async (email) => {
+    try {
+      const response = await apiRequest.get('/barbers/find-by-email', {
+        params: { email }
+      });
+      return response.data ? response.data : response; // Gestisce entrambi i possibili formati di risposta
+    } catch (error) {
+      console.error('Error finding barber by email:', error);
+      throw error;
+    }
+  },
+
   // Ottiene gli appuntamenti di un barbiere
   getBarberAppointments: async (barberId, startDate, endDate) => {
     try {
@@ -106,20 +119,5 @@ export const barberApi = {
       console.error('Error fetching barber stats:', error);
       throw error;
     }
-  },
-
-  // Trova un barbiere per email
-  findBarberByEmail: async (email) => {
-    try {
-      const response = await apiRequest.get('/barbers/find-by-email', {
-        params: { email }
-      });
-      return response;
-    } catch (error) {
-      console.error('Error finding barber by email:', error);
-      throw error;
     }
-  }
 };
-
-export default barberApi;
