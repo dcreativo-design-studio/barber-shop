@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowDown, ArrowUp, Calendar, Clock, DollarSign, Scissors, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { barberApi } from '../../services/barberApi';
+import { barberApi } from '../../config/barberApi';
 
 // Array di colori per i grafici
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A4DE6C', '#8884D8', '#82CA9D'];

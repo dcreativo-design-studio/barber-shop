@@ -1,7 +1,7 @@
 import { AlertCircle, Check, Clock, DollarSign, Plus, Scissors, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { barberApi } from '../../services/barberApi';
-import { servicesApi } from '../../services/servicesApi';
+import { servicesApi } from '../../config/api';
+import { barberApi } from '../../config/barberApi';
 
 function BarberServices({ barberId }) {
   const [loading, setLoading] = useState(true);

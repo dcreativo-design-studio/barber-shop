@@ -1,6 +1,6 @@
 import { AlertCircle, Check, Clock, Coffee, Palmtree } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { barberApi } from '../../services/barberApi';
+import { barberApi } from '../../config/barberApi';
 import VacationPicker from '../VacationPicker';
 
 function BarberSchedule({ barberId }) {

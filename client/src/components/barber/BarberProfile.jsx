@@ -1,7 +1,7 @@
 import { AlertCircle, Check, Eye, EyeOff, Lock, LogOut, Mail, Phone, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { barberApi } from '../../config/barberApi';
 import { useAuth } from '../../context/AuthContext';
-import { barberApi } from '../../services/barberApi';
 
 function BarberProfile({ barberId }) {
   const { user, logout, updateUserInfo } = useAuth();
