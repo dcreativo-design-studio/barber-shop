@@ -33,84 +33,119 @@ export const barberController = {
   },
 
   // Crea un nuovo barbiere (solo admin)
-  async createBarber(req, res) {
-    try {
-      // Aggiungi orari di lavoro di default se non forniti
-      const defaultWorkingHours = [
-        { day: 'monday', isWorking: true, startTime: '09:00', endTime: '19:00' },
-        { day: 'tuesday', isWorking: true, startTime: '09:00', endTime: '19:00' },
-        { day: 'wednesday', isWorking: true, startTime: '09:00', endTime: '19:00' },
-        { day: 'thursday', isWorking: true, startTime: '09:00', endTime: '19:00' },
-        { day: 'friday', isWorking: true, startTime: '09:00', endTime: '19:00' },
-        { day: 'saturday', isWorking: true, startTime: '09:00', endTime: '17:00' },
-        { day: 'sunday', isWorking: false, startTime: '09:00', endTime: '19:00' }
-      ];
+  // Crea un nuovo barbiere (solo admin)
+async createBarber(req, res) {
+  try {
+    // Verifica email duplicata
+    const { email } = req.body;
 
-      // Crea il barbiere
-      const barber = new Barber({
-        ...req.body,
-        workingHours: req.body.workingHours || defaultWorkingHours,
-        isActive: true
+    // Controlla se esiste già un barbiere con questa email
+    const existingBarber = await Barber.findOne({ email });
+    if (existingBarber) {
+      return res.status(400).json({
+        message: 'Un barbiere con questa email esiste già'
       });
+    }
 
-      await barber.save();
+    // Controlla se esiste già un utente con questa email
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: 'Un utente con questa email esiste già'
+      });
+    }
 
-      // Genera una password casuale per il barbiere
-      const generatePassword = () => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-        let password = '';
-        for (let i = 0; i < 10; i++) {
-          password += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return password;
-      };
+    // Aggiungi orari di lavoro di default se non forniti
+    const defaultWorkingHours = [
+      { day: 'monday', isWorking: true, startTime: '09:00', endTime: '19:00' },
+      { day: 'tuesday', isWorking: true, startTime: '09:00', endTime: '19:00' },
+      { day: 'wednesday', isWorking: true, startTime: '09:00', endTime: '19:00' },
+      { day: 'thursday', isWorking: true, startTime: '09:00', endTime: '19:00' },
+      { day: 'friday', isWorking: true, startTime: '09:00', endTime: '19:00' },
+      { day: 'saturday', isWorking: true, startTime: '09:00', endTime: '17:00' },
+      { day: 'sunday', isWorking: false, startTime: '09:00', endTime: '19:00' }
+    ];
 
-      const plainPassword = generatePassword();
+    // Crea il barbiere
+    const barber = new Barber({
+      ...req.body,
+      workingHours: req.body.workingHours || defaultWorkingHours,
+      isActive: true
+    });
 
-      // Crea un account utente per il barbiere
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(plainPassword, salt);
+    await barber.save();
 
+    // Genera una password casuale per il barbiere
+    const generatePassword = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      let password = '';
+      for (let i = 0; i < 10; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    };
+
+    const plainPassword = generatePassword();
+
+    // Crea un account utente per il barbiere
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(plainPassword, salt);
+
+    try {
       const barberUser = new User({
         firstName: barber.firstName,
         lastName: barber.lastName,
         email: barber.email,
         phone: barber.phone,
         password: hashedPassword,
-        role: 'barber',
+        role: 'barber', // Assicurati che 'barber' sia un valore valido nell'enum di User
         barberId: barber._id
       });
 
       await barberUser.save();
+    } catch (userError) {
+      // Se la creazione dell'utente fallisce, elimina il barbiere per mantenere la coerenza dei dati
+      await Barber.findByIdAndDelete(barber._id);
+      console.error('Error creating barber user:', userError);
 
-      // Invia email con le credenziali al barbiere
-      await sendEmail({
-        to: barber.email,
-        subject: 'Your Style Barber Studio - Credenziali di accesso',
-        html: `
-          <h2>Benvenuto in Your Style Barber Studio!</h2>
-          <p>Ciao ${barber.firstName},</p>
-          <p>Sei stato registrato come barbiere nel nostro sistema.</p>
-          <p>Ecco le tue credenziali di accesso:</p>
-          <ul>
-            <li><strong>Email:</strong> ${barber.email}</li>
-            <li><strong>Password:</strong> ${plainPassword}</li>
-          </ul>
-          <p>Puoi accedere al tuo pannello personale cliccando <a href="${process.env.FRONTEND_URL}/login">qui</a>.</p>
-          <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
-          <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
-        `
-      });
+      if (userError.name === 'ValidationError') {
+        return res.status(400).json({
+          message: 'Errore di validazione: assicurati che il ruolo "barber" sia valido nel modello User',
+          error: userError.message
+        });
+      }
 
-      res.status(201).json({
-        ...barber.toObject(),
-        message: 'Barbiere creato con successo e credenziali inviate via email'
-      });
-    } catch (error) {
-      console.error('Error creating barber:', error);
-      res.status(400).json({ message: error.message });
+      throw userError;
     }
-  },
+
+    // Invia email con le credenziali al barbiere
+    await sendEmail({
+      to: barber.email,
+      subject: 'Your Style Barber Studio - Credenziali di accesso',
+      html: `
+        <h2>Benvenuto in Your Style Barber Studio!</h2>
+        <p>Ciao ${barber.firstName},</p>
+        <p>Sei stato registrato come barbiere nel nostro sistema.</p>
+        <p>Ecco le tue credenziali di accesso:</p>
+        <ul>
+          <li><strong>Email:</strong> ${barber.email}</li>
+          <li><strong>Password:</strong> ${plainPassword}</li>
+        </ul>
+        <p>Puoi accedere al tuo pannello personale cliccando <a href="${process.env.FRONTEND_URL}/login">qui</a>.</p>
+        <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
+        <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
+      `
+    });
+
+    res.status(201).json({
+      ...barber.toObject(),
+      message: 'Barbiere creato con successo e credenziali inviate via email'
+    });
+  } catch (error) {
+    console.error('Error creating barber:', error);
+    res.status(400).json({ message: error.message });
+  }
+},
 
   // Aggiorna un barbiere (solo admin)
   async updateBarber(req, res) {
