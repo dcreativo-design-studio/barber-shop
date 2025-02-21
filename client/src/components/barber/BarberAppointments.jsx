@@ -67,11 +67,12 @@ function BarberAppointments({ barberId }) {
         // Aggiorniamo il formato dei dati ricevuti
         let formattedAppointments = [];
 
+        // Gestisci array diretto di appuntamenti
         if (Array.isArray(response)) {
-          // Se la risposta è un array diretto di appuntamenti
           formattedAppointments = response;
-        } else if (response && response.appointments && typeof response.appointments === 'object') {
-          // Se la risposta è raggruppata per giorno
+        }
+        // Gestisci appointments raggruppati con struttura nidificata
+        else if (response && response.appointments && typeof response.appointments === 'object') {
           const datesKeys = Object.keys(response.appointments);
           console.log('Dates keys:', datesKeys);
 
@@ -83,6 +84,10 @@ function BarberAppointments({ barberId }) {
               }
             });
           }
+        }
+        // Gestisci appuntamenti come proprietà diretta
+        else if (response && Array.isArray(response.appointments)) {
+          formattedAppointments = response.appointments;
         }
 
         console.log('Formatted appointments:', formattedAppointments);
