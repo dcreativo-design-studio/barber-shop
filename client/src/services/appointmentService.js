@@ -13,18 +13,30 @@ export const appointmentService = {
 
   async getBarberAppointments(barberId, startDate, endDate) {
     try {
-      // Adattato per funzionare con come chiamato dal componente BarberAppointments
+      // Converte le date in formato yyyy-MM-dd per rispettare il formato che sembra usare il backend
+      const formattedStartDate = startDate.slice(0, 10);
+      const formattedEndDate = endDate.slice(0, 10);
+
+      console.log(`Fetching barber appointments with: barberId=${barberId}, startDate=${formattedStartDate}, endDate=${formattedEndDate}`);
+
+      // Questo è l'endpoint che sembra funzionare nel pannello admin
       const params = {
-        startDate,
-        endDate
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        viewType: 'day',
+        barberId
       };
 
-      const response = await apiRequest.get(`/appointments/barber/${barberId}`, { params });
+      // Usiamo l'endpoint /appointments/filtered come visto nel pannello admin
+      const response = await apiRequest.get('/appointments/filtered', { params });
+
+      console.log('Response from appointments/filtered endpoint:', response);
+
       return response.data || response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
-      // Return empty object with valid structure instead of throwing
-      return { appointments: {} };
+      // Return empty array with valid structure instead of throwing
+      return [];
     }
   },
 
@@ -102,17 +114,6 @@ export const appointmentService = {
       return response.data || response;
     } catch (error) {
       console.error(`Error fetching ${viewType} appointments:`, error);
-      throw error;
-    }
-  },
-
-  // Aggiunta per compatibilità con il codice esistente
-  async getBarberAppointmentsCalendar(barberId, params) {
-    try {
-      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, { params });
-      return response.data || response;
-    } catch (error) {
-      console.error('Error fetching barber calendar appointments:', error);
       throw error;
     }
   }

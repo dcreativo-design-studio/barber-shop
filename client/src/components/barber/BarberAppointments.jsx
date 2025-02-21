@@ -56,37 +56,32 @@ function BarberAppointments({ barberId }) {
       console.log('Fetching appointments for barberId:', barberId, 'from', startDate.toISOString(), 'to', endDate.toISOString());
 
       try {
-        // Utilizziamo il formato di data ISO per le date
-        const startDateIso = startDate.toISOString();
-        const endDateIso = endDate.toISOString();
-
         const response = await appointmentService.getBarberAppointments(
           barberId,
-          startDateIso,
-          endDateIso
+          startDate.toISOString(),
+          endDate.toISOString()
         );
 
         console.log('Appointments response:', response);
 
-        // Aggiorniamo il formato dei dati ricevuti
+        // Per gestire sia array che altri formati di risposta
         let formattedAppointments = [];
 
-        if (response && response.appointments) {
-          // Se la risposta è raggruppata per giorno
-          const datesKeys = Object.keys(response.appointments);
-          console.log('Dates keys:', datesKeys);
-
-          if (datesKeys.length > 0) {
-            datesKeys.forEach(date => {
-              if (response.appointments[date] && Array.isArray(response.appointments[date].appointments)) {
-                const dayAppointments = response.appointments[date].appointments;
-                formattedAppointments = [...formattedAppointments, ...dayAppointments];
-              }
-            });
-          }
-        } else if (Array.isArray(response)) {
+        if (Array.isArray(response)) {
           // Se la risposta è un array diretto di appuntamenti
           formattedAppointments = response;
+        } else if (response && response.appointments && Array.isArray(response.appointments)) {
+          // Se la risposta è un oggetto con una proprietà appointments come array
+          formattedAppointments = response.appointments;
+        } else if (response && typeof response === 'object') {
+          // Se è un altro tipo di oggetto, controlla se ha proprietà con array di appuntamenti
+          Object.keys(response).forEach(key => {
+            if (response[key] && Array.isArray(response[key])) {
+              formattedAppointments = [...formattedAppointments, ...response[key]];
+            } else if (response[key] && response[key].appointments && Array.isArray(response[key].appointments)) {
+              formattedAppointments = [...formattedAppointments, ...response[key].appointments];
+            }
+          });
         }
 
         console.log('Formatted appointments:', formattedAppointments);
