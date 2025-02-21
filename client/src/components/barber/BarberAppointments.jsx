@@ -56,32 +56,49 @@ function BarberAppointments({ barberId }) {
       console.log('Fetching appointments for barberId:', barberId, 'from', startDate.toISOString(), 'to', endDate.toISOString());
 
       try {
-        const response = await appointmentService.getBarberAppointments(
-          barberId,
-          startDate.toISOString(),
-          endDate.toISOString()
-        );
+        // Prima proviamo con l'API del barber che usa calendar/barber (che richiede admin)
+        let response = [];
 
-        console.log('Appointments response:', response);
+        try {
+          // Prima proviamo a usare l'endpoint calendar/barber (può richiedere admin)
+          response = await barberApi.getBarberAppointments(
+            barberId,
+            startDate.toISOString(),
+            endDate.toISOString()
+          );
 
-        // Per gestire sia array che altri formati di risposta
+          console.log('Response from barberApi.getBarberAppointments:', response);
+        } catch (adminError) {
+          console.log('Error with admin endpoint, trying client endpoint:', adminError);
+          // Se fallisce, proviamo con l'endpoint my-appointments che è accessibile ai client
+          response = await barberApi.getBarberAppointmentsFromClient(
+            barberId,
+            startDate.toISOString(),
+            endDate.toISOString()
+          );
+
+          console.log('Response from barberApi.getBarberAppointmentsFromClient:', response);
+        }
+
+        // Aggiorniamo il formato dei dati ricevuti
         let formattedAppointments = [];
 
         if (Array.isArray(response)) {
           // Se la risposta è un array diretto di appuntamenti
           formattedAppointments = response;
-        } else if (response && response.appointments && Array.isArray(response.appointments)) {
-          // Se la risposta è un oggetto con una proprietà appointments come array
-          formattedAppointments = response.appointments;
-        } else if (response && typeof response === 'object') {
-          // Se è un altro tipo di oggetto, controlla se ha proprietà con array di appuntamenti
-          Object.keys(response).forEach(key => {
-            if (response[key] && Array.isArray(response[key])) {
-              formattedAppointments = [...formattedAppointments, ...response[key]];
-            } else if (response[key] && response[key].appointments && Array.isArray(response[key].appointments)) {
-              formattedAppointments = [...formattedAppointments, ...response[key].appointments];
-            }
-          });
+        } else if (response && response.appointments && typeof response.appointments === 'object') {
+          // Se la risposta è raggruppata per giorno
+          const datesKeys = Object.keys(response.appointments);
+          console.log('Dates keys:', datesKeys);
+
+          if (datesKeys.length > 0) {
+            datesKeys.forEach(date => {
+              if (response.appointments[date] && Array.isArray(response.appointments[date].appointments)) {
+                const dayAppointments = response.appointments[date].appointments;
+                formattedAppointments = [...formattedAppointments, ...dayAppointments];
+              }
+            });
+          }
         }
 
         console.log('Formatted appointments:', formattedAppointments);

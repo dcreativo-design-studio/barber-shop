@@ -13,29 +13,17 @@ export const appointmentService = {
 
   async getBarberAppointments(barberId, startDate, endDate) {
     try {
-      // Converte le date in formato yyyy-MM-dd per rispettare il formato che sembra usare il backend
-      const formattedStartDate = startDate.slice(0, 10);
-      const formattedEndDate = endDate.slice(0, 10);
+      // Cambiamo endpoint per utilizzare calendar/barber che è accessibile ai barbieri
+      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, {
+        params: { startDate, endDate }
+      });
 
-      console.log(`Fetching barber appointments with: barberId=${barberId}, startDate=${formattedStartDate}, endDate=${formattedEndDate}`);
-
-      // Questo è l'endpoint che sembra funzionare nel pannello admin
-      const params = {
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-        viewType: 'day',
-        barberId
-      };
-
-      // Usiamo l'endpoint /appointments/filtered come visto nel pannello admin
-      const response = await apiRequest.get('/appointments/filtered', { params });
-
-      console.log('Response from appointments/filtered endpoint:', response);
+      console.log('Response from calendar/barber endpoint:', response);
 
       return response.data || response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
-      // Return empty array with valid structure instead of throwing
+      // In caso di errore restituiamo un array vuoto
       return [];
     }
   },

@@ -5,7 +5,7 @@ export const barberApi = {
   getBarberDetails: async (barberId) => {
     try {
       const response = await apiRequest.get(`/barbers/${barberId}`);
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error fetching barber details:', error);
       throw error;
@@ -25,16 +25,58 @@ export const barberApi = {
     }
   },
 
-  // Ottiene gli appuntamenti di un barbiere
+  // Ottiene gli appuntamenti di un barbiere - METODO ORIGINALE
   getBarberAppointments: async (barberId, startDate, endDate) => {
     try {
-      const response = await apiRequest.get(`/appointments/barber/${barberId}`, {
+      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, {
         params: { startDate, endDate }
       });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
-      throw error;
+      return []; // Restituisce un array vuoto invece di propagare l'errore
+    }
+  },
+
+  // NUOVO METODO - Ottiene gli appuntamenti dal cliente
+  getBarberAppointmentsFromClient: async (barberId, startDate, endDate) => {
+    try {
+      // Convert dates to YYYY-MM-DD format for client API
+      const formattedStartDate = typeof startDate === 'string' ? startDate.split('T')[0] : new Date(startDate).toISOString().split('T')[0];
+      const formattedEndDate = typeof endDate === 'string' ? endDate.split('T')[0] : new Date(endDate).toISOString().split('T')[0];
+
+      // Ottieni gli appuntamenti dal client per questo barbiere
+      const response = await apiRequest.get('/appointments/my-appointments');
+
+      console.log('My appointments response:', response);
+
+      // Filtra gli appuntamenti per questo barbiere e nell'intervallo di date
+      if (Array.isArray(response)) {
+        const filteredAppointments = response.filter(app => {
+          if (!app.date || !app.barber) return false;
+
+          // Verifica che il barbiere sia quello richiesto
+          const isCorrectBarber = app.barber === barberId ||
+                                 (app.barber && app.barber._id === barberId);
+
+          // Verifica che la data sia nell'intervallo
+          const appDate = new Date(app.date);
+          const start = new Date(formattedStartDate);
+          const end = new Date(formattedEndDate);
+          end.setHours(23, 59, 59, 999); // Imposta alla fine della giornata
+
+          const isInDateRange = appDate >= start && appDate <= end;
+
+          return isCorrectBarber && isInDateRange;
+        });
+
+        return filteredAppointments;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error fetching barber appointments from client:', error);
+      return []; // Restituisce un array vuoto in caso di errore
     }
   },
 
@@ -42,7 +84,7 @@ export const barberApi = {
   updateBarberWorkingHours: async (barberId, workingHours) => {
     try {
       const response = await apiRequest.put(`/barbers/${barberId}/working-hours`, { workingHours });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber working hours:', error);
       throw error;
@@ -53,7 +95,7 @@ export const barberApi = {
   updateBarberVacations: async (barberId, vacations) => {
     try {
       const response = await apiRequest.put(`/barbers/${barberId}/vacations`, { vacations });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber vacations:', error);
       throw error;
@@ -64,7 +106,7 @@ export const barberApi = {
   updateBarberServices: async (barberId, services) => {
     try {
       const response = await apiRequest.put(`/barbers/${barberId}/services`, { services });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber services:', error);
       throw error;
@@ -75,7 +117,7 @@ export const barberApi = {
   updateBarberProfile: async (barberId, profileData) => {
     try {
       const response = await apiRequest.put(`/barbers/${barberId}`, profileData);
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber profile:', error);
       throw error;
@@ -86,7 +128,7 @@ export const barberApi = {
   notifyScheduleUpdate: async (barberId) => {
     try {
       const response = await apiRequest.post(`/notifications/schedule-update`, { barberId });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error sending schedule update notification:', error);
       throw error;
@@ -101,7 +143,7 @@ export const barberApi = {
         currentPassword,
         newPassword
       });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error changing password:', error);
       throw error;
@@ -114,10 +156,12 @@ export const barberApi = {
       const response = await apiRequest.get(`/barbers/${barberId}/stats`, {
         params: { timeframe }
       });
-      return response;
+      return response.data ? response.data : response;
     } catch (error) {
       console.error('Error fetching barber stats:', error);
       throw error;
     }
-    }
+  }
 };
+
+export default barberApi;
