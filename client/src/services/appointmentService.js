@@ -4,27 +4,34 @@ export const appointmentService = {
   async getAppointments(params) {
     try {
       const response = await apiRequest.get('/admin/appointments', { params });
-      return response;
+      return response.data || response;
     } catch (error) {
       console.error('Error fetching appointments:', error);
       throw error;
     }
   },
 
-  async getBarberAppointments(barberId, params) {
+  async getBarberAppointments(barberId, startDate, endDate) {
     try {
-      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, { params });
-      return response;
+      // Adattato per funzionare con come chiamato dal componente BarberAppointments
+      const params = {
+        startDate,
+        endDate
+      };
+
+      const response = await apiRequest.get(`/appointments/barber/${barberId}`, { params });
+      return response.data || response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
-      throw error;
+      // Return empty object with valid structure instead of throwing
+      return { appointments: {} };
     }
   },
 
   async getBarbers() {
     try {
       const response = await apiRequest.get('/barbers');
-      return response;
+      return response.data || response;
     } catch (error) {
       console.error('Error fetching barbers:', error);
       throw error;
@@ -37,7 +44,7 @@ export const appointmentService = {
         `/appointments/${appointmentId}/status`,
         updateData
       );
-      return response;
+      return response.data || response;
     } catch (error) {
       console.error('Error updating appointment status:', error);
       throw error;
@@ -52,7 +59,7 @@ export const appointmentService = {
         ...(barberId && { barberId })
       };
       const response = await apiRequest.get('/appointments/filtered', { params });
-      return response;
+      return response.data || response;
     } catch (error) {
       console.error('Error fetching appointments by range:', error);
       throw error;
@@ -91,10 +98,24 @@ export const appointmentService = {
 
       console.log('Fetching appointments with params:', params);
 
-      return await apiRequest.get('/appointments/filtered', { params });
+      const response = await apiRequest.get('/appointments/filtered', { params });
+      return response.data || response;
     } catch (error) {
       console.error(`Error fetching ${viewType} appointments:`, error);
       throw error;
     }
+  },
+
+  // Aggiunta per compatibilità con il codice esistente
+  async getBarberAppointmentsCalendar(barberId, params) {
+    try {
+      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, { params });
+      return response.data || response;
+    } catch (error) {
+      console.error('Error fetching barber calendar appointments:', error);
+      throw error;
+    }
   }
 };
+
+export default appointmentService;

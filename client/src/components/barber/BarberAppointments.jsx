@@ -53,37 +53,77 @@ function BarberAppointments({ barberId }) {
         endDate.setHours(23, 59, 59, 999);
       }
 
-      const response = await appointmentService.getBarberAppointments(
-        barberId,
-        startDate.toISOString(),
-        endDate.toISOString()
-      );
+      console.log('Fetching appointments for barberId:', barberId, 'from', startDate.toISOString(), 'to', endDate.toISOString());
 
-      // Aggiorniamo il formato dei dati ricevuti
-      let formattedAppointments = [];
-      if (response && response.appointments) {
-        // Se la risposta è raggruppata per giorno
-        Object.keys(response.appointments).forEach(date => {
-          const dayAppointments = response.appointments[date].appointments;
-          formattedAppointments = [...formattedAppointments, ...dayAppointments];
+      try {
+        // Utilizziamo il formato di data ISO per le date
+        const startDateIso = startDate.toISOString();
+        const endDateIso = endDate.toISOString();
+
+        const response = await appointmentService.getBarberAppointments(
+          barberId,
+          startDateIso,
+          endDateIso
+        );
+
+        console.log('Appointments response:', response);
+
+        // Aggiorniamo il formato dei dati ricevuti
+        let formattedAppointments = [];
+
+        if (response && response.appointments) {
+          // Se la risposta è raggruppata per giorno
+          const datesKeys = Object.keys(response.appointments);
+          console.log('Dates keys:', datesKeys);
+
+          if (datesKeys.length > 0) {
+            datesKeys.forEach(date => {
+              if (response.appointments[date] && Array.isArray(response.appointments[date].appointments)) {
+                const dayAppointments = response.appointments[date].appointments;
+                formattedAppointments = [...formattedAppointments, ...dayAppointments];
+              }
+            });
+          }
+        } else if (Array.isArray(response)) {
+          // Se la risposta è un array diretto di appuntamenti
+          formattedAppointments = response;
+        }
+
+        console.log('Formatted appointments:', formattedAppointments);
+
+        // Se non ci sono appuntamenti, mostriamo solo un array vuoto
+        if (!formattedAppointments || formattedAppointments.length === 0) {
+          setAppointments([]);
+          calculateStats([]);
+          return;
+        }
+
+        // Ordinamento degli appuntamenti per data e ora
+        formattedAppointments.sort((a, b) => {
+          if (!a || !b || !a.date || !a.time || !b.date || !b.time) return 0;
+          try {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateA - dateB;
+          } catch (e) {
+            console.error('Error sorting appointments:', e);
+            return 0;
+          }
         });
-      } else if (Array.isArray(response)) {
-        // Se la risposta è un array diretto di appuntamenti
-        formattedAppointments = response;
+
+        setAppointments(formattedAppointments);
+        calculateStats(formattedAppointments);
+      } catch (apiError) {
+        console.error('API error fetching appointments:', apiError);
+        setError('Errore nella comunicazione con il server. Riprova più tardi.');
+        setAppointments([]);
+        calculateStats([]);
       }
-
-      // Ordinamento degli appuntamenti per data e ora
-      formattedAppointments.sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.time}`);
-        const dateB = new Date(`${b.date}T${b.time}`);
-        return dateA - dateB;
-      });
-
-      setAppointments(formattedAppointments);
-      calculateStats(formattedAppointments);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('Error in fetchAppointments function:', error);
       setError('Errore nel caricamento degli appuntamenti. Riprova più tardi.');
+      setAppointments([]);
+      calculateStats([]);
     } finally {
       setLoading(false);
     }
