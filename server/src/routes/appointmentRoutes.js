@@ -207,18 +207,28 @@ router.get('/filtered', authenticateUser, async (req, res) => {
 
     // Per le chiamate dal pannello admin, basandoci sul viewType
     if (req.user.role === 'admin') {
-      // Per le viste giornaliere e normali, restituisci un array diretto
-      if (!viewType || viewType === 'day' || viewType === 'range') {
-        console.log('Admin endpoint, returning direct array for day/range view');
-        return res.json(appointments);
-      }
-
-      // Per le viste settimanali e mensili, potrebbe essere necessario un formato diverso
-      // Verifica se il controller originale si aspetta un formato specifico
       if (viewType === 'week' || viewType === 'month') {
-        console.log('Admin endpoint, returning formatted response for week/month view');
-        // Qui dovremmo seguire il formato che il controller week/month si aspetta
-        // Per ora, proviamo con un array diretto
+        console.log(`Admin endpoint, special response format for ${viewType} view`);
+
+        // Per le viste settimanali e mensili, dobbiamo emulare il formato originale
+        // Raggruppiamo gli appuntamenti per data
+        const appointmentsByDate = {};
+
+        appointments.forEach(appointment => {
+          const dateStr = appointment.date.toISOString().split('T')[0];
+          if (!appointmentsByDate[dateStr]) {
+            appointmentsByDate[dateStr] = {
+              date: dateStr,
+              appointments: []
+            };
+          }
+          appointmentsByDate[dateStr].appointments.push(appointment);
+        });
+
+        return res.json(appointmentsByDate);
+      } else {
+        // Per le viste giornaliere e range, restituisci un array diretto
+        console.log('Admin endpoint, returning direct array for day/range view');
         return res.json(appointments);
       }
     }
