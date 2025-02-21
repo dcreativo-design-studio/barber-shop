@@ -10,7 +10,6 @@ function Navbar({ onThemeToggle, isDark }) {
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-
     useEffect(() => {
       const handleScroll = () => {
         const currentScrollY = window.scrollY;
@@ -36,6 +35,7 @@ function Navbar({ onThemeToggle, isDark }) {
     const handleLogout = () => {
       logout();
       navigate('/login');
+      setIsMenuOpen(false); // Close mobile menu after logout
     };
 
     return (
@@ -132,52 +132,66 @@ function Navbar({ onThemeToggle, isDark }) {
 
         {/* Mobile Menu */}
         <div className={`md:hidden bg-[var(--bg-secondary)] backdrop-blur-sm transition-all duration-300 ${
-          isMenuOpen ? 'max-h-48' : 'max-h-0'
-        } overflow-hidden`}>
+          isMenuOpen ? 'max-h-screen' : 'max-h-0'
+        } overflow-hidden shadow-lg`}>
           <div className="px-4 py-2 space-y-2">
             {user && (
               <>
+                {/* User info in mobile menu */}
+                <div className="py-2 text-[var(--accent)] border-b border-gray-700 mb-2">
+                  Benvenuto, {user.firstName}!
+                </div>
+
                 <Link
                   to="/booking"
                   className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Prenota
                 </Link>
                 <Link
                   to="/waiting-list"
                   className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Lista d'attesa
                 </Link>
                 <Link
                   to="/profile"
                   className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Profilo
                 </Link>
                 {user?.role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
-                    >
-                      Pannello Admin
-                    </Link>
-                  )}
+                  <Link
+                    to="/admin"
+                    className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Pannello Admin
+                  </Link>
+                )}
 
-                  {user?.role === 'barber' && (
-                    <Link
-                      to="/barber"
-                      className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
-                    >
-                      Pannello Barbiere
-                    </Link>
-                  )}
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left py-2 text-red-500 hover:text-red-400 transition-colors"
-                >
-                  Logout
-                </button>
+                {user?.role === 'barber' && (
+                  <Link
+                    to="/barber"
+                    className="block py-2 text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Pannello Barbiere
+                  </Link>
+                )}
+
+                {/* Logout button in mobile menu - styled differently to stand out */}
+                <div className="pt-2 mt-2 border-t border-gray-700">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded text-center transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
               </>
             )}
           </div>
