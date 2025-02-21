@@ -105,28 +105,9 @@ export const appointmentService = {
 
       console.log('Fetching appointments with params:', params);
 
-      // Per retrocompatibilità con il vecchio sistema, se siamo in admin
-      // e la vista è settimanale o mensile, usiamo gli endpoint originali
-      if (viewType === 'week' || viewType === 'month') {
-        try {
-          // Prima prova con gli endpoint originali
-          let endpoint = `/appointments/calendar/${viewType}`;
-          const response = await apiRequest.get(endpoint, {
-            params: {
-              date: formattedStartDate,
-              ...(barberId && { barberId })
-            }
-          });
-          console.log(`Response from ${endpoint}:`, response);
-          return response.data || response;
-        } catch (err) {
-          console.log('Error with original endpoint, falling back to filtered:', err);
-          // Se fallisce, torna all'endpoint filtered
-        }
-      }
-
-      // Usa l'endpoint filtered
+      // Usa direttamente l'endpoint filtered senza provare gli endpoint originali
       const response = await apiRequest.get('/appointments/filtered', { params });
+      console.log(`Response from filtered endpoint:`, response);
       return response.data || response;
     } catch (error) {
       console.error(`Error fetching ${viewType} appointments:`, error);

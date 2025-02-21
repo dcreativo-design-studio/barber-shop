@@ -224,6 +224,23 @@ router.get('/filtered', authenticateUser, async (req, res) => {
         const appointmentsByDate = {};
 
         appointments.forEach(appointment => {
+          // Assicuriamoci che tutti i dati necessari siano presenti
+          if (!appointment.client) {
+            appointment.client = {
+              firstName: 'Cliente',
+              lastName: 'Sconosciuto',
+              email: 'N/A',
+              phone: 'N/A'
+            };
+          }
+
+          if (!appointment.barber) {
+            appointment.barber = {
+              firstName: 'Barbiere',
+              lastName: 'Sconosciuto'
+            };
+          }
+
           const dateStr = appointment.date.toISOString().split('T')[0];
           if (!appointmentsByDate[dateStr]) {
             appointmentsByDate[dateStr] = {

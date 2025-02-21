@@ -83,13 +83,34 @@ useEffect(() => {
 
       if (Array.isArray(response)) {
         if (viewType === 'day') {
-          setAppointments(response);
+          // Assicurati che tutti gli appuntamenti abbiano le proprietà necessarie
+          const safeAppointments = response.map(app => ({
+            ...app,
+            client: app.client || { firstName: 'Cliente', lastName: 'Sconosciuto', email: 'N/A', phone: 'N/A' },
+            barber: app.barber || { firstName: 'Barbiere', lastName: 'Sconosciuto' }
+          }));
+          setAppointments(safeAppointments);
         } else {
-          // Per viste settimanali e mensili, appiattisci l'array di gruppi
-          const flattenedAppointments = response.reduce((acc, group) => {
-            return [...acc, ...group.appointments];
-          }, []);
-          setAppointments(flattenedAppointments);
+          // Per viste settimanali e mensili
+          try {
+            // Gestione per array di appuntamenti raggruppati
+            const flattenedAppointments = response.reduce((acc, group) => {
+              if (group && Array.isArray(group.appointments)) {
+                // Assicurati che tutti gli appuntamenti abbiano le proprietà necessarie
+                const safeAppointments = group.appointments.map(app => ({
+                  ...app,
+                  client: app.client || { firstName: 'Cliente', lastName: 'Sconosciuto', email: 'N/A', phone: 'N/A' },
+                  barber: app.barber || { firstName: 'Barbiere', lastName: 'Sconosciuto' }
+                }));
+                return [...acc, ...safeAppointments];
+              }
+              return acc;
+            }, []);
+            setAppointments(flattenedAppointments);
+          } catch (e) {
+            console.error('Error flattening appointments:', e);
+            setAppointments([]);
+          }
         }
       } else {
         setAppointments([]);
