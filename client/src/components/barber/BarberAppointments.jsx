@@ -56,29 +56,13 @@ function BarberAppointments({ barberId }) {
       console.log('Fetching appointments for barberId:', barberId, 'from', startDate.toISOString(), 'to', endDate.toISOString());
 
       try {
-        // Prima proviamo con l'API del barber che usa calendar/barber (che richiede admin)
-        let response = [];
+        const response = await appointmentService.getBarberAppointments(
+          barberId,
+          startDate.toISOString(),
+          endDate.toISOString()
+        );
 
-        try {
-          // Prima proviamo a usare l'endpoint calendar/barber (può richiedere admin)
-          response = await barberApi.getBarberAppointments(
-            barberId,
-            startDate.toISOString(),
-            endDate.toISOString()
-          );
-
-          console.log('Response from barberApi.getBarberAppointments:', response);
-        } catch (adminError) {
-          console.log('Error with admin endpoint, trying client endpoint:', adminError);
-          // Se fallisce, proviamo con l'endpoint my-appointments che è accessibile ai client
-          response = await barberApi.getBarberAppointmentsFromClient(
-            barberId,
-            startDate.toISOString(),
-            endDate.toISOString()
-          );
-
-          console.log('Response from barberApi.getBarberAppointmentsFromClient:', response);
-        }
+        console.log('Appointments response:', response);
 
         // Aggiorniamo il formato dei dati ricevuti
         let formattedAppointments = [];

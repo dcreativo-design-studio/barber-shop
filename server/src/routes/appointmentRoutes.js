@@ -2,6 +2,7 @@ import { Router } from 'express';
 import twilio from 'twilio';
 import { appointmentController } from '../controllers/appointmentController.js';
 import { authenticateUser, requireAdmin } from '../middleware/authMiddleware.js';
+import Appointment from '../models/Appointment.js'; // Aggiungiamo questa importazione
 import Barber from '../models/Barber.js';
 import { initializeScheduler } from '../services/appointmentScheduler.js';
 import { notificationService } from '../services/notificationService.js';
@@ -89,10 +90,121 @@ router.put('/:id', appointmentController.updateAppointment);
 router.get('/available-slots', appointmentController.getAvailableSlots);
 router.get('/barber/:barberId/availability', appointmentController.getBarberAvailability);
 
+// NUOVO ENDPOINT: Ottiene gli appuntamenti di un barbiere specifico (accessibile a admin e al barbiere stesso)
+router.get('/barber/:barberId/appointments', async (req, res) => {
+  try {
+    const { barberId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    // Verifica che l'utente sia un admin o il barbiere stesso
+    if (req.user.role !== 'admin' &&
+       (req.user.role !== 'barber' || req.user.barberId !== barberId)) {
+      return res.status(403).json({
+        message: 'Accesso negato. Puoi visualizzare solo i tuoi appuntamenti.'
+      });
+    }
+
+    // Validazione dei parametri
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'Parametri startDate e endDate richiesti' });
+    }
+
+    // Converti le date
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Assicurati che end sia alla fine della giornata
+    end.setHours(23, 59, 59, 999);
+
+    console.log(`Cercando appuntamenti per barbiere: ${barberId} dal ${start.toISOString()} al ${end.toISOString()}`);
+
+    // Trova gli appuntamenti
+    const appointments = await Appointment.find({
+      barber: barberId,
+      date: { $gte: start, $lte: end },
+      status: { $ne: 'cancelled' }
+    }).sort({ date: 1, time: 1 })
+      .populate('client', 'firstName lastName email phone')
+      .populate('barber', 'firstName lastName');
+
+    console.log(`Trovati ${appointments.length} appuntamenti`);
+
+    // Organizza gli appuntamenti per data
+    const appointmentsByDate = {};
+    appointments.forEach(appointment => {
+      const dateStr = appointment.date.toISOString().split('T')[0];
+      if (!appointmentsByDate[dateStr]) {
+        appointmentsByDate[dateStr] = {
+          date: dateStr,
+          appointments: []
+        };
+      }
+      appointmentsByDate[dateStr].appointments.push(appointment);
+    });
+
+    res.json({ appointments: appointmentsByDate });
+  } catch (error) {
+    console.error('Error fetching barber appointments:', error);
+    res.status(500).json({ message: 'Errore nel recupero degli appuntamenti' });
+  }
+});
+
+// Modifica l'endpoint filtrato per permettere ai barbieri di vedere i propri appuntamenti
+router.get('/filtered', authenticateUser, async (req, res) => {
+  try {
+    const { startDate, endDate, viewType, barberId } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'startDate e endDate sono richiesti' });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    // Crea la query di base
+    const query = {
+      date: { $gte: start, $lte: end },
+      status: { $ne: 'cancelled' }
+    };
+
+    // Aggiungi il filtro per barberId se specificato
+    if (barberId) {
+      query.barber = barberId;
+    }
+    // Se l'utente è un barbiere e non admin, può vedere solo i suoi appuntamenti
+    else if (req.user.role === 'barber') {
+      // Assicurati che un barbiere possa vedere solo i propri appuntamenti
+      if (!req.user.barberId) {
+        return res.status(403).json({ message: 'Accesso negato. ID barbiere non trovato.' });
+      }
+      query.barber = req.user.barberId;
+    }
+    // Se non è né admin né un barbiere che guarda i propri appuntamenti, nega l'accesso
+    else if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Accesso negato.' });
+    }
+
+    console.log('MongoDB query:', query);
+
+    // Esegui la query e popola i dati necessari
+    const appointments = await Appointment.find(query)
+      .populate('client', 'firstName lastName email phone')
+      .populate('barber', 'firstName lastName')
+      .sort({ date: 1, time: 1 });
+
+    res.json(appointments);
+  } catch (error) {
+    console.error('Error in filtered appointments:', error);
+    res.status(500).json({ message: 'Errore nel recupero degli appuntamenti' });
+  }
+});
+
 // ========= ROTTE ADMIN =========
 // Gestione appuntamenti
 router.get('/', requireAdmin, appointmentController.getAll);
-router.get('/filtered', requireAdmin, appointmentController.getAllWithDateRange);
+// La rotta filtered è stata sostituita con quella sopra
+// router.get('/filtered', requireAdmin, appointmentController.getAllWithDateRange);
 router.put('/:id/status', requireAdmin, appointmentController.updateStatus);
 router.put('/:id/notes', requireAdmin, appointmentController.updateNotes);
 router.get('/stats', requireAdmin, appointmentController.getStats);

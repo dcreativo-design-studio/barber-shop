@@ -13,18 +13,18 @@ export const appointmentService = {
 
   async getBarberAppointments(barberId, startDate, endDate) {
     try {
-      // Cambiamo endpoint per utilizzare calendar/barber che è accessibile ai barbieri
-      const response = await apiRequest.get(`/appointments/calendar/barber/${barberId}`, {
+      // Utilizziamo il nuovo endpoint dedicato ai barbieri
+      const response = await apiRequest.get(`/appointments/barber/${barberId}/appointments`, {
         params: { startDate, endDate }
       });
 
-      console.log('Response from calendar/barber endpoint:', response);
+      console.log('Response from barber appointments endpoint:', response);
 
       return response.data || response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
-      // In caso di errore restituiamo un array vuoto
-      return [];
+      // Return empty object with valid structure instead of throwing
+      return { appointments: {} };
     }
   },
 
@@ -58,6 +58,7 @@ export const appointmentService = {
         endDate,
         ...(barberId && { barberId })
       };
+      // Ora possiamo utilizzare l'endpoint filtered anche come barbiere
       const response = await apiRequest.get('/appointments/filtered', { params });
       return response.data || response;
     } catch (error) {
@@ -98,6 +99,7 @@ export const appointmentService = {
 
       console.log('Fetching appointments with params:', params);
 
+      // Anche qui possiamo utilizzare l'endpoint filtered
       const response = await apiRequest.get('/appointments/filtered', { params });
       return response.data || response;
     } catch (error) {
