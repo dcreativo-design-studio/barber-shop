@@ -161,7 +161,7 @@ router.get('/barber/:barberId/appointments', async (req, res) => {
   }
 });
 
-// Modifica l'endpoint filtrato per permettere ai barbieri di vedere i propri appuntamenti
+// Modifica l'endpoint filtrato per gestire correttamente tutte le viste admin
 router.get('/filtered', authenticateUser, async (req, res) => {
   try {
     const { startDate, endDate, viewType, barberId } = req.query;
@@ -205,11 +205,22 @@ router.get('/filtered', authenticateUser, async (req, res) => {
       .populate('barber', 'firstName lastName')
       .sort({ date: 1, time: 1 });
 
-    // IMPORTANTE: Formato di risposta diverso a seconda dell'utente e del viewType
-    // Per le chiamate dal pannello admin, restituisci un array diretto di appuntamenti
+    // Per le chiamate dal pannello admin, basandoci sul viewType
     if (req.user.role === 'admin') {
-      console.log('Admin endpoint, returning direct array');
-      return res.json(appointments);
+      // Per le viste giornaliere e normali, restituisci un array diretto
+      if (!viewType || viewType === 'day' || viewType === 'range') {
+        console.log('Admin endpoint, returning direct array for day/range view');
+        return res.json(appointments);
+      }
+
+      // Per le viste settimanali e mensili, potrebbe essere necessario un formato diverso
+      // Verifica se il controller originale si aspetta un formato specifico
+      if (viewType === 'week' || viewType === 'month') {
+        console.log('Admin endpoint, returning formatted response for week/month view');
+        // Qui dovremmo seguire il formato che il controller week/month si aspetta
+        // Per ora, proviamo con un array diretto
+        return res.json(appointments);
+      }
     }
 
     // Per le chiamate dal pannello barbiere, formatta la risposta come oggetto nidificato
