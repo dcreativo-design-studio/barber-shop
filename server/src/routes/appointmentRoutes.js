@@ -205,27 +205,29 @@ router.get('/filtered', authenticateUser, async (req, res) => {
       .populate('barber', 'firstName lastName')
       .sort({ date: 1, time: 1 });
 
-    // Per backward compatibility con il controller originale, formattiamo la risposta
-    if (viewType === 'day' || viewType === 'week' || viewType === 'month') {
-      // Raggruppa gli appuntamenti per data
-      const appointmentsByDate = {};
-
-      appointments.forEach(appointment => {
-        const dateStr = appointment.date.toISOString().split('T')[0];
-        if (!appointmentsByDate[dateStr]) {
-          appointmentsByDate[dateStr] = {
-            date: dateStr,
-            appointments: []
-          };
-        }
-        appointmentsByDate[dateStr].appointments.push(appointment);
-      });
-
-      res.json({ appointments: appointmentsByDate });
-    } else {
-      // Formato standard per altri tipi di vista
-      res.json(appointments);
+    // IMPORTANTE: Formato di risposta diverso a seconda dell'utente e del viewType
+    // Per le chiamate dal pannello admin, restituisci un array diretto di appuntamenti
+    if (req.user.role === 'admin') {
+      console.log('Admin endpoint, returning direct array');
+      return res.json(appointments);
     }
+
+    // Per le chiamate dal pannello barbiere, formatta la risposta come oggetto nidificato
+    // Raggruppa gli appuntamenti per data
+    const appointmentsByDate = {};
+
+    appointments.forEach(appointment => {
+      const dateStr = appointment.date.toISOString().split('T')[0];
+      if (!appointmentsByDate[dateStr]) {
+        appointmentsByDate[dateStr] = {
+          date: dateStr,
+          appointments: []
+        };
+      }
+      appointmentsByDate[dateStr].appointments.push(appointment);
+    });
+
+    res.json({ appointments: appointmentsByDate });
   } catch (error) {
     console.error('Error in filtered appointments:', error);
     res.status(500).json({ message: 'Errore nel recupero degli appuntamenti' });
