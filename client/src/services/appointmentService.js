@@ -13,33 +13,16 @@ export const appointmentService = {
 
   async getBarberAppointments(barberId, startDate, endDate) {
     try {
-      // Utilizziamo il nuovo endpoint dedicato ai barbieri
-      // Per compatibilità con altre parti del sistema, proviamo anche l'endpoint filtered
-      try {
-        console.log(`Fetching barber appointments with params: barberId=${barberId}, startDate=${startDate}, endDate=${endDate}`);
-        const response = await apiRequest.get(`/appointments/barber/${barberId}/appointments`, {
-          params: { startDate, endDate }
-        });
+      // Per i barbieri, usiamo l'endpoint filtered che ora funziona per loro
+      const params = {
+        startDate,
+        endDate,
+        barberId
+      };
 
-        console.log('Response from barber appointments endpoint:', response);
-
-        return response.data || response;
-      } catch (err) {
-        // Se fallisce, proviamo con l'endpoint filtered
-        console.log('Fallback to filtered endpoint due to error:', err);
-        const response = await apiRequest.get('/appointments/filtered', {
-          params: {
-            startDate,
-            endDate,
-            barberId,
-            viewType: 'day' // aggiungiamo viewType per assicurare la formattazione corretta
-          }
-        });
-
-        console.log('Response from filtered endpoint:', response);
-
-        return response.data || response;
-      }
+      const response = await apiRequest.get('/appointments/filtered', { params });
+      console.log('Barber appointments response:', response);
+      return response.data || response;
     } catch (error) {
       console.error('Error fetching barber appointments:', error);
       // Return empty object with valid structure instead of throwing
@@ -75,10 +58,9 @@ export const appointmentService = {
       const params = {
         startDate,
         endDate,
-        viewType: 'range', // Aggiunto per chiarezza
         ...(barberId && { barberId })
       };
-      // Ora possiamo utilizzare l'endpoint filtered anche come barbiere
+      // Usa l'endpoint filtered
       const response = await apiRequest.get('/appointments/filtered', { params });
       return response.data || response;
     } catch (error) {
@@ -110,16 +92,40 @@ export const appointmentService = {
           throw new Error('Tipo di vista non valido');
       }
 
+      // Converti le date nel formato corretto per la query
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = endDate.toISOString().split('T')[0];
+
       const params = {
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
         viewType,
         ...(barberId && { barberId })
       };
 
       console.log('Fetching appointments with params:', params);
 
-      // Anche qui possiamo utilizzare l'endpoint filtered
+      // Per retrocompatibilità con il vecchio sistema, se siamo in admin
+      // e la vista è settimanale o mensile, usiamo gli endpoint originali
+      if (viewType === 'week' || viewType === 'month') {
+        try {
+          // Prima prova con gli endpoint originali
+          let endpoint = `/appointments/calendar/${viewType}`;
+          const response = await apiRequest.get(endpoint, {
+            params: {
+              date: formattedStartDate,
+              ...(barberId && { barberId })
+            }
+          });
+          console.log(`Response from ${endpoint}:`, response);
+          return response.data || response;
+        } catch (err) {
+          console.log('Error with original endpoint, falling back to filtered:', err);
+          // Se fallisce, torna all'endpoint filtered
+        }
+      }
+
+      // Usa l'endpoint filtered
       const response = await apiRequest.get('/appointments/filtered', { params });
       return response.data || response;
     } catch (error) {

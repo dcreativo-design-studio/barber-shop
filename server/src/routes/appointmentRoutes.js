@@ -99,18 +99,24 @@ router.get('/barber/:barberId/appointments', async (req, res) => {
     console.log('User requesting appointments:', {
       userId: req.user._id,
       userRole: req.user.role,
+      userBarberId: req.user.barberId || 'undefined',
       requestedBarberId: barberId
     });
 
-    // Verifica che l'utente sia un admin o il barbiere stesso (controlliamo sia _id che barberId)
+    // Verifica che l'utente sia un admin o il barbiere stesso
+    // Confronta sia come stringa che come ObjectId per sicurezza
     const isAdmin = req.user.role === 'admin';
     const isBarberOwner = req.user.role === 'barber' &&
       (req.user._id.toString() === barberId ||
-       (req.user.barberId && req.user.barberId.toString() === barberId) ||
-       (req.user.barber && req.user.barber.toString() === barberId));
+       (req.user.barberId && req.user.barberId.toString() === barberId));
 
     if (!isAdmin && !isBarberOwner) {
-      console.log('Access denied. User:', req.user, 'Requested barberId:', barberId);
+      console.log('Access denied. User:', {
+        id: req.user._id,
+        role: req.user.role,
+        barberId: req.user.barberId
+      }, 'Requested barberId:', barberId);
+
       return res.status(403).json({
         message: 'Accesso negato. Puoi visualizzare solo i tuoi appuntamenti.'
       });
@@ -210,8 +216,11 @@ router.get('/filtered', authenticateUser, async (req, res) => {
       if (viewType === 'week' || viewType === 'month') {
         console.log(`Admin endpoint, special response format for ${viewType} view`);
 
-        // Per le viste settimanali e mensili, dobbiamo emulare il formato originale
+        // Per le viste settimanali e mensili, dobbiamo emulare il formato che il frontend si aspetta
         // Raggruppiamo gli appuntamenti per data
+        const groupedAppointments = [];
+
+        // Crea un oggetto per raggruppare gli appuntamenti per data
         const appointmentsByDate = {};
 
         appointments.forEach(appointment => {
@@ -225,7 +234,15 @@ router.get('/filtered', authenticateUser, async (req, res) => {
           appointmentsByDate[dateStr].appointments.push(appointment);
         });
 
-        return res.json(appointmentsByDate);
+        // Converti l'oggetto in un array di gruppi di appuntamenti
+        for (const date in appointmentsByDate) {
+          groupedAppointments.push(appointmentsByDate[date]);
+        }
+
+        // Ordina i gruppi per data
+        groupedAppointments.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        return res.json(groupedAppointments);
       } else {
         // Per le viste giornaliere e range, restituisci un array diretto
         console.log('Admin endpoint, returning direct array for day/range view');
