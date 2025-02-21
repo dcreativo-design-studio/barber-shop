@@ -96,9 +96,21 @@ router.get('/barber/:barberId/appointments', async (req, res) => {
     const { barberId } = req.params;
     const { startDate, endDate } = req.query;
 
-    // Verifica che l'utente sia un admin o il barbiere stesso
-    if (req.user.role !== 'admin' &&
-       (req.user.role !== 'barber' || req.user.barberId !== barberId)) {
+    console.log('User requesting appointments:', {
+      userId: req.user._id,
+      userRole: req.user.role,
+      requestedBarberId: barberId
+    });
+
+    // Verifica che l'utente sia un admin o il barbiere stesso (controlliamo sia _id che barberId)
+    const isAdmin = req.user.role === 'admin';
+    const isBarberOwner = req.user.role === 'barber' &&
+      (req.user._id.toString() === barberId ||
+       (req.user.barberId && req.user.barberId.toString() === barberId) ||
+       (req.user.barber && req.user.barber.toString() === barberId));
+
+    if (!isAdmin && !isBarberOwner) {
+      console.log('Access denied. User:', req.user, 'Requested barberId:', barberId);
       return res.status(403).json({
         message: 'Accesso negato. Puoi visualizzare solo i tuoi appuntamenti.'
       });
@@ -175,10 +187,10 @@ router.get('/filtered', authenticateUser, async (req, res) => {
     // Se l'utente è un barbiere e non admin, può vedere solo i suoi appuntamenti
     else if (req.user.role === 'barber') {
       // Assicurati che un barbiere possa vedere solo i propri appuntamenti
-      if (!req.user.barberId) {
+      if (!req.user.barberId && !req.user._id) {
         return res.status(403).json({ message: 'Accesso negato. ID barbiere non trovato.' });
       }
-      query.barber = req.user.barberId;
+      query.barber = req.user.barberId || req.user._id;
     }
     // Se non è né admin né un barbiere che guarda i propri appuntamenti, nega l'accesso
     else if (req.user.role !== 'admin') {
@@ -193,7 +205,27 @@ router.get('/filtered', authenticateUser, async (req, res) => {
       .populate('barber', 'firstName lastName')
       .sort({ date: 1, time: 1 });
 
-    res.json(appointments);
+    // Per backward compatibility con il controller originale, formattiamo la risposta
+    if (viewType === 'day' || viewType === 'week' || viewType === 'month') {
+      // Raggruppa gli appuntamenti per data
+      const appointmentsByDate = {};
+
+      appointments.forEach(appointment => {
+        const dateStr = appointment.date.toISOString().split('T')[0];
+        if (!appointmentsByDate[dateStr]) {
+          appointmentsByDate[dateStr] = {
+            date: dateStr,
+            appointments: []
+          };
+        }
+        appointmentsByDate[dateStr].appointments.push(appointment);
+      });
+
+      res.json({ appointments: appointmentsByDate });
+    } else {
+      // Formato standard per altri tipi di vista
+      res.json(appointments);
+    }
   } catch (error) {
     console.error('Error in filtered appointments:', error);
     res.status(500).json({ message: 'Errore nel recupero degli appuntamenti' });
