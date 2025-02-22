@@ -5,6 +5,38 @@ import Barber from '../models/Barber.js';
 
 const router = Router();
 
+// Middleware personalizzato per verificare che un utente sia admin o il barbiere stesso
+const isAdminOrSameBarber = async (req, res, next) => {
+  try {
+    // Se l'utente è un admin, permetti sempre l'accesso
+    if (req.user.role === 'admin') {
+      return next();
+    }
+
+    // Se l'utente è un barbiere, verifica che stia modificando solo i propri dati
+    if (req.user.role === 'barber') {
+      const barberId = req.params.id;
+
+      // Verifica se l'ID del barbiere corrisponde all'ID dell'utente o al barberId associato
+      const isOwnProfile =
+        req.user._id.toString() === barberId ||
+        (req.user.barberId && req.user.barberId.toString() === barberId);
+
+      if (isOwnProfile) {
+        return next();
+      }
+    }
+
+    // Se non è né admin né il barbiere stesso, nega l'accesso
+    return res.status(403).json({
+      message: 'Accesso negato. È richiesto il ruolo di amministratore.'
+    });
+  } catch (error) {
+    console.error('Error in isAdminOrSameBarber middleware:', error);
+    return res.status(500).json({ message: 'Errore interno del server' });
+  }
+};
+
 // Rotte pubbliche (senza autenticazione)
 router.get('/public', barberController.getActiveBarbers);
 router.get('/public/:id', barberController.getPublicBarberDetails);
@@ -48,19 +80,24 @@ router.get('/:id/availability', barberController.getBarberAvailability);
 router.post('/', requireAdmin, barberController.createBarber);
 router.put('/:id', requireAdmin, barberController.updateBarber);
 router.delete('/:id', requireAdmin, barberController.deactivateBarber);
-router.put('/:id/vacations', requireAdmin, barberController.updateVacations);
-// Rotte per gli orari di lavoro (solo admin)
-router.put('/:id/working-hours/:day', requireAdmin, barberController.updateWorkingHours);
 
-// Le nuove rotte per servizi e orari completi
+// MODIFICA: Route per vacanze (admin o barbiere stesso)
+router.put('/:id/vacations', isAdminOrSameBarber, barberController.updateVacations);
+
+// MODIFICA: Rotte per gli orari di lavoro (admin o barbiere stesso)
+router.put('/:id/working-hours/:day', isAdminOrSameBarber, barberController.updateWorkingHours);
+
+// MODIFICA: Le nuove rotte per servizi e orari completi (admin o barbiere stesso per working-hours)
 if (barberController.updateAllWorkingHours) {
-  router.put('/:id/working-hours', requireAdmin, barberController.updateAllWorkingHours);
+  router.put('/:id/working-hours', isAdminOrSameBarber, barberController.updateAllWorkingHours);
 }
+
+// I servizi possono essere modificati solo dagli admin
 if (barberController.updateBarberServices) {
   router.put('/:id/services', requireAdmin, barberController.updateBarberServices);
 }
 
-// Statistiche
+// Statistiche (visibili solo agli admin)
 router.get('/:id/stats', requireAdmin, barberController.getBarberStats);
 
 export default router;
