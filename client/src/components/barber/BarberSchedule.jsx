@@ -28,6 +28,7 @@ function BarberSchedule({ barberId }) {
       setError('');
 
       const response = await barberApi.getBarberDetails(barberId);
+      console.log('Barber data fetched:', response);
 
       setBarber(response);
 
@@ -55,6 +56,18 @@ function BarberSchedule({ barberId }) {
         return DAY_KEYS.indexOf(a.day) - DAY_KEYS.indexOf(b.day);
       });
 
+      // Assicuriamoci che tutti i campi necessari esistano per ciascun giorno
+      initialWorkingHours = initialWorkingHours.map(dayData => ({
+        day: dayData.day,
+        isWorking: Boolean(dayData.isWorking),
+        startTime: dayData.startTime || '09:00',
+        endTime: dayData.endTime || '18:00',
+        hasBreak: Boolean(dayData.hasBreak),
+        breakStart: dayData.hasBreak ? (dayData.breakStart || '12:00') : null,
+        breakEnd: dayData.hasBreak ? (dayData.breakEnd || '13:00') : null
+      }));
+
+      console.log('Initialized working hours:', initialWorkingHours);
       setWorkingHours(initialWorkingHours);
 
       // Inizializza le vacanze
@@ -100,6 +113,7 @@ function BarberSchedule({ barberId }) {
       currentDay[field] = value;
     }
 
+    console.log('Updated working hours:', updatedHours);
     setWorkingHours(updatedHours);
     setHasChanges(true);
   };
@@ -142,18 +156,35 @@ function BarberSchedule({ barberId }) {
         }
       }
 
-      // Aggiorna gli orari di lavoro
-      await barberApi.updateBarberWorkingHours(barberId, workingHours);
+      console.log('Saving working hours:', workingHours);
 
-      // Aggiorna le vacanze
-      await barberApi.updateBarberVacations(barberId, vacations);
+      // Aggiorna gli orari di lavoro - gestisci separatamente
+      try {
+        await barberApi.updateBarberWorkingHours(barberId, workingHours);
+      } catch (workingHoursError) {
+        console.error('Error updating working hours:', workingHoursError);
+        throw new Error('Errore nell\'aggiornamento degli orari: ' + (workingHoursError.message || 'Errore sconosciuto'));
+      }
+
+      console.log('Working hours updated successfully');
+
+      // Aggiorna le vacanze - gestisci separatamente
+      try {
+        await barberApi.updateBarberVacations(barberId, vacations);
+      } catch (vacationsError) {
+        console.error('Error updating vacations:', vacationsError);
+        throw new Error('Errore nell\'aggiornamento delle vacanze: ' + (vacationsError.message || 'Errore sconosciuto'));
+      }
+
+      console.log('Vacations updated successfully');
 
       setSuccess('Modifiche salvate con successo!');
       setHasChanges(false);
 
-      // Notifica l'amministratore delle modifiche
+      // Notifica l'amministratore delle modifiche (ma non interrompere il flusso se fallisce)
       try {
         await barberApi.notifyScheduleUpdate(barberId);
+        console.log('Admin notification sent successfully');
       } catch (notificationError) {
         console.error('Error sending notification:', notificationError);
         // Non interrompiamo il flusso se la notifica fallisce
@@ -161,7 +192,7 @@ function BarberSchedule({ barberId }) {
 
     } catch (error) {
       console.error('Error saving changes:', error);
-      setError('Errore durante il salvataggio delle modifiche. Riprova più tardi.');
+      setError('Errore durante il salvataggio delle modifiche: ' + (error.message || 'Riprova più tardi.'));
     } finally {
       setSaving(false);
 
@@ -302,7 +333,7 @@ function BarberSchedule({ barberId }) {
                             <label className="block text-sm mb-1">Inizio Pausa</label>
                             <input
                               type="time"
-                              value={hours.breakStart}
+                              value={hours.breakStart || ''}
                               onChange={(e) => handleWorkingHoursChange(index, 'breakStart', e.target.value)}
                               className="p-2 rounded bg-[var(--bg-primary)] border border-[var(--accent)]"
                             />
@@ -311,7 +342,7 @@ function BarberSchedule({ barberId }) {
                             <label className="block text-sm mb-1">Fine Pausa</label>
                             <input
                               type="time"
-                              value={hours.breakEnd}
+                              value={hours.breakEnd || ''}
                               onChange={(e) => handleWorkingHoursChange(index, 'breakEnd', e.target.value)}
                               className="p-2 rounded bg-[var(--bg-primary)] border border-[var(--accent)]"
                             />

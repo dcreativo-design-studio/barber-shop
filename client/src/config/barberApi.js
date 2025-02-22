@@ -83,10 +83,38 @@ export const barberApi = {
   // Aggiorna gli orari di lavoro di un barbiere
   updateBarberWorkingHours: async (barberId, workingHours) => {
     try {
-      const response = await apiRequest.put(`/barbers/${barberId}/working-hours`, { workingHours });
+      // Assicuriamoci che gli orari siano formattati correttamente
+      const formattedWorkingHours = workingHours.map(hours => ({
+        day: hours.day,
+        isWorking: Boolean(hours.isWorking),
+        startTime: hours.startTime || '',
+        endTime: hours.endTime || '',
+        hasBreak: Boolean(hours.hasBreak),
+        breakStart: hours.hasBreak ? (hours.breakStart || '') : null,
+        breakEnd: hours.hasBreak ? (hours.breakEnd || '') : null
+      }));
+
+      console.log('Sending working hours update:', { barberId, workingHours: formattedWorkingHours });
+
+      // Usiamo il percorso API corretto per i barbieri
+      // Nel caso in cui l'API richieda uno schema specifico
+      const response = await apiRequest.put(`/api/barbers/${barberId}/working-hours`, {
+        workingHours: formattedWorkingHours
+      });
+
       return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber working hours:', error);
+
+      // Log più dettagliato per debug
+      if (error.response) {
+        console.error('Error response:', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
+
       throw error;
     }
   },
@@ -94,10 +122,29 @@ export const barberApi = {
   // Aggiorna le vacanze di un barbiere
   updateBarberVacations: async (barberId, vacations) => {
     try {
-      const response = await apiRequest.put(`/barbers/${barberId}/vacations`, { vacations });
+      // Assicuriamoci che le vacanze siano formattate correttamente
+      const formattedVacations = vacations.map(vacation => ({
+        startDate: vacation.startDate,
+        endDate: vacation.endDate
+      }));
+
+      const response = await apiRequest.put(`/api/barbers/${barberId}/vacations`, {
+        vacations: formattedVacations
+      });
+
       return response.data ? response.data : response;
     } catch (error) {
       console.error('Error updating barber vacations:', error);
+
+      // Log più dettagliato per debug
+      if (error.response) {
+        console.error('Error response:', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
+
       throw error;
     }
   },
