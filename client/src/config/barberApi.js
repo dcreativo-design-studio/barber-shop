@@ -96,9 +96,8 @@ export const barberApi = {
 
       console.log('Sending working hours update:', { barberId, workingHours: formattedWorkingHours });
 
-      // Usiamo il percorso API corretto per i barbieri
-      // Nel caso in cui l'API richieda uno schema specifico
-      const response = await apiRequest.put(`/api/barbers/${barberId}/working-hours`, {
+      // URL CORRETTO: usa solo /barbers/ senza il prefisso /api/
+      const response = await apiRequest.put(`/barbers/${barberId}/working-hours`, {
         workingHours: formattedWorkingHours
       });
 
@@ -128,7 +127,8 @@ export const barberApi = {
         endDate: vacation.endDate
       }));
 
-      const response = await apiRequest.put(`/api/barbers/${barberId}/vacations`, {
+      // URL CORRETTO: usa solo /barbers/ senza il prefisso /api/
+      const response = await apiRequest.put(`/barbers/${barberId}/vacations`, {
         vacations: formattedVacations
       });
 
