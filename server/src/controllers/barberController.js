@@ -390,60 +390,63 @@ async createBarber(req, res) {
   },
 
   // Verifica se un barbiere è in vacanza in una data specifica
-  async checkVacation(req, res) {
-    try {
-      const { id } = req.params;
-      const { date } = req.query;
+async checkVacation(req, res) {
+  try {
+    const { id } = req.params;
+    const { date } = req.query;
 
-      // Normalize input date to start of day
-      const checkDate = new Date(date);
-      checkDate.setHours(0, 0, 0, 0);
+    // Normalize input date to start of day
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
 
-      if (isNaN(checkDate.getTime())) {
-        return res.status(400).json({ message: 'Data non valida' });
-      }
-
-      const barber = await Barber.findById(id);
-      if (!barber) {
-        return res.status(404).json({ message: 'Barbiere non trovato' });
-      }
-
-      console.log('Checking date:', checkDate);
-      console.log('Barber vacations:', barber.vacations);
-
-      // Find matching vacation period
-      const matchingVacation = barber.vacations.find(vacation => {
-        const startDate = new Date(vacation.startDate);
-        const endDate = new Date(vacation.endDate);
-
-        // Normalize vacation dates to start of day
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
-
-        console.log('Comparing with vacation period:', {
-          start: startDate,
-          end: endDate,
-          checkDate: checkDate
-        });
-
-        return checkDate >= startDate && checkDate <= endDate;
-      });
-
-      const isOnVacation = !!matchingVacation;
-      console.log('Is on vacation:', isOnVacation);
-
-      res.json({
-        isOnVacation,
-        vacationInfo: matchingVacation ? {
-          startDate: matchingVacation.startDate,
-          endDate: matchingVacation.endDate
-        } : null
-      });
-    } catch (error) {
-      console.error('Error checking vacation:', error);
-      res.status(500).json({ message: error.message });
+    if (isNaN(checkDate.getTime())) {
+      return res.status(400).json({ message: 'Data non valida' });
     }
-  },
+
+    const barber = await Barber.findById(id);
+    if (!barber) {
+      return res.status(404).json({ message: 'Barbiere non trovato' });
+    }
+
+    console.log('Checking date:', checkDate);
+    console.log('Barber vacations:', barber.vacations);
+
+    // Find matching vacation period
+    const matchingVacation = barber.vacations.find(vacation => {
+      // Crea date oggetti da stringhe
+      const startDate = new Date(vacation.startDate);
+      const endDate = new Date(vacation.endDate);
+
+      // Normalize vacation dates
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+
+      console.log('Comparing with vacation period:', {
+        start: startDate,
+        end: endDate,
+        checkDate: checkDate
+      });
+
+      // CORREZIONE: Modifica la condizione per considerare solo le date STRETTAMENTE successive
+      // alla data di inizio vacanza
+      return checkDate > startDate && checkDate <= endDate;
+    });
+
+    const isOnVacation = !!matchingVacation;
+    console.log('Is on vacation:', isOnVacation);
+
+    res.json({
+      isOnVacation,
+      vacationInfo: matchingVacation ? {
+        startDate: matchingVacation.startDate,
+        endDate: matchingVacation.endDate
+      } : null
+    });
+  } catch (error) {
+    console.error('Error checking vacation:', error);
+    res.status(500).json({ message: error.message });
+  }
+},
   // Ottiene le statistiche di un barbiere
   async getBarberStats(req, res) {
     try {
