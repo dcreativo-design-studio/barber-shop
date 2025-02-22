@@ -120,6 +120,7 @@ if (barberController.updateBarberServices) {
 }
 
 // Statistiche (visibili solo agli admin)
-router.get('/:id/stats', requireAdmin, barberController.getBarberStats);
+// Nel file barberRoutes.js, la rotta deve apparire esattamente così:
+router.get('/:id/stats', isAdminOrSameBarber, barberController.getBarberStats);
 
 export default router;

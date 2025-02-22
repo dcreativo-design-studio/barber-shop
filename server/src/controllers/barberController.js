@@ -448,46 +448,140 @@ async checkVacation(req, res) {
   }
 },
   // Ottiene le statistiche di un barbiere
-  async getBarberStats(req, res) {
-    try {
-      const barberId = req.params.id;
-      const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - 1);
+async getBarberStats(req, res) {
+  try {
+    const barberId = req.params.id;
+    const { timeframe = 'month' } = req.query;
 
-      const stats = await Appointment.aggregate([
-        {
-          $match: {
-            barber: mongoose.Types.ObjectId(barberId),
-            date: { $gte: startDate },
-            status: { $ne: 'cancelled' }
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            totalAppointments: { $sum: 1 },
-            totalRevenue: { $sum: '$price' },
-            averageDuration: { $avg: '$duration' },
-            serviceBreakdown: {
-              $push: {
-                service: '$service',
-                price: '$price'
-              }
+    // Calcola le date di inizio in base al timeframe
+    const endDate = new Date();
+    let startDate;
+
+    switch (timeframe) {
+      case 'week':
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'month':
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case 'year':
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+    }
+
+    console.log('Getting stats for barber:', barberId);
+    console.log('Date range:', { startDate, endDate, timeframe });
+
+    // Cerca gli appuntamenti usando una conversione sicura dell'ObjectId
+    let barberObjectId;
+    try {
+      barberObjectId = new mongoose.Types.ObjectId(barberId);
+    } catch (err) {
+      console.error('Invalid ObjectId format:', err);
+      return res.status(400).json({ message: 'ID barbiere non valido' });
+    }
+
+    const stats = await Appointment.aggregate([
+      {
+        $match: {
+          barber: barberObjectId,
+          date: { $gte: startDate, $lte: endDate },
+          status: { $ne: 'cancelled' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAppointments: { $sum: 1 },
+          totalRevenue: { $sum: '$price' },
+          averageDuration: { $avg: '$duration' },
+          serviceBreakdown: {
+            $push: {
+              service: '$service',
+              price: '$price'
             }
           }
         }
-      ]);
+      }
+    ]);
 
-      res.json(stats[0] || {
-        totalAppointments: 0,
-        totalRevenue: 0,
-        averageDuration: 0,
-        serviceBreakdown: []
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    // Prepara i dati per la risposta
+    const result = {
+      timeframe,
+      appointments: {
+        total: 0,
+        previousPeriod: null
+      },
+      revenue: {
+        total: 0,
+        previousPeriod: null
+      },
+      duration: {
+        average: 0
+      },
+      mostPopularService: {
+        name: 'N/A',
+        count: 0
+      },
+      serviceDistribution: [],
+      appointmentsByPeriod: [],
+      revenueByPeriod: []
+    };
+
+    // Popola con dati reali se disponibili
+    if (stats && stats[0]) {
+      result.appointments.total = stats[0].totalAppointments || 0;
+      result.revenue.total = stats[0].totalRevenue || 0;
+      result.duration.average = stats[0].averageDuration || 0;
+
+      // Elabora la distribuzione dei servizi
+      if (stats[0].serviceBreakdown && stats[0].serviceBreakdown.length > 0) {
+        const serviceCount = {};
+
+        stats[0].serviceBreakdown.forEach(item => {
+          if (!serviceCount[item.service]) {
+            serviceCount[item.service] = {
+              count: 0,
+              revenue: 0
+            };
+          }
+          serviceCount[item.service].count++;
+          serviceCount[item.service].revenue += (item.price || 0);
+        });
+
+        // Converti in array
+        result.serviceDistribution = Object.keys(serviceCount).map(service => ({
+          name: service,
+          count: serviceCount[service].count,
+          revenue: serviceCount[service].revenue
+        }));
+
+        // Trova il servizio più popolare
+        if (result.serviceDistribution.length > 0) {
+          result.serviceDistribution.sort((a, b) => b.count - a.count);
+          result.mostPopularService = {
+            name: result.serviceDistribution[0].name,
+            count: result.serviceDistribution[0].count
+          };
+        }
+      }
     }
-  },
+
+    console.log('Sending stats response:', result);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in getBarberStats:', error);
+    res.status(500).json({
+      message: error.message || 'Errore nel recupero delle statistiche'
+    });
+  }
+},
 
   // Ottiene la disponibilità di un barbiere per una data specifica
   async getBarberAvailability(req, res) {
