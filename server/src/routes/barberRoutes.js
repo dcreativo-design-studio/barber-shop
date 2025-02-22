@@ -8,26 +8,48 @@ const router = Router();
 // Middleware personalizzato per verificare che un utente sia admin o il barbiere stesso
 const isAdminOrSameBarber = async (req, res, next) => {
   try {
+    console.log('isAdminOrSameBarber middleware triggered');
+    console.log('User role:', req.user.role);
+    console.log('User ID:', req.user._id.toString());
+    console.log('Requested barberId:', req.params.id);
+
     // Se l'utente è un admin, permetti sempre l'accesso
     if (req.user.role === 'admin') {
+      console.log('User is admin, access granted');
       return next();
     }
 
     // Se l'utente è un barbiere, verifica che stia modificando solo i propri dati
     if (req.user.role === 'barber') {
-      const barberId = req.params.id;
+      const requestedBarberId = req.params.id;
 
-      // Verifica se l'ID del barbiere corrisponde all'ID dell'utente o al barberId associato
-      const isOwnProfile =
-        req.user._id.toString() === barberId ||
-        (req.user.barberId && req.user.barberId.toString() === barberId);
+      // Tenta di trovare il barbiere associato all'utente corrente
+      let barberUser;
+      try {
+        barberUser = await Barber.findOne({
+          $or: [
+            { _id: req.user._id },
+            { _id: requestedBarberId, email: req.user.email }
+          ]
+        });
+        console.log('Found barber:', barberUser ? barberUser._id.toString() : 'not found');
+      } catch (err) {
+        console.error('Error finding barber:', err);
+      }
+
+      // Verifica se l'ID del barbiere trovato corrisponde all'ID richiesto
+      const isOwnProfile = barberUser && barberUser._id.toString() === requestedBarberId;
+
+      console.log('Is own profile?', isOwnProfile);
 
       if (isOwnProfile) {
+        console.log('Barbiere modifica i propri dati, accesso consentito');
         return next();
       }
     }
 
     // Se non è né admin né il barbiere stesso, nega l'accesso
+    console.log('Access denied');
     return res.status(403).json({
       message: 'Accesso negato. È richiesto il ruolo di amministratore.'
     });
