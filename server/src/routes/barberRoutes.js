@@ -11,7 +11,6 @@ const isAdminOrSameBarber = async (req, res, next) => {
     console.log('isAdminOrSameBarber middleware triggered');
     console.log('User role:', req.user.role);
     console.log('User ID:', req.user._id.toString());
-    console.log('User barberId:', req.user.barberId ? req.user.barberId.toString() : 'undefined');
     console.log('Requested barberId:', req.params.id);
 
     // Se l'utente è un admin, permetti sempre l'accesso
@@ -22,19 +21,29 @@ const isAdminOrSameBarber = async (req, res, next) => {
 
     // Se l'utente è un barbiere, verifica che stia modificando solo i propri dati
     if (req.user.role === 'barber') {
-      const barberId = req.params.id;
+      const requestedBarberId = req.params.id;
 
-      // Verifica se l'ID del barbiere corrisponde all'ID dell'utente o al barberId associato
-      const isIdMatch = req.user._id.toString() === barberId;
-      const isBarberIdMatch = req.user.barberId && req.user.barberId.toString() === barberId;
-      const isOwnProfile = isIdMatch || isBarberIdMatch;
+      // Tenta di trovare il barbiere associato all'utente corrente
+      let barberUser;
+      try {
+        barberUser = await Barber.findOne({
+          $or: [
+            { _id: req.user._id },
+            { _id: requestedBarberId, email: req.user.email }
+          ]
+        });
+        console.log('Found barber:', barberUser ? barberUser._id.toString() : 'not found');
+      } catch (err) {
+        console.error('Error finding barber:', err);
+      }
 
-      console.log('ID match?', isIdMatch);
-      console.log('BarberID match?', isBarberIdMatch);
+      // Verifica se l'ID del barbiere trovato corrisponde all'ID richiesto
+      const isOwnProfile = barberUser && barberUser._id.toString() === requestedBarberId;
+
       console.log('Is own profile?', isOwnProfile);
 
       if (isOwnProfile) {
-        console.log('Barbiere accede ai propri dati, accesso consentito');
+        console.log('Barbiere modifica i propri dati, accesso consentito');
         return next();
       }
     }
@@ -94,15 +103,23 @@ router.post('/', requireAdmin, barberController.createBarber);
 router.put('/:id', requireAdmin, barberController.updateBarber);
 router.delete('/:id', requireAdmin, barberController.deactivateBarber);
 
-// MODIFICHE: Rotte per vacanze e orari di lavoro (admin o barbiere stesso)
+// MODIFICA: Route per vacanze (admin o barbiere stesso)
 router.put('/:id/vacations', isAdminOrSameBarber, barberController.updateVacations);
-router.put('/:id/working-hours/:day', isAdminOrSameBarber, barberController.updateWorkingHours);
-router.put('/:id/working-hours', isAdminOrSameBarber, barberController.updateAllWorkingHours);
 
-// NUOVA MODIFICA: Statistiche (admin o barbiere stesso)
-router.get('/:id/stats', isAdminOrSameBarber, barberController.getBarberStats);
+// MODIFICA: Rotte per gli orari di lavoro (admin o barbiere stesso)
+router.put('/:id/working-hours/:day', isAdminOrSameBarber, barberController.updateWorkingHours);
+
+// MODIFICA: Le nuove rotte per servizi e orari completi (admin o barbiere stesso per working-hours)
+if (barberController.updateAllWorkingHours) {
+  router.put('/:id/working-hours', isAdminOrSameBarber, barberController.updateAllWorkingHours);
+}
 
 // I servizi possono essere modificati solo dagli admin
-router.put('/:id/services', requireAdmin, barberController.updateBarberServices);
+if (barberController.updateBarberServices) {
+  router.put('/:id/services', requireAdmin, barberController.updateBarberServices);
+}
+
+// Statistiche (visibili solo agli admin)
+router.get('/:id/stats', requireAdmin, barberController.getBarberStats);
 
 export default router;
