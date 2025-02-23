@@ -48,8 +48,9 @@ function BarberStats({ barberId }) {
     if (!services || !Array.isArray(services)) return [];
 
     return services.map((service, index) => ({
-      name: service.service,
+      name: service.name || service.service, // Aggiungiamo service come fallback
       value: service.count,
+      percentage: service.count || 0,
       color: COLORS[index % COLORS.length]
     }));
   };
@@ -261,33 +262,35 @@ function BarberStats({ barberId }) {
           <h3 className="text-xl font-semibold mb-6">Distribuzione Servizi</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={formatServiceData(stats.serviceDistribution)}
-                  cx="50%"
-                  cy="50%"
-                  labelLine
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {formatServiceData(stats.serviceDistribution).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value) => [`${value} prenotazioni`, 'Quantità']}
-                  contentStyle={{
-                    backgroundColor: '#333',
-                    border: '1px solid #555',
-                    borderRadius: '4px',
-                    color: '#fff'
-                  }}
-                />
-                <Legend />
-              </PieChart>
+            <PieChart>
+            <Pie
+              data={formatServiceData(stats.serviceDistribution)}
+              cx="50%"
+              cy="50%"
+              labelLine
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="value"
+              nameKey="name"
+              label={({ name, value, percent }) =>
+                `${name}: ${(percent * 100).toFixed(0)}%`
+              }
+            >
+              {formatServiceData(stats.serviceDistribution).map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value, name) => [`${value} prenotazioni`, name]}
+              contentStyle={{
+                backgroundColor: '#333',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                color: '#fff'
+              }}
+            />
+            <Legend />
+          </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
