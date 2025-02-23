@@ -253,6 +253,34 @@ async createBarber(req, res) {
       const { id } = req.params;
       const { services } = req.body;
 
+      // Verifica che il barbiere esista
+      const barber = await Barber.findById(id);
+      if (!barber) {
+        return res.status(404).json({
+          success: false,
+          message: 'Barbiere non trovato'
+        });
+      }
+
+      // Se è un barbiere, può modificare solo i servizi esistenti (non aggiungerne di nuovi)
+      if (req.user.role === 'barber') {
+        // Verifica che tutti i servizi selezionati siano servizi validi nel sistema
+        const allServices = await Service.find({ isActive: true });
+        const validServiceNames = allServices.map(s => s.name);
+
+        const allServicesValid = services.every(service =>
+          validServiceNames.includes(service)
+        );
+
+        if (!allServicesValid) {
+          return res.status(400).json({
+            success: false,
+            message: 'Alcuni servizi selezionati non sono validi'
+          });
+        }
+      }
+
+      // Aggiorna i servizi del barbiere
       const updatedBarber = await Barber.findOneAndUpdate(
         { _id: id },
         { $set: { services } },

@@ -1,8 +1,7 @@
-import { AlertCircle, Check, Clock, DollarSign, Plus, Scissors, X } from 'lucide-react';
+import { AlertCircle, Check, Clock, DollarSign, Plus, Scissors } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { servicesApi } from '../../config/api';
 import { barberApi } from '../../config/barberApi';
-import { useAuth } from '../../context/AuthContext';
 
 function BarberServices({ barberId }) {
   const [loading, setLoading] = useState(true);
@@ -12,39 +11,44 @@ function BarberServices({ barberId }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showAddServiceModal, setShowAddServiceModal] = useState(false);
-  const { user } = useAuth();
-  const isAdmin = user && user.role === 'admin';
-  const [newService, setNewService] = useState({
-    name: '',
-    price: '',
-    duration: '',
-    description: ''
-  });
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Aggiungi un intervallo di polling per aggiornare i servizi
   useEffect(() => {
-    if (barberId) {
-      fetchData();
-    }
+    // Funzione di fetch iniziale
+    fetchData();
+
+    // Imposta un intervallo per controllare gli aggiornamenti
+    const interval = setInterval(fetchData, 30000); // Controlla ogni 30 secondi
+
+    // Cleanup dell'intervallo quando il componente viene smontato
+    return () => clearInterval(interval);
   }, [barberId]);
 
+  // Modifica fetchData per gestire gli aggiornamenti senza disturbare la selezione dell'utente
   const fetchData = async () => {
     try {
-      setLoading(true);
-      setError('');
-
       // Carica i dati del barbiere
       const barberData = await barberApi.getBarberDetails(barberId);
-      setBarber(barberData);
-      setSelectedServices(barberData.services || []);
 
       // Carica tutti i servizi disponibili
       const servicesData = await servicesApi.getActiveServices();
+
+      // Aggiorna i servizi selezionati solo se non ci sono modifiche pendenti
+      if (!hasChanges) {
+        setSelectedServices(barberData.services || []);
+      }
+
+      // Aggiorna sempre la lista dei servizi disponibili
       setAvailableServices(servicesData);
+
+      setBarber(barberData);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Errore nel caricamento dei dati. Riprova più tardi.');
+      // Non mostrare l'errore per gli aggiornamenti automatici
+      if (loading) {
+        setError('Errore nel caricamento dei dati. Riprova più tardi.');
+      }
     } finally {
       setLoading(false);
     }
@@ -92,63 +96,6 @@ function BarberServices({ barberId }) {
     }
   };
 
-  const handleNewServiceSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      setSaving(true);
-      setError('');
-
-      // Validazione
-      if (!newService.name || !newService.price || !newService.duration) {
-        setError('Nome, prezzo e durata sono campi obbligatori.');
-        setSaving(false);
-        return;
-      }
-
-      // Verifica che il prezzo e la durata siano numeri validi
-      if (isNaN(Number(newService.price)) || Number(newService.price) <= 0) {
-        setError('Il prezzo deve essere un numero maggiore di zero.');
-        setSaving(false);
-        return;
-      }
-
-      if (isNaN(Number(newService.duration)) || Number(newService.duration) <= 0) {
-        setError('La durata deve essere un numero maggiore di zero.');
-        setSaving(false);
-        return;
-      }
-
-      // Crea il nuovo servizio
-      const createdService = await servicesApi.createService({
-        ...newService,
-        price: Number(newService.price),
-        duration: Number(newService.duration)
-      });
-
-      // Aggiorna la lista dei servizi disponibili
-      setAvailableServices([...availableServices, createdService]);
-
-      // Seleziona automaticamente il nuovo servizio
-      setSelectedServices([...selectedServices, createdService.name]);
-      setHasChanges(true);
-
-      // Resetta il form e chiudi il modale
-      setNewService({
-        name: '',
-        price: '',
-        duration: '',
-        description: ''
-      });
-      setShowAddServiceModal(false);
-    } catch (error) {
-      console.error('Error creating service:', error);
-      setError('Errore durante la creazione del servizio. Riprova più tardi.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -173,37 +120,25 @@ function BarberServices({ barberId }) {
           Gestione Servizi
         </h2>
 
-        <div className="flex gap-2">
-    {isAdmin && (
-      <button
-        onClick={() => setShowAddServiceModal(true)}
-        className="bg-[var(--bg-primary)] border border-[var(--accent)] text-[var(--accent)] px-4 py-2 rounded-lg hover:bg-[var(--accent)] hover:text-white transition-colors flex items-center"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Nuovo Servizio
-      </button>
-    )}
-
-    {hasChanges && (
-      <button
-        onClick={handleSaveServices}
-        disabled={saving}
-        className="bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center"
-      >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Salva
-                </>
-              )}
-            </button>
-          )}
-        </div>
+        {hasChanges && (
+          <button
+            onClick={handleSaveServices}
+            disabled={saving}
+            className="bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center"
+          >
+            {saving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Check className="w-4 h-4 mr-2" />
+                Salva
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {error && (
@@ -230,7 +165,7 @@ function BarberServices({ barberId }) {
         {availableServices.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <Scissors className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>Nessun servizio disponibile. Aggiungi un nuovo servizio per iniziare.</p>
+            <p>Nessun servizio disponibile.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -281,105 +216,6 @@ function BarberServices({ barberId }) {
           </div>
         )}
       </div>
-
-      {/* Modale per aggiungere un nuovo servizio */}
-      {showAddServiceModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-primary)] rounded-lg p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Nuovo Servizio</h3>
-              <button
-                onClick={() => setShowAddServiceModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleNewServiceSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Nome del servizio</label>
-                <input
-                  type="text"
-                  value={newService.name}
-                  onChange={(e) => setNewService({...newService, name: e.target.value})}
-                  className="w-full p-2 rounded bg-[var(--bg-secondary)] border border-[var(--accent)]"
-                  placeholder="es. Taglio Uomo"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Prezzo (CHF)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={newService.price}
-                    onChange={(e) => setNewService({...newService, price: e.target.value})}
-                    className="w-full p-2 rounded bg-[var(--bg-secondary)] border border-[var(--accent)]"
-                    placeholder="es. 25.00"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Durata (minuti)</label>
-                  <input
-                    type="number"
-                    min="5"
-                    step="5"
-                    value={newService.duration}
-                    onChange={(e) => setNewService({...newService, duration: e.target.value})}
-                    className="w-full p-2 rounded bg-[var(--bg-secondary)] border border-[var(--accent)]"
-                    placeholder="es. 30"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Descrizione (opzionale)</label>
-                <textarea
-                  value={newService.description}
-                  onChange={(e) => setNewService({...newService, description: e.target.value})}
-                  className="w-full p-2 rounded bg-[var(--bg-secondary)] border border-[var(--accent)]"
-                  placeholder="Descrivi brevemente il servizio..."
-                  rows="3"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowAddServiceModal(false)}
-                  className="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600"
-                >
-                  Annulla
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-50 flex items-center"
-                >
-                  {saving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crea Servizio
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

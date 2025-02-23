@@ -114,9 +114,9 @@ if (barberController.updateAllWorkingHours) {
   router.put('/:id/working-hours', isAdminOrSameBarber, barberController.updateAllWorkingHours);
 }
 
-// I servizi possono essere modificati solo dagli admin
+// I servizi possono essere gestiti sia dagli admin che dai barbieri (per i propri servizi)
 if (barberController.updateBarberServices) {
-  router.put('/:id/services', requireAdmin, barberController.updateBarberServices);
+  router.put('/:id/services', isAdminOrSameBarber, barberController.updateBarberServices);
 }
 
 // Statistiche (visibili solo agli admin)
