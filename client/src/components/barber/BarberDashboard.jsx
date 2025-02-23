@@ -129,8 +129,8 @@ function BarberDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[var(--bg-primary)] navbar-offset"> {/* Usando la classe di utility navbar-offset */}
+      <div className="max-w-7xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-[var(--accent)] mb-8">
           Pannello Barbiere
           {user && (
@@ -139,7 +139,6 @@ function BarberDashboard() {
             </span>
           )}
         </h1>
-
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-8">
           <button

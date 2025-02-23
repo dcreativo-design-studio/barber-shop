@@ -129,9 +129,9 @@ function App() {
     <TimezoneProvider>
       <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] theme-transition">
         <Navbar onThemeToggle={toggleTheme} isDark={theme === 'dark'} />
-        <main className="container mx-auto px-4">
-          {renderRoutes()}
-        </main>
+        <main className="container mx-auto px-4 navbar-offset">
+  {renderRoutes()}
+</main>
       </div>
     </TimezoneProvider>
   );

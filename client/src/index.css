@@ -170,3 +170,7 @@
 [data-theme='dark'] {
   --calendar-invert: 1;
 }
+
+.navbar-offset {
+  padding-top: calc(3.5rem + 1rem); /* 3.5rem (56px) per la navbar + 1rem (16px) di spazio extra */
+}
