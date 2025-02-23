@@ -2,6 +2,7 @@ import { AlertCircle, Check, Clock, DollarSign, Plus, Scissors, X } from 'lucide
 import React, { useEffect, useState } from 'react';
 import { servicesApi } from '../../config/api';
 import { barberApi } from '../../config/barberApi';
+import { useAuth } from '../../context/AuthContext';
 
 function BarberServices({ barberId }) {
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,8 @@ function BarberServices({ barberId }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user && user.role === 'admin';
   const [newService, setNewService] = useState({
     name: '',
     price: '',
@@ -171,20 +174,22 @@ function BarberServices({ barberId }) {
         </h2>
 
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowAddServiceModal(true)}
-            className="bg-[var(--bg-primary)] border border-[var(--accent)] text-[var(--accent)] px-4 py-2 rounded-lg hover:bg-[var(--accent)] hover:text-white transition-colors flex items-center"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuovo Servizio
-          </button>
+    {isAdmin && (
+      <button
+        onClick={() => setShowAddServiceModal(true)}
+        className="bg-[var(--bg-primary)] border border-[var(--accent)] text-[var(--accent)] px-4 py-2 rounded-lg hover:bg-[var(--accent)] hover:text-white transition-colors flex items-center"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Nuovo Servizio
+      </button>
+    )}
 
-          {hasChanges && (
-            <button
-              onClick={handleSaveServices}
-              disabled={saving}
-              className="bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center"
-            >
+    {hasChanges && (
+      <button
+        onClick={handleSaveServices}
+        disabled={saving}
+        className="bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center"
+      >
               {saving ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
