@@ -297,7 +297,7 @@ function Stats() {
             </ResponsiveContainer>
           </div>
         </div>
-
+            {/* Ricavi per Periodo */}
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">
             {`Ricavi per ${getPeriodTitle()}`}
@@ -322,7 +322,7 @@ function Stats() {
             </ResponsiveContainer>
           </div>
         </div>
-
+            {/* Fasce Orarie Popolari (Nuovo) */}
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">Fasce Orarie Popolari</h3>
           <div className="h-80">
@@ -344,6 +344,7 @@ function Stats() {
           </div>
         </div>
 
+            {/* Fidelizzazione Clienti (Nuovo) */}
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">Fidelizzazione Clienti</h3>
           <div className="h-80">
@@ -369,6 +370,22 @@ function Stats() {
                 <Tooltip />
                 <Legend />
               </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        {/* Popolarità Servizi (esistente) */}
+        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
+          <h3 className="text-lg font-semibold mb-4">Popolarità Servizi</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.serviceStats}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="var(--accent)" name="Prenotazioni" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
