@@ -59,7 +59,6 @@ function Stats() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Aggiungi qui eventuali headers di autenticazione se necessari
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         credentials: 'include'
@@ -70,7 +69,8 @@ function Stats() {
       }
 
       const data = await response.json();
-      console.log('Barbers data:', data);
+      console.log('Fetched barbers:', data);
+      console.log('First barber structure:', data[0]);
       setBarbers(data);
     } catch (error) {
       console.error('Error fetching barbers:', error);
@@ -82,18 +82,41 @@ function Stats() {
       setStats(prev => ({ ...prev, loading: true, error: '' }));
       console.log('Fetching stats with:', { timeframe: stats.selectedTimeframe, barberId: stats.selectedBarber });
 
+      // Ottieni i dati dal backend
       const response = await adminApi.getStats(stats.selectedTimeframe, stats.selectedBarber);
       console.log('Stats response:', response);
 
-      const formattedStats = {
-        appointmentsByMonth: response.appointmentsByMonth?.map(item => ({
+      // Formatta i dati in modo diverso in base al timeframe
+      let appointmentsByMonth = [];
+      let revenueByMonth = [];
+
+      if (stats.selectedTimeframe === 'month' && response.appointmentsByDay) {
+        // Per il mese, usa i dati giornalieri
+        appointmentsByMonth = response.appointmentsByDay.map(item => ({
+          name: `${item.day}`,
+          Appuntamenti: item.count
+        }));
+
+        revenueByMonth = response.revenueByDay.map(item => ({
+          name: `${item.day}`,
+          Ricavi: item.revenue
+        }));
+      } else {
+        // Per settimana e anno, usa i dati mensili standard
+        appointmentsByMonth = response.appointmentsByMonth?.map(item => ({
           name: item.month,
           Appuntamenti: item.count
-        })) || [],
-        revenueByMonth: response.revenueByMonth?.map(item => ({
+        })) || [];
+
+        revenueByMonth = response.revenueByMonth?.map(item => ({
           name: item.month,
           Ricavi: item.revenue
-        })) || [],
+        })) || [];
+      }
+
+      const formattedStats = {
+        appointmentsByMonth,
+        revenueByMonth,
         serviceStats: response.serviceStats || [],
         peakHours: response.peakHours || [],
         customerRetention: response.customerRetention || []
@@ -154,54 +177,11 @@ function Stats() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="text-3xl font-bold text-[var(--accent)]">Statistiche</h2>
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Custom Select per Timeframe */}
-          <div className="relative">
-            <button
-              onClick={() => setIsTimeframeOpen(!isTimeframeOpen)}
-              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-            >
-              {stats.selectedTimeframe === 'week' ? 'Questa settimana' :
-               stats.selectedTimeframe === 'month' ? 'Questo mese' :
-               'Quest\'anno'}
-            </button>
-            {isTimeframeOpen && (
-              <div className="absolute z-10 w-[200px] mt-1 bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg shadow-lg">
-                <div
-                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer"
-                  onClick={() => {
-                    setStats(prev => ({ ...prev, selectedTimeframe: 'week' }));
-                    setIsTimeframeOpen(false);
-                  }}
-                >
-                  Questa settimana
-                </div>
-                <div
-                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer"
-                  onClick={() => {
-                    setStats(prev => ({ ...prev, selectedTimeframe: 'month' }));
-                    setIsTimeframeOpen(false);
-                  }}
-                >
-                  Questo mese
-                </div>
-                <div
-                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer"
-                  onClick={() => {
-                    setStats(prev => ({ ...prev, selectedTimeframe: 'year' }));
-                    setIsTimeframeOpen(false);
-                  }}
-                >
-                  Quest'anno
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Custom Select per Barber */}
           <div className="relative">
             <button
               onClick={() => setIsBarberOpen(!isBarberOpen)}
-              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-white"
+              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-[var(--text-primary)]"
             >
               {stats.selectedBarber === 'all' ? 'Tutti i barbieri' :
                (() => {
@@ -210,9 +190,9 @@ function Stats() {
                })()}
             </button>
             {isBarberOpen && (
-              <div className="absolute z-10 w-[200px] mt-1 bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-50 w-[200px] mt-1 bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg shadow-lg max-h-60 overflow-y-auto">
                 <div
-                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer"
+                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer text-[var(--text-primary)]"
                   onClick={() => {
                     setStats(prev => ({ ...prev, selectedBarber: 'all' }));
                     setIsBarberOpen(false);
@@ -232,6 +212,49 @@ function Stats() {
                     {`${barber.firstName} ${barber.lastName}`}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Custom Select per Timeframe */}
+          <div className="relative">
+            <button
+              onClick={() => setIsTimeframeOpen(!isTimeframeOpen)}
+              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-[var(--text-primary)]"
+            >
+              {stats.selectedTimeframe === 'week' ? 'Questa settimana' :
+              stats.selectedTimeframe === 'month' ? 'Questo mese' :
+              'Quest\'anno'}
+            </button>
+            {isTimeframeOpen && (
+              <div className="absolute z-40 w-[200px] mt-1 bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg shadow-lg">
+                <div
+                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer text-[var(--text-primary)]"
+                  onClick={() => {
+                    setStats(prev => ({ ...prev, selectedTimeframe: 'week' }));
+                    setIsTimeframeOpen(false);
+                  }}
+                >
+                  Questa settimana
+                </div>
+                <div
+                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer text-[var(--text-primary)]"
+                  onClick={() => {
+                    setStats(prev => ({ ...prev, selectedTimeframe: 'month' }));
+                    setIsTimeframeOpen(false);
+                  }}
+                >
+                  Questo mese
+                </div>
+                <div
+                  className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer text-[var(--text-primary)]"
+                  onClick={() => {
+                    setStats(prev => ({ ...prev, selectedTimeframe: 'year' }));
+                    setIsTimeframeOpen(false);
+                  }}
+                >
+                  Quest'anno
+                </div>
               </div>
             )}
           </div>
@@ -275,15 +298,26 @@ function Stats() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">
-            {`Appuntamenti per ${getPeriodTitle()}`}
+            {stats.selectedTimeframe === 'month'
+              ? 'Appuntamenti Giornalieri'
+              : `Appuntamenti per ${getPeriodTitle()}`}
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.appointmentsByMonth}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                />
                 <Legend />
                 <Line
                   type="monotone"
@@ -297,18 +331,29 @@ function Stats() {
             </ResponsiveContainer>
           </div>
         </div>
-            {/* Ricavi per Periodo */}
+
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">
-            {`Ricavi per ${getPeriodTitle()}`}
+            {stats.selectedTimeframe === 'month'
+              ? 'Ricavi Giornalieri'
+              : `Ricavi per ${getPeriodTitle()}`}
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.revenueByMonth}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => `CHF ${value}`} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
+                  formatter={(value) => [`CHF ${value}`, 'Ricavi']}
+                />
                 <Legend />
                 <Line
                   type="monotone"
@@ -322,16 +367,24 @@ function Stats() {
             </ResponsiveContainer>
           </div>
         </div>
-            {/* Fasce Orarie Popolari (Nuovo) */}
+
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">Fasce Orarie Popolari</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.peakHours}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
-                <XAxis dataKey="hour" />
-                <YAxis />
-                <Tooltip />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
+                />
                 <Legend />
                 <Bar
                   dataKey="count"
@@ -344,7 +397,6 @@ function Stats() {
           </div>
         </div>
 
-            {/* Fidelizzazione Clienti (Nuovo) */}
         <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
           <h3 className="text-lg font-medium mb-4">Fidelizzazione Clienti</h3>
           <div className="h-80">
@@ -357,7 +409,8 @@ function Stats() {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
-                  label
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
                 >
                   {stats.customerRetention.map((entry, index) => (
                     <Cell
@@ -367,24 +420,41 @@ function Stats() {
                     />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
+                  formatter={(value) => [`${value}`, 'Clienti']}
+                />
+                <Legend formatter={(value) => <span style={{ color: 'var(--text-primary)' }}>{value}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
-        {/* Popolarità Servizi (esistente) */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Popolarità Servizi</h3>
-          <div className="h-72">
+
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-lg">
+          <h3 className="text-lg font-medium mb-4">Popolarità Servizi</h3>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.serviceStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--text-primary)' }}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)' }}
+                  labelStyle={{ color: 'var(--text-primary)' }}
+                />
                 <Legend />
-                <Bar dataKey="count" fill="var(--accent)" name="Prenotazioni" />
+                <Bar
+                  dataKey="count"
+                  fill="var(--accent)"
+                  name="Prenotazioni"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

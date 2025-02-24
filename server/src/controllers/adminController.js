@@ -127,10 +127,6 @@ export const adminController = {
   async getDashboardStats(req, res) {
     try {
       const { timeframe = 'month', barberId } = req.query;
-
-      // Debug log per i parametri ricevuti
-      console.log('Received params:', { timeframe, barberId });
-
       const today = new Date();
       let startDate;
       let endDate = new Date(today);
@@ -156,7 +152,7 @@ export const adminController = {
           endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
       }
 
-      // Debug log per le date calcolate
+      // Debug log per i parametri ricevuti
       console.log('Date range:', {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
@@ -191,11 +187,8 @@ export const adminController = {
         }
       }
 
-      // Debug log for match condition
-      console.log('Match condition:', matchCondition);
-
-      // Pipeline per statistiche di base
-      const stats = await Appointment.aggregate([
+      // Pipeline per statistiche di base (mensili)
+      const monthlyStats = await Appointment.aggregate([
         {
           $match: matchCondition
         },
@@ -219,10 +212,74 @@ export const adminController = {
         }
       ]);
 
-      // Debug log for stats
-      console.log('Base stats results:', stats);
+      // Pipeline per statistiche giornaliere (solo se timeframe è 'month')
+      let dailyStats = [];
+      let dailyRevenue = [];
 
-      // Pipeline per fasce orarie popolari con lo stesso matchCondition
+      if (timeframe === 'month') {
+        dailyStats = await Appointment.aggregate([
+          {
+            $match: matchCondition
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: '$date' },
+                month: { $month: '$date' },
+                day: { $dayOfMonth: '$date' }
+              },
+              count: { $sum: 1 },
+              revenue: { $sum: '$price' }
+            }
+          },
+          {
+            $sort: {
+              '_id.year': 1,
+              '_id.month': 1,
+              '_id.day': 1
+            }
+          },
+          {
+            $project: {
+              day: '$_id.day',
+              count: 1,
+              _id: 0
+            }
+          }
+        ]);
+
+        dailyRevenue = await Appointment.aggregate([
+          {
+            $match: matchCondition
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: '$date' },
+                month: { $month: '$date' },
+                day: { $dayOfMonth: '$date' }
+              },
+              revenue: { $sum: '$price' }
+            }
+          },
+          {
+            $sort: {
+              '_id.year': 1,
+              '_id.month': 1,
+              '_id.day': 1
+            }
+          },
+          {
+            $project: {
+              day: '$_id.day',
+              revenue: 1,
+              _id: 0
+            }
+          }
+        ]);
+      }
+
+      // Altre pipeline esistenti
       const peakHours = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -245,7 +302,6 @@ export const adminController = {
         }
       ]);
 
-      // Pipeline per fidelizzazione clienti con lo stesso matchCondition
       const customerRetention = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -280,7 +336,6 @@ export const adminController = {
         }
       ]);
 
-      // Pipeline per statistiche dei servizi con lo stesso matchCondition
       const serviceStats = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -304,53 +359,48 @@ export const adminController = {
       ]);
 
       const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
-                     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+                      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
-      // Formatta i dati con controllo errori
+      // Formatta i dati
       let formattedStats;
-      try {
-        if (timeframe === 'week') {
-          formattedStats = stats.map(stat => ({
-            month: `${stat._id.day}/${stat._id.month}`,
-            count: stat.count,
-            revenue: stat.revenue
-          }));
-        } else {
-          const allMonths = [];
-          let currentDate = new Date(startDate);
+      if (timeframe === 'week') {
+        formattedStats = monthlyStats.map(stat => ({
+          month: `${stat._id.day}/${stat._id.month}`,
+          count: stat.count,
+          revenue: stat.revenue
+        }));
+      } else {
+        const allMonths = [];
+        let currentDate = new Date(startDate);
 
-          while (currentDate <= endDate) {
-            const monthIndex = currentDate.getMonth();
-            const existingStat = stats.find(s =>
-              s._id.month === monthIndex + 1 &&
-              s._id.year === currentDate.getFullYear()
-            );
+        while (currentDate <= endDate) {
+          const monthIndex = currentDate.getMonth();
+          const existingStat = monthlyStats.find(s =>
+            s._id.month === monthIndex + 1 &&
+            s._id.year === currentDate.getFullYear()
+          );
 
-            allMonths.push({
-              month: months[monthIndex],
-              count: existingStat?.count || 0,
-              revenue: existingStat?.revenue || 0
-            });
+          allMonths.push({
+            month: months[monthIndex],
+            count: existingStat?.count || 0,
+            revenue: existingStat?.revenue || 0
+          });
 
-            currentDate.setMonth(currentDate.getMonth() + 1);
-          }
-
-          formattedStats = allMonths;
+          currentDate.setMonth(currentDate.getMonth() + 1);
         }
-      } catch (formatError) {
-        console.error('Error formatting stats:', formatError);
-        return res.status(500).json({
-          message: 'Errore nella formattazione delle statistiche',
-          error: formatError.message
-        });
+
+        formattedStats = allMonths;
       }
 
-      // Debug log final response
-      console.log('Sending response with formatted stats');
-
+      // Ritorna tutti i dati formattati, includendo i dati giornalieri quando il timeframe è 'month'
       res.json({
         appointmentsByMonth: formattedStats,
         revenueByMonth: formattedStats,
+        // Aggiungi statistiche giornaliere se timeframe è 'month'
+        ...(timeframe === 'month' && {
+          appointmentsByDay: dailyStats,
+          revenueByDay: dailyRevenue
+        }),
         serviceStats,
         peakHours,
         customerRetention
