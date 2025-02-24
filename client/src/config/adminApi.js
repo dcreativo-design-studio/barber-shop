@@ -12,5 +12,15 @@ export const adminApi = {
       console.error('Error fetching admin stats:', error);
       throw error;
     }
+  },
+
+  getBarbers: async () => {
+    try {
+      const response = await apiRequest.get('/barbers');
+      return response.data || response;
+    } catch (error) {
+      console.error('Error fetching barbers:', error);
+      throw error;
+    }
   }
 };

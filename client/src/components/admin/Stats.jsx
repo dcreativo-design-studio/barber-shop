@@ -188,7 +188,10 @@ function Stats() {
               className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
             >
               {stats.selectedBarber === 'all' ? 'Tutti i barbieri' :
-               barbers.find(b => b._id === stats.selectedBarber)?.name || 'Seleziona barbiere'}
+               (() => {
+                 const barber = barbers.find(b => b._id === stats.selectedBarber);
+                 return barber ? `${barber.firstName} ${barber.lastName}` : 'Seleziona barbiere';
+               })()}
             </button>
             {isBarberOpen && (
               <div className="absolute z-10 w-[200px] mt-1 bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg shadow-lg max-h-60 overflow-y-auto">
