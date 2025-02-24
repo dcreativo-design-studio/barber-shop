@@ -127,7 +127,7 @@ export const adminController = {
   // Metodo per le statistiche dashboard
   async getDashboardStats(req, res) {
     try {
-      const { timeframe = 'month' } = req.query;
+      const { timeframe = 'month', barberId } = req.query;
       const today = new Date();
       let startDate;
       let endDate = new Date(today);
@@ -136,44 +136,46 @@ export const adminController = {
       // Calcola la data di inizio in base al timeframe
       switch(timeframe) {
         case 'week':
-          // Da oggi ai prossimi 7 giorni
           startDate = new Date(today);
           endDate = new Date(today);
           endDate.setDate(today.getDate() + 7);
           break;
-
         case 'month':
-          // Inizio del mese corrente
           startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-          // Fine del mese corrente
           endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
           break;
-
         case 'year':
-          // Tutto l'anno corrente
           startDate = new Date(today.getFullYear(), 0, 1);
           endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
           break;
-
         default:
           startDate = new Date(today.getFullYear(), today.getMonth(), 1);
           endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
       }
 
       // Debug log
-      console.log('Date range:', {
+      console.log('Request params:', {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        timeframe
+        timeframe,
+        barberId
       });
 
-      // Pipeline per statistiche di base (appuntamenti e ricavi)
+      // Base match condition
+      const matchCondition = {
+        date: { $gte: startDate, $lte: endDate },
+        status: { $ne: 'cancelled' }
+      };
+
+      // Add barber filter if specified
+      if (barberId && barberId !== 'all') {
+        matchCondition.barber = new mongoose.Types.ObjectId(barberId);
+      }
+
+      // Pipeline per statistiche di base
       const stats = await Appointment.aggregate([
         {
-          $match: {
-            date: { $gte: startDate, $lte: endDate },
-            status: { $ne: 'cancelled' }
-          }
+          $match: matchCondition
         },
         {
           $group: {
@@ -198,10 +200,7 @@ export const adminController = {
       // Pipeline per fasce orarie popolari
       const peakHours = await Appointment.aggregate([
         {
-          $match: {
-            date: { $gte: startDate, $lte: endDate },
-            status: { $ne: 'cancelled' }
-          }
+          $match: matchCondition
         },
         {
           $group: {
@@ -224,10 +223,7 @@ export const adminController = {
       // Pipeline per fidelizzazione clienti
       const customerRetention = await Appointment.aggregate([
         {
-          $match: {
-            date: { $gte: startDate, $lte: endDate },
-            status: { $ne: 'cancelled' }
-          }
+          $match: matchCondition
         },
         {
           $group: {
@@ -262,10 +258,7 @@ export const adminController = {
       // Pipeline per statistiche dei servizi
       const serviceStats = await Appointment.aggregate([
         {
-          $match: {
-            date: { $gte: startDate, $lte: endDate },
-            status: { $ne: 'cancelled' }
-          }
+          $match: matchCondition
         },
         {
           $group: {
@@ -288,7 +281,7 @@ export const adminController = {
       const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
                      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
-      // Formatta i dati in base al timeframe
+      // Formatta i dati
       let formattedStats;
       if (timeframe === 'week') {
         formattedStats = stats.map(stat => ({
@@ -297,7 +290,6 @@ export const adminController = {
           revenue: stat.revenue
         }));
       } else {
-        // Per mese e anno, crea un array con tutti i mesi, anche quelli senza appuntamenti
         const allMonths = [];
         let currentDate = new Date(startDate);
 
@@ -320,7 +312,6 @@ export const adminController = {
         formattedStats = allMonths;
       }
 
-      // Ritorna tutti i dati formattati
       res.json({
         appointmentsByMonth: formattedStats,
         revenueByMonth: formattedStats,

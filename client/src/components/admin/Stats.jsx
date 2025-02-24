@@ -27,18 +27,31 @@ function Stats() {
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false);
   const [isBarberOpen, setIsBarberOpen] = useState(false);
 
+  // Carica i barbieri al mount del componente
   useEffect(() => {
-    fetchBarbers();
-  }, []); // Esegui fetchBarbers solo al mount del componente
+    const loadInitialData = async () => {
+      await fetchBarbers();
+      // Carica le statistiche solo dopo aver caricato i barbieri
+      await fetchStats();
+    };
+    loadInitialData();
+  }, []);
 
+  // Aggiorna le statistiche quando cambiano i filtri
   useEffect(() => {
-    fetchStats();
+    if (barbers.length > 0) { // Assicurati che i barbieri siano già caricati
+      fetchStats();
+    }
   }, [stats.selectedTimeframe, stats.selectedBarber]);
 
-  // Log quando i barbieri cambiano
+  // Debug
   useEffect(() => {
-    console.log('Barbers list updated:', barbers);
-  }, [barbers]);
+    console.log('Current state:', {
+      barbers,
+      selectedBarber: stats.selectedBarber,
+      selectedTimeframe: stats.selectedTimeframe
+    });
+  }, [barbers, stats.selectedBarber, stats.selectedTimeframe]);
 
   const fetchBarbers = async () => {
     try {
@@ -67,20 +80,23 @@ function Stats() {
   const fetchStats = async () => {
     try {
       setStats(prev => ({ ...prev, loading: true, error: '' }));
+      console.log('Fetching stats with:', { timeframe: stats.selectedTimeframe, barberId: stats.selectedBarber });
+
       const response = await adminApi.getStats(stats.selectedTimeframe, stats.selectedBarber);
+      console.log('Stats response:', response);
 
       const formattedStats = {
-        appointmentsByMonth: response.appointmentsByMonth.map(item => ({
+        appointmentsByMonth: response.appointmentsByMonth?.map(item => ({
           name: item.month,
           Appuntamenti: item.count
-        })),
-        revenueByMonth: response.revenueByMonth.map(item => ({
+        })) || [],
+        revenueByMonth: response.revenueByMonth?.map(item => ({
           name: item.month,
           Ricavi: item.revenue
-        })),
-        serviceStats: response.serviceStats,
-        peakHours: response.peakHours,
-        customerRetention: response.customerRetention
+        })) || [],
+        serviceStats: response.serviceStats || [],
+        peakHours: response.peakHours || [],
+        customerRetention: response.customerRetention || []
       };
 
       setStats(prev => ({
