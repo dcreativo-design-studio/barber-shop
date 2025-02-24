@@ -1,15 +1,14 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
 import React, { useEffect, useState } from 'react';
 import {
   Bar, BarChart, CartesianGrid,
-  Cell,
-  Legend, Line, LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer, Tooltip, XAxis, YAxis
+  Cell, Legend, Line, LineChart,
+  Pie, PieChart, ResponsiveContainer,
+  Tooltip, XAxis, YAxis
 } from 'recharts';
 import { adminApi } from '../../config/adminApi';
 
-// Colori per i grafici a torta
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 function Stats() {
@@ -17,26 +16,37 @@ function Stats() {
     appointmentsByMonth: [],
     revenueByMonth: [],
     serviceStats: [],
-    peakHours: [], // Nuovo
-    barberPerformance: [], // Nuovo
-    customerRetention: [], // Nuovo
+    peakHours: [],
+    barberPerformance: [],
+    customerRetention: [],
     loading: true,
     error: '',
-    selectedTimeframe: 'month' // Nuovo: per filtrare i dati
+    selectedTimeframe: 'month',
+    selectedBarber: 'all' // New state for barber filter
   });
 
+  const [barbers, setBarbers] = useState([]);
+
   useEffect(() => {
+    fetchBarbers();
     fetchStats();
-  }, [stats.selectedTimeframe]); // Aggiunto selectedTimeframe come dipendenza
+  }, [stats.selectedTimeframe, stats.selectedBarber]);
+
+  const fetchBarbers = async () => {
+    try {
+      const response = await fetch('/api/barbers');
+      const data = await response.json();
+      setBarbers(data);
+    } catch (error) {
+      console.error('Error fetching barbers:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
       setStats(prev => ({ ...prev, loading: true, error: '' }));
+      const response = await adminApi.getStats(stats.selectedTimeframe, stats.selectedBarber);
 
-      const response = await adminApi.getStats(stats.selectedTimeframe);
-      console.log('Received stats:', response);
-
-      // Formatta i dati per i grafici
       const formattedStats = {
         appointmentsByMonth: response.appointmentsByMonth.map(item => ({
           name: item.month,
@@ -54,8 +64,7 @@ function Stats() {
       setStats(prev => ({
         ...prev,
         ...formattedStats,
-        loading: false,
-        error: ''
+        loading: false
       }));
     } catch (error) {
       console.error('Error in fetchStats:', error);
@@ -66,28 +75,22 @@ function Stats() {
       }));
     }
   };
-  // Funzione per ottenere il titolo corretto per periodo nei grafici
+
   const getPeriodTitle = () => {
     switch(stats.selectedTimeframe) {
-      case 'week':
-        return 'Settimana';
-      case 'month':
-        return 'Mese';
-      case 'year':
-        return 'Anno';
-      default:
-        return 'Mese';
+      case 'week': return 'Settimana';
+      case 'month': return 'Mese';
+      case 'year': return 'Anno';
+      default: return 'Mese';
     }
   };
-  // Nuove funzioni helper per i calcoli
-
 
   if (stats.loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)]"></div>
-          <p className="mt-4 text-[var(--text-primary)]">Caricamento statistiche...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Caricamento statistiche...</p>
         </div>
       </div>
     );
@@ -95,163 +98,211 @@ function Stats() {
 
   if (stats.error) {
     return (
-      <div className="bg-red-500 text-white p-4 rounded-lg shadow">
-        <h3 className="font-bold mb-2">Errore</h3>
-        <p>{stats.error}</p>
-        <button
-          onClick={fetchStats}
-          className="mt-4 bg-white text-red-500 px-4 py-2 rounded hover:bg-red-100 transition-colors"
-        >
-          Riprova
-        </button>
-      </div>
+      <Card className="bg-destructive/10">
+        <CardHeader>
+          <CardTitle className="text-destructive">Errore</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-destructive">{stats.error}</p>
+          <button
+            onClick={fetchStats}
+            className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+          >
+            Riprova
+          </button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[var(--accent)]">Statistiche</h2>
-        <div className="flex gap-4">
-          <select
+    <div className="space-y-8 p-6 bg-background">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 className="text-3xl font-bold text-primary">Dashboard Amministratore</h2>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Select
             value={stats.selectedTimeframe}
-            onChange={(e) => setStats(prev => ({ ...prev, selectedTimeframe: e.target.value }))}
-            className="p-2 rounded bg-[var(--bg-primary)] border border-[var(--accent)]"
+            onValueChange={(value) => setStats(prev => ({ ...prev, selectedTimeframe: value }))}
+            className="min-w-[200px] bg-card"
           >
             <option value="week">Questa settimana</option>
             <option value="month">Questo mese</option>
             <option value="year">Quest'anno</option>
-          </select>
+          </Select>
+          <Select
+            value={stats.selectedBarber}
+            onValueChange={(value) => setStats(prev => ({ ...prev, selectedBarber: value }))}
+            className="min-w-[200px] bg-card"
+          >
+            <option value="all">Tutti i barbieri</option>
+            {barbers.map(barber => (
+              <option key={barber._id} value={barber._id}>
+                {barber.name}
+              </option>
+            ))}
+          </Select>
           <button
             onClick={fetchStats}
-            className="bg-[var(--accent)] text-white px-4 py-2 rounded hover:opacity-90"
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl"
           >
             Aggiorna
           </button>
         </div>
       </div>
 
-      {/* KPI Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-lg">
-          <h3 className="font-semibold mb-2">Appuntamenti Totali</h3>
-          <p className="text-3xl font-bold text-[var(--accent)]">
-            {stats.appointmentsByMonth.reduce((acc, curr) => acc + curr.Appuntamenti, 0)}
-          </p>
-        </div>
-        <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-lg">
-          <h3 className="font-semibold mb-2">Ricavo Totale</h3>
-          <p className="text-3xl font-bold text-[var(--accent)]">
-            CHF {stats.revenueByMonth.reduce((acc, curr) => acc + curr.Ricavi, 0).toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-lg">
-          <h3 className="font-semibold mb-2">Cliente Fidelizzati</h3>
-          <p className="text-3xl font-bold text-[var(--accent)]">
-            {stats.customerRetention.reduce((acc, curr) => curr.name !== '1 visita' ? acc + curr.value : acc, 0)}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Appuntamenti Totali</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-primary">
+              {stats.appointmentsByMonth.reduce((acc, curr) => acc + curr.Appuntamenti, 0)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Ricavo Totale</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-primary">
+              CHF {stats.revenueByMonth.reduce((acc, curr) => acc + curr.Ricavi, 0).toFixed(2)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Clienti Fidelizzati</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-primary">
+              {stats.customerRetention.reduce((acc, curr) =>
+                curr.name !== '1 visita' ? acc + curr.value : acc, 0
+              )}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Grafici esistenti */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Appuntamenti per Periodo */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">
-            {`Appuntamenti per ${getPeriodTitle()}`}
-          </h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.appointmentsByMonth}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="Appuntamenti" stroke="var(--accent)" activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">
+              {`Appuntamenti per ${getPeriodTitle()}`}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.appointmentsByMonth}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="Appuntamenti"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary))" }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Ricavi per Periodo */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">
-            {`Ricavi per ${getPeriodTitle()}`}
-          </h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.revenueByMonth}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => `CHF ${value}`} />
-                <Legend />
-                <Line type="monotone" dataKey="Ricavi" stroke="#4CAF50" activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">
+              {`Ricavi per ${getPeriodTitle()}`}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.revenueByMonth}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `CHF ${value}`} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="Ricavi"
+                    stroke="#4CAF50"
+                    strokeWidth={2}
+                    dot={{ fill: "#4CAF50" }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Fasce Orarie Popolari (Nuovo) */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Fasce Orarie Popolari</h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.peakHours}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hour" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="var(--accent)" name="Appuntamenti" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Fasce Orarie Popolari</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.peakHours}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="count"
+                    fill="hsl(var(--primary))"
+                    name="Appuntamenti"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Fidelizzazione Clienti (Nuovo) */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Fidelizzazione Clienti</h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.customerRetention}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {stats.customerRetention.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Popolarità Servizi (esistente) */}
-        <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-4">Popolarità Servizi</h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.serviceStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="var(--accent)" name="Prenotazioni" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Fidelizzazione Clienti</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.customerRetention}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {stats.customerRetention.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                        className="hover:opacity-80 transition-opacity"
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

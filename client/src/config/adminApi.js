@@ -1,10 +1,10 @@
 import { apiRequest } from './api';
 
 export const adminApi = {
-  getStats: async (timeframe = 'month') => {
+  getStats: async (timeframe = 'month', barberId = 'all') => {
     try {
       const response = await apiRequest.get('/admin/stats', {
-        params: { timeframe }
+        params: { timeframe, barberId }
       });
       console.log('Stats response:', response);
       return response;
