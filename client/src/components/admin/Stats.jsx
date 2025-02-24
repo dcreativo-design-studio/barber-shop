@@ -201,7 +201,7 @@ function Stats() {
           <div className="relative">
             <button
               onClick={() => setIsBarberOpen(!isBarberOpen)}
-              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              className="w-[200px] px-4 py-2 text-left bg-[var(--bg-secondary)] border border-[var(--accent)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-white"
             >
               {stats.selectedBarber === 'all' ? 'Tutti i barbieri' :
                (() => {
