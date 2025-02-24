@@ -223,13 +223,13 @@ function Stats() {
                 {barbers.map(barber => (
                   <div
                     key={barber._id}
-                    className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer"
+                    className="px-4 py-2 hover:bg-[var(--accent)] cursor-pointer text-[var(--text-primary)]"
                     onClick={() => {
                       setStats(prev => ({ ...prev, selectedBarber: barber._id }));
                       setIsBarberOpen(false);
                     }}
                   >
-                    {barber.name}
+                    {`${barber.firstName} ${barber.lastName}`}
                   </div>
                 ))}
               </div>
