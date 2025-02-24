@@ -29,13 +29,35 @@ function Stats() {
 
   useEffect(() => {
     fetchBarbers();
+  }, []); // Esegui fetchBarbers solo al mount del componente
+
+  useEffect(() => {
     fetchStats();
   }, [stats.selectedTimeframe, stats.selectedBarber]);
 
+  // Log quando i barbieri cambiano
+  useEffect(() => {
+    console.log('Barbers list updated:', barbers);
+  }, [barbers]);
+
   const fetchBarbers = async () => {
     try {
-      const response = await fetch('/api/barbers');
+      const response = await fetch('https://api.barbershop.dcreativo.ch/api/barbers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Aggiungi qui eventuali headers di autenticazione se necessari
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Barbers data:', data);
       setBarbers(data);
     } catch (error) {
       console.error('Error fetching barbers:', error);
