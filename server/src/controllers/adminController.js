@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose'; // Aggiungi questa riga
 import Appointment from '../models/Appointment.js';
 import Service from '../models/Service.js';
 import User from '../models/User.js';
-import { notificationService } from '../services/notificationService.js'; // Aggiungi questa riga
-
+import { notificationService } from '../services/notificationService.js';
 
 export const adminController = {
   // Metodi esistenti per gli appuntamenti
@@ -124,10 +124,13 @@ export const adminController = {
     }
   },
 
-  // Metodo per le statistiche dashboard
   async getDashboardStats(req, res) {
     try {
       const { timeframe = 'month', barberId } = req.query;
+
+      // Debug log per i parametri ricevuti
+      console.log('Received params:', { timeframe, barberId });
+
       const today = new Date();
       let startDate;
       let endDate = new Date(today);
@@ -153,8 +156,8 @@ export const adminController = {
           endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
       }
 
-      // Debug log
-      console.log('Request params:', {
+      // Debug log per le date calcolate
+      console.log('Date range:', {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         timeframe,
@@ -169,8 +172,27 @@ export const adminController = {
 
       // Add barber filter if specified
       if (barberId && barberId !== 'all') {
-        matchCondition.barber = new mongoose.Types.ObjectId(barberId);
+        try {
+          // Verifica validità dell'ID
+          if (!mongoose.Types.ObjectId.isValid(barberId)) {
+            return res.status(400).json({
+              message: 'ID barbiere non valido',
+              error: 'Invalid ObjectId format'
+            });
+          }
+          matchCondition.barber = new mongoose.Types.ObjectId(barberId);
+          console.log('Added barber filter:', matchCondition.barber);
+        } catch (error) {
+          console.error('Error converting barberId to ObjectId:', error);
+          return res.status(400).json({
+            message: 'Errore nella conversione dell\'ID barbiere',
+            error: error.message
+          });
+        }
       }
+
+      // Debug log for match condition
+      console.log('Match condition:', matchCondition);
 
       // Pipeline per statistiche di base
       const stats = await Appointment.aggregate([
@@ -197,7 +219,10 @@ export const adminController = {
         }
       ]);
 
-      // Pipeline per fasce orarie popolari
+      // Debug log for stats
+      console.log('Base stats results:', stats);
+
+      // Pipeline per fasce orarie popolari con lo stesso matchCondition
       const peakHours = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -220,7 +245,7 @@ export const adminController = {
         }
       ]);
 
-      // Pipeline per fidelizzazione clienti
+      // Pipeline per fidelizzazione clienti con lo stesso matchCondition
       const customerRetention = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -255,7 +280,7 @@ export const adminController = {
         }
       ]);
 
-      // Pipeline per statistiche dei servizi
+      // Pipeline per statistiche dei servizi con lo stesso matchCondition
       const serviceStats = await Appointment.aggregate([
         {
           $match: matchCondition
@@ -281,36 +306,47 @@ export const adminController = {
       const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
                      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
-      // Formatta i dati
+      // Formatta i dati con controllo errori
       let formattedStats;
-      if (timeframe === 'week') {
-        formattedStats = stats.map(stat => ({
-          month: `${stat._id.day}/${stat._id.month}`,
-          count: stat.count,
-          revenue: stat.revenue
-        }));
-      } else {
-        const allMonths = [];
-        let currentDate = new Date(startDate);
+      try {
+        if (timeframe === 'week') {
+          formattedStats = stats.map(stat => ({
+            month: `${stat._id.day}/${stat._id.month}`,
+            count: stat.count,
+            revenue: stat.revenue
+          }));
+        } else {
+          const allMonths = [];
+          let currentDate = new Date(startDate);
 
-        while (currentDate <= endDate) {
-          const monthIndex = currentDate.getMonth();
-          const existingStat = stats.find(s =>
-            s._id.month === monthIndex + 1 &&
-            s._id.year === currentDate.getFullYear()
-          );
+          while (currentDate <= endDate) {
+            const monthIndex = currentDate.getMonth();
+            const existingStat = stats.find(s =>
+              s._id.month === monthIndex + 1 &&
+              s._id.year === currentDate.getFullYear()
+            );
 
-          allMonths.push({
-            month: months[monthIndex],
-            count: existingStat?.count || 0,
-            revenue: existingStat?.revenue || 0
-          });
+            allMonths.push({
+              month: months[monthIndex],
+              count: existingStat?.count || 0,
+              revenue: existingStat?.revenue || 0
+            });
 
-          currentDate.setMonth(currentDate.getMonth() + 1);
+            currentDate.setMonth(currentDate.getMonth() + 1);
+          }
+
+          formattedStats = allMonths;
         }
-
-        formattedStats = allMonths;
+      } catch (formatError) {
+        console.error('Error formatting stats:', formatError);
+        return res.status(500).json({
+          message: 'Errore nella formattazione delle statistiche',
+          error: formatError.message
+        });
       }
+
+      // Debug log final response
+      console.log('Sending response with formatted stats');
 
       res.json({
         appointmentsByMonth: formattedStats,
