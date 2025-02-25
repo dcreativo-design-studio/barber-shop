@@ -4,5 +4,16 @@
   ],
   "env": {
     "VITE_API_URL": "https://api.barbershop.dcreativo.ch"
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "x-speed-insights",
+          "value": "true"
+        }
+      ]
+    }
+  ]
 }

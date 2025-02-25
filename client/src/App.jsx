@@ -1,4 +1,3 @@
-import { SpeedInsights } from '@vercel/speed-insights/react'; // Import for React (not Next.js)
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -133,8 +132,6 @@ function App() {
         <main className="container mx-auto px-4 navbar-offset">
           {renderRoutes()}
         </main>
-        {/* Add the SpeedInsights component */}
-        <SpeedInsights />
       </div>
     </TimezoneProvider>
   );
