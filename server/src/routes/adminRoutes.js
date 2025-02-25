@@ -21,6 +21,8 @@ router.get('/users', adminController.getAllUsers);
 router.post('/users', adminController.createUser);
 router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
+// Nuova rotta per il ripristino della password
+router.post('/users/:id/reset-password', adminController.resetUserPassword);
 
 // Rotte per i servizi
 router.get('/services', adminController.getAllServices);

@@ -604,5 +604,54 @@ export const adminController = {
     } catch (error) {
       res.status(500).json({ message: 'Errore nell\'eliminazione dell\'utente' });
     }
+  },
+  async resetUserPassword(req, res) {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+
+      if (!newPassword) {
+        return res.status(400).json({ message: 'La nuova password è richiesta' });
+      }
+
+      // Trova l'utente
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({ message: 'Utente non trovato' });
+      }
+
+      // Hash della nuova password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      // Aggiorna la password dell'utente
+      user.password = hashedPassword;
+      await user.save();
+
+      // Invia email di notifica all'utente
+      try {
+        // Utilizza il servizio di notifica esistente o il modulo nodemailer direttamente
+        await notificationService.sendPasswordResetNotification(
+          user,
+          newPassword,
+          req.user // l'admin che ha effettuato il reset
+        );
+        console.log(`Password reset notification sent to ${user.email}`);
+      } catch (emailError) {
+        console.error('Error sending password reset notification:', emailError);
+        // Non blocchiamo il processo se l'invio dell'email fallisce
+      }
+
+      res.json({
+        message: 'Password ripristinata con successo',
+        userEmail: user.email
+      });
+    } catch (error) {
+      console.error('Error in resetUserPassword:', error);
+      res.status(500).json({
+        message: 'Errore nel ripristino della password',
+        error: error.message
+      });
+    }
   }
 };

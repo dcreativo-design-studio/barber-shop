@@ -284,6 +284,55 @@ export const notificationService = {
     } catch (error) {
       console.error('Error sending update confirmation email:', error);
     }
+  },
+  async sendPasswordResetNotification(user, newPassword, admin) {
+    // Controlla se l'utente ha un'email
+    if (!user.email) {
+      throw new Error('User email is required for password reset notification');
+    }
+
+    const emailSubject = 'La tua password è stata ripristinata';
+
+    // Personalizza il saluto in base al ruolo
+    let greeting = 'Gentile Cliente';
+    if (user.role === 'barber') {
+      greeting = 'Gentile Barbiere';
+    } else if (user.role === 'admin') {
+      greeting = 'Gentile Amministratore';
+    }
+
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
+        <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">${emailSubject}</h2>
+        <p>${greeting} ${user.firstName} ${user.lastName},</p>
+        <p>Ti informiamo che la tua password è stata ripristinata da un amministratore del sistema.</p>
+        <p>Le tue nuove credenziali di accesso sono:</p>
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Password:</strong> ${newPassword}</p>
+        </div>
+        <p>Ti consigliamo di modificare la password al primo accesso per mantenere sicuro il tuo account.</p>
+        <p>Se non hai richiesto questo ripristino o hai domande, ti preghiamo di contattarci immediatamente.</p>
+        <p style="margin-top: 30px; color: #777; font-size: 12px;">
+          Questo è un messaggio automatico, si prega di non rispondere a questa email.
+        </p>
+      </div>
+    `;
+
+    try {
+      // Utilizza il tuo sistema di invio email esistente
+      await this.sendEmail({
+        to: user.email,
+        subject: emailSubject,
+        html: emailContent
+      });
+
+      console.log(`Password reset email sent to ${user.email}`);
+      return true;
+    } catch (error) {
+      console.error(`Error sending password reset email to ${user.email}:`, error);
+      throw error;
+    }
   }
 };
 
