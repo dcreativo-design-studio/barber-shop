@@ -320,14 +320,16 @@ export const notificationService = {
     `;
 
     try {
-      // Utilizza il tuo sistema di invio email esistente
-      await this.sendEmail({
+      // Utilizzo del transporter importato per inviare l'email
+      const mailOptions = {
+        from: process.env.SMTP_USER,
         to: user.email,
         subject: emailSubject,
         html: emailContent
-      });
+      };
 
-      console.log(`Password reset email sent to ${user.email}`);
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Password reset email sent to ${user.email}: ${info.messageId}`);
       return true;
     } catch (error) {
       console.error(`Error sending password reset email to ${user.email}:`, error);
