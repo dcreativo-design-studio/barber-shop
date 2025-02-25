@@ -81,8 +81,10 @@ export const notificationService = {
 
       await transporter.sendMail(mailOptions);
       console.log('Reminder email sent successfully to:', user.email);
+      return true;
     } catch (error) {
       console.error('Error sending reminder email:', error);
+      return false;
     }
   },
 
@@ -104,7 +106,8 @@ export const notificationService = {
 
     while (attempt < retries) {
       try {
-        const formattedPhone = this.formatPhoneNumber(user.phone);
+        // Qui utilizziamo formatPhoneNumber direttamente
+        const formattedPhone = formatPhoneNumber(user.phone);
         console.log(`Attempt ${attempt + 1}/${retries} - Sending SMS to:`, formattedPhone);
 
         // Configurazione debug

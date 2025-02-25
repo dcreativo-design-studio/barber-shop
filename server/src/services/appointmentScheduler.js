@@ -17,7 +17,9 @@ const getHoursRemaining = (appointmentDate, appointmentTime) => {
 
 const sendReminders = async (appointment) => {
   try {
-    console.log(`Sending reminders for appointment: ${appointment._id}`);
+    console.log(`Starting reminders for appointment ${appointment._id} (${appointment.service})`);
+    console.log(`Client: ${appointment.client?.firstName} ${appointment.client?.lastName}, Phone: ${appointment.client?.phone}`);
+    console.log(`Date: ${appointment.date}, Time: ${appointment.time}`);
 
     // Usa findOneAndUpdate per evitare race conditions
     const updatedAppointment = await Appointment.findOneAndUpdate(
@@ -43,14 +45,32 @@ const sendReminders = async (appointment) => {
       return;
     }
 
-    // Invia le notifiche in parallelo
-    await Promise.all([
-      notificationService.sendReminderEmail(updatedAppointment, updatedAppointment.client),
-      notificationService.sendWhatsAppMessage(updatedAppointment, updatedAppointment.client),
-      notificationService.sendReminderSMS(updatedAppointment, updatedAppointment.client)
-    ]);
+    // Invia le notifiche una per una per identificare l'errore specifico
+    console.log('Sending reminder email...');
+    try {
+      await notificationService.sendReminderEmail(updatedAppointment, updatedAppointment.client);
+      console.log('Email reminder sent successfully');
+    } catch (emailError) {
+      console.error('Error sending email reminder:', emailError);
+    }
 
-    console.log(`Reminders sent successfully for appointment ${updatedAppointment._id}`);
+    console.log('Sending WhatsApp reminder...');
+    try {
+      await notificationService.sendWhatsAppMessage(updatedAppointment, updatedAppointment.client);
+      console.log('WhatsApp reminder sent successfully');
+    } catch (whatsappError) {
+      console.error('Error sending WhatsApp reminder:', whatsappError);
+    }
+
+    console.log('Sending SMS reminder...');
+    try {
+      await notificationService.sendReminderSMS(updatedAppointment, updatedAppointment.client);
+      console.log('SMS reminder sent successfully');
+    } catch (smsError) {
+      console.error('Error sending SMS reminder:', smsError);
+    }
+
+    console.log(`All reminders processed for appointment ${updatedAppointment._id}`);
   } catch (error) {
     console.error(`Error sending reminders for appointment ${appointment._id}:`, error);
 
