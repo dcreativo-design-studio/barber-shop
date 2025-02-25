@@ -5,8 +5,8 @@ import { authenticateUser, requireAdmin } from '../middleware/authMiddleware.js'
 import Appointment from '../models/Appointment.js'; // Aggiungiamo questa importazione
 import Barber from '../models/Barber.js';
 import { initializeScheduler } from '../services/appointmentScheduler.js';
+import { forceReminderForAppointment, runDiagnosticCheck } from '../services/diagnosticTools.js';
 import { notificationService } from '../services/notificationService.js';
-
 const router = Router();
 
 // Log di debug
@@ -326,6 +326,247 @@ router.post('/test-scheduler', requireAdmin, async (req, res) => {
     res.json({ message: 'Scheduler test triggered successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint di test per le notifiche
+router.post('/test-notifications', requireAdmin, async (req, res) => {
+  try {
+    const { phoneNumber, email, notificationType } = req.body;
+
+    if (!phoneNumber && !email) {
+      return res.status(400).json({
+        error: 'Almeno un metodo di contatto (email o telefono) è richiesto'
+      });
+    }
+
+    // Crea un appuntamento fittizio per il test
+    const testAppointment = {
+      _id: 'test-appointment-id',
+      service: 'Test Servizio',
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Domani
+      time: '14:30',
+      barber: {
+        firstName: 'Test',
+        lastName: 'Barbiere'
+      },
+      price: 50
+    };
+
+    // Crea un utente fittizio per il test
+    const testUser = {
+      firstName: 'Test',
+      lastName: 'Utente',
+      email: email || 'test@example.com',
+      phone: phoneNumber || '+41791234567'
+    };
+
+    let results = {};
+
+    // Invia notifiche in base al tipo richiesto
+    switch (notificationType) {
+      case 'email':
+        results.email = await notificationService.sendReminderEmail(testAppointment, testUser);
+        break;
+      case 'sms':
+        results.sms = await notificationService.sendReminderSMS(testAppointment, testUser);
+        break;
+      case 'whatsapp':
+        results.whatsapp = await notificationService.sendWhatsAppMessage(testAppointment, testUser);
+        break;
+      case 'all':
+      default:
+        // Invia tutti i tipi di notifiche
+        results.email = email ? await notificationService.sendReminderEmail(testAppointment, testUser) : null;
+        results.sms = phoneNumber ? await notificationService.sendReminderSMS(testAppointment, testUser) : null;
+        results.whatsapp = phoneNumber ? await notificationService.sendWhatsAppMessage(testAppointment, testUser) : null;
+    }
+
+    // Se disponibile, usa la funzione di test completa
+    if (notificationService.testNotificationSystem && phoneNumber) {
+      results.systemTest = await notificationService.testNotificationSystem(phoneNumber);
+    }
+
+    res.json({
+      success: true,
+      message: 'Test notifiche eseguito',
+      results
+    });
+  } catch (error) {
+    console.error('Errore nel test delle notifiche:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Aggiungi anche un endpoint per verificare quali appuntamenti riceveranno promemoria presto
+router.get('/upcoming-reminders', requireAdmin, async (req, res) => {
+  try {
+    // Trova gli appuntamenti che dovrebbero ricevere promemoria nelle prossime 36 ore
+    const now = new Date();
+    const in36Hours = new Date(now.getTime() + 36 * 60 * 60 * 1000);
+
+    const appointments = await Appointment.find({
+      status: { $in: ['confirmed', 'pending'] },
+      date: { $gte: now, $lte: in36Hours },
+      reminderSent: false
+    })
+    .populate('client', 'firstName lastName email phone')
+    .populate('barber', 'firstName lastName')
+    .sort({ date: 1, time: 1 })
+    .lean();
+
+    // Calcola le ore rimanenti per ogni appuntamento
+    const appointmentsWithHours = appointments.map(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      const [hours, minutes] = appointment.time.split(':').map(Number);
+      appointmentDate.setHours(hours, minutes, 0, 0);
+      const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
+
+      return {
+        ...appointment,
+        hoursRemaining: parseFloat(hoursDifference.toFixed(2)),
+        shouldSendReminder: hoursDifference <= 26 && hoursDifference > 23
+      };
+    });
+
+    res.json({
+      success: true,
+      currentTime: now,
+      count: appointmentsWithHours.length,
+      appointments: appointmentsWithHours
+    });
+  } catch (error) {
+    console.error('Errore nel recupero dei promemoria imminenti:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint per la diagnostica del sistema di notifiche
+router.get('/system-diagnostic', requireAdmin, async (req, res) => {
+  try {
+    const diagnosticResults = await runDiagnosticCheck();
+    res.json({
+      success: true,
+      diagnosticResults
+    });
+  } catch (error) {
+    console.error('Errore durante la diagnostica:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint per forzare un promemoria per un appuntamento specifico
+router.post('/force-reminder/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await forceReminderForAppointment(id);
+    res.json({
+      success: true,
+      message: 'Promemoria forzato elaborato',
+      result
+    });
+  } catch (error) {
+    console.error('Errore nel forzare il promemoria:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint per eseguire manualmente lo scheduler dei promemoria
+router.post('/run-reminder-scheduler', requireAdmin, async (req, res) => {
+  try {
+    // Esegui manualmente lo scheduler dei promemoria
+    console.log('Esecuzione manuale dello scheduler dei promemoria...');
+
+    const now = new Date();
+    const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+    const appointments = await Appointment.find({
+      status: { $in: ['confirmed', 'pending'] },
+      reminderSent: false,
+      date: { $gte: now, $lte: in48Hours }
+    })
+    .populate('client', 'firstName lastName email phone')
+    .populate('barber', 'firstName lastName')
+    .lean();
+
+    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
+
+    const results = [];
+    for (const appointment of appointments) {
+      try {
+        const appointmentDate = new Date(appointment.date);
+        const [hours, minutes] = appointment.time.split(':').map(Number);
+        appointmentDate.setHours(hours, minutes, 0, 0);
+        const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
+
+        console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursDifference.toFixed(2)}`);
+
+        // Includi appuntamenti che sono nel range di 26-23 ore
+        const shouldSendReminder = hoursDifference <= 26 && hoursDifference > 23;
+
+        results.push({
+          id: appointment._id,
+          client: `${appointment.client?.firstName || 'N/A'} ${appointment.client?.lastName || 'N/A'}`,
+          date: appointment.date,
+          time: appointment.time,
+          hoursRemaining: parseFloat(hoursDifference.toFixed(2)),
+          shouldSendReminder,
+          processed: false
+        });
+
+        if (shouldSendReminder) {
+          // Crea una nuova istanza dell'appuntamento per il documento Mongoose
+          const appointmentDoc = await Appointment.findById(appointment._id)
+            .populate('client', 'firstName lastName email phone')
+            .populate('barber', 'firstName lastName');
+
+          // Invia i promemoria
+          if (appointmentDoc) {
+            await notificationService.sendReminderEmail(appointmentDoc, appointmentDoc.client);
+            await notificationService.sendReminderSMS(appointmentDoc, appointmentDoc.client);
+            await notificationService.sendWhatsAppMessage(appointmentDoc, appointmentDoc.client);
+
+            // Aggiorna lo stato
+            appointmentDoc.reminderSent = true;
+            appointmentDoc.lastReminderAttempt = new Date();
+            await appointmentDoc.save();
+
+            // Aggiorna il risultato
+            const index = results.findIndex(r => r.id.toString() === appointment._id.toString());
+            if (index >= 0) {
+              results[index].processed = true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Errore nell'elaborazione dell'appuntamento ${appointment._id}:`, error);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Scheduler dei promemoria eseguito manualmente',
+      processed: results.filter(r => r.processed).length,
+      appointments: results
+    });
+  } catch (error) {
+    console.error('Errore nell\'esecuzione dello scheduler:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 

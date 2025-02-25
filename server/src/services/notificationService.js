@@ -4,7 +4,7 @@ import twilio from 'twilio';
 import Appointment from '../models/Appointment.js';
 import { sendCancellationEmailToAdmin, sendCancellationEmailToClient, transporter } from './emailService.js';
 
-// Debug delle variabili d'ambiente Twilio
+// Debug delle variabili d'ambiente Twilio con maggiori dettagli
 console.log('Twilio environment variables check:', {
   ACCOUNT_SID_EXISTS: !!process.env.TWILIO_ACCOUNT_SID,
   ACCOUNT_SID_LENGTH: process.env.TWILIO_ACCOUNT_SID?.length,
@@ -12,30 +12,83 @@ console.log('Twilio environment variables check:', {
   AUTH_TOKEN_LENGTH: process.env.TWILIO_AUTH_TOKEN?.length,
   PHONE_NUMBER_EXISTS: !!process.env.TWILIO_PHONE_NUMBER,
   WHATSAPP_NUMBER_EXISTS: !!process.env.TWILIO_WHATSAPP_NUMBER,
+  PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER ? `${process.env.TWILIO_PHONE_NUMBER.substring(0, 3)}...` : 'Missing',
+  WHATSAPP_NUMBER: process.env.TWILIO_WHATSAPP_NUMBER ? `${process.env.TWILIO_WHATSAPP_NUMBER.substring(0, 3)}...` : 'Missing',
 });
-// Funzione helper per formattare i numeri di telefono svizzeri
+
+// Funzione helper migliorata per formattare i numeri di telefono svizzeri
 const formatPhoneNumber = (phoneNumber) => {
-  let cleaned = phoneNumber.replace(/\D/g, '');
-  if (cleaned.startsWith('0')) {
-    cleaned = '41' + cleaned.substring(1);
+  if (!phoneNumber) {
+    console.error('Numero di telefono mancante');
+    throw new Error('Phone number is required');
   }
-  if (!cleaned.startsWith('+')) {
-    cleaned = '+' + cleaned;
+
+  try {
+    console.log('Formattazione numero di telefono:', phoneNumber);
+
+    // Rimuovi tutti i caratteri non numerici
+    let cleaned = phoneNumber.replace(/\D/g, '');
+    console.log('Numero pulito (solo cifre):', cleaned);
+
+    // Gestione prefisso svizzero
+    if (cleaned.startsWith('0')) {
+      cleaned = '41' + cleaned.substring(1);
+      console.log('Numero con prefisso svizzero aggiunto:', cleaned);
+    }
+
+    if (!cleaned.startsWith('41') && !cleaned.startsWith('+41')) {
+      // Se non inizia con 41 o +41, verifica se è un numero svizzero
+      if (cleaned.length === 9) {
+        // Probabilmente è un numero svizzero senza prefisso (es. 79XXXXXXX)
+        cleaned = '41' + cleaned;
+        console.log('Numero svizzero rilevato, aggiunto prefisso 41:', cleaned);
+      }
+    }
+
+    // Assicurati che inizi con +
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned;
+      console.log('Aggiunto + al numero:', cleaned);
+    }
+
+    // Validazione base del formato
+    if (cleaned.length < 11 || cleaned.length > 15) {
+      console.warn('Lunghezza del numero formatato non standard:', cleaned.length, cleaned);
+    }
+
+    console.log('Numero formattato finale:', cleaned);
+    return cleaned;
+  } catch (error) {
+    console.error('Errore nella formattazione del numero di telefono:', error);
+    throw error;
   }
-  return cleaned;
 };
 
-// Configurazione Twilio (condizionale)
+// Configurazione Twilio (condizionale) con gestione errori migliorata
 let twilioClient = null;
 try {
   if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
     twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    console.log('Twilio client initialized successfully');
+    console.log('Twilio client inizializzato con successo');
+
+    // Test della connessione Twilio
+    twilioClient.api.accounts(process.env.TWILIO_ACCOUNT_SID)
+      .fetch()
+      .then(account => {
+        console.log('✅ Twilio account verificato:', {
+          friendlyName: account.friendlyName,
+          status: account.status,
+          type: account.type
+        });
+      })
+      .catch(error => {
+        console.error('❌ Errore verifica account Twilio:', error.message);
+      });
   } else {
-    console.log('Twilio credentials not provided - SMS/WhatsApp features will be disabled');
+    console.log('Credenziali Twilio non fornite - le funzionalità SMS/WhatsApp saranno disabilitate');
   }
 } catch (error) {
-  console.log('Error initializing Twilio client:', error.message);
+  console.error('Errore inizializzazione client Twilio:', error);
 }
 
 export const notificationService = {
@@ -43,21 +96,32 @@ export const notificationService = {
   async sendCancellationEmail(appointment, user) {
     try {
       await sendCancellationEmailToClient(appointment, user);
+      return true;
     } catch (error) {
-      console.error('Error sending cancellation email to client:', error);
+      console.error('Errore invio email di cancellazione al cliente:', error);
+      return false;
     }
   },
 
   async sendAdminCancellationConfirmation(appointment, admin, client) {
     try {
       await sendCancellationEmailToAdmin(appointment, client);
+      return true;
     } catch (error) {
-      console.error('Error sending cancellation email to admin:', error);
+      console.error('Errore invio email di cancellazione all\'admin:', error);
+      return false;
     }
   },
 
   async sendReminderEmail(appointment, user) {
     try {
+      if (!user || !user.email) {
+        console.error('Email utente mancante per invio promemoria');
+        return false;
+      }
+
+      console.log(`Invio email di promemoria a ${user.email} per appuntamento ${appointment._id}`);
+
       const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
@@ -79,18 +143,23 @@ export const notificationService = {
         `
       };
 
-      await transporter.sendMail(mailOptions);
-      console.log('Reminder email sent successfully to:', user.email);
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email di promemoria inviata con successo a:', user.email, info.messageId);
       return true;
     } catch (error) {
-      console.error('Error sending reminder email:', error);
+      console.error('Errore invio email di promemoria:', error);
       return false;
     }
   },
 
   async sendReminderSMS(appointment, user, retries = 3, delayBase = 2000) {
     if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
-      console.log('Skipping SMS reminder - Twilio not configured');
+      console.log('SMS di promemoria saltato - Twilio non configurato');
+      return false;
+    }
+
+    if (!user || !user.phone) {
+      console.error('Telefono utente mancante per invio SMS');
       return false;
     }
 
@@ -106,29 +175,43 @@ export const notificationService = {
 
     while (attempt < retries) {
       try {
-        // Qui utilizziamo formatPhoneNumber direttamente
+        // Utilizziamo formatPhoneNumber con maggiori controlli
         const formattedPhone = formatPhoneNumber(user.phone);
-        console.log(`Attempt ${attempt + 1}/${retries} - Sending SMS to:`, formattedPhone);
+        console.log(`Tentativo ${attempt + 1}/${retries} - Invio SMS a:`, formattedPhone);
+
+        // Costruisci il messaggio
+        const messageBody = formatAppointmentMessage(appointment);
+        console.log('Contenuto messaggio SMS:', messageBody);
 
         // Configurazione debug
-        console.log('Twilio Configuration:', {
+        console.log('Configurazione Twilio per SMS:', {
           from: process.env.TWILIO_PHONE_NUMBER,
           to: formattedPhone,
-          attempt: attempt + 1,
-          isTrial: true
+          attemptNumber: attempt + 1
         });
 
         const message = await twilioClient.messages.create({
-          body: formatAppointmentMessage(appointment),
+          body: messageBody,
           to: formattedPhone,
           from: process.env.TWILIO_PHONE_NUMBER,
           statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL
         });
 
-        console.log('SMS sent successfully:', {
+        console.log('SMS inviato con successo:', {
           messageId: message.sid,
           status: message.status,
           attempt: attempt + 1
+        });
+
+        // Aggiorna l'appuntamento con l'ID del messaggio
+        await Appointment.findByIdAndUpdate(appointment._id, {
+          $push: {
+            smsNotifications: {
+              messageSid: message.sid,
+              status: message.status,
+              timestamp: new Date()
+            }
+          }
         });
 
         return true; // Successo
@@ -137,7 +220,7 @@ export const notificationService = {
         lastError = error;
         attempt++;
 
-        console.error(`SMS sending failed - Attempt ${attempt}/${retries}:`, {
+        console.error(`Invio SMS fallito - Tentativo ${attempt}/${retries}:`, {
           error: error.message,
           code: error.code,
           moreInfo: error.moreInfo,
@@ -148,26 +231,26 @@ export const notificationService = {
         // Gestione specifica degli errori
         switch (error.code) {
           case 20003:
-            console.error('Authentication error - Check Twilio credentials');
+            console.error('Errore di autenticazione - Controlla le credenziali Twilio');
             await Appointment.findByIdAndUpdate(appointment._id, {
               lastReminderAttempt: new Date(),
-              reminderError: 'Authentication error'
+              reminderError: 'Errore di autenticazione Twilio'
             });
             return false;
 
           case 21211:
-            console.error('Invalid phone number format');
+            console.error('Formato numero di telefono non valido');
             await Appointment.findByIdAndUpdate(appointment._id, {
               lastReminderAttempt: new Date(),
-              reminderError: 'Invalid phone number format'
+              reminderError: 'Formato numero di telefono non valido'
             });
             return false;
 
           case 21608:
-            console.error('Phone number not in allowed list (Trial account)');
+            console.error('Numero di telefono non nell\'elenco consentito (account di prova)');
             await Appointment.findByIdAndUpdate(appointment._id, {
               lastReminderAttempt: new Date(),
-              reminderError: 'Phone number not in allowed list'
+              reminderError: 'Numero di telefono non nell\'elenco consentito'
             });
             return false;
 
@@ -175,7 +258,7 @@ export const notificationService = {
             // Per altri errori, aspetta prima di riprovare usando exponential backoff
             if (attempt < retries) {
               const delay = delayBase * Math.pow(2, attempt - 1);
-              console.log(`Waiting ${delay}ms before next attempt...`);
+              console.log(`Attesa di ${delay}ms prima del prossimo tentativo...`);
               await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
@@ -183,79 +266,86 @@ export const notificationService = {
     }
 
     // Se arriviamo qui, tutti i tentativi sono falliti
-    console.error(`Failed to send SMS after ${retries} attempts`);
+    console.error(`Invio SMS fallito dopo ${retries} tentativi`);
 
     await Appointment.findByIdAndUpdate(appointment._id, {
       lastReminderAttempt: new Date(),
-      reminderError: lastError?.message || 'Max retries exceeded'
+      reminderError: lastError?.message || 'Tentativi massimi superati'
     });
 
     return false; // Fallimento dopo tutti i tentativi
-},
-
-  // Helper per formattare i numeri di telefono
-  formatPhoneNumber(phoneNumber) {
-    if (!phoneNumber) {
-      throw new Error('Phone number is required');
-    }
-
-    let cleaned = phoneNumber.replace(/\D/g, '');
-
-    // Gestione prefisso svizzero
-    if (cleaned.startsWith('0')) {
-      cleaned = '41' + cleaned.substring(1);
-    }
-    if (!cleaned.startsWith('+')) {
-      cleaned = '+' + cleaned;
-    }
-
-    // Validazione base del formato
-    if (cleaned.length < 11 || cleaned.length > 15) {
-      throw new Error('Invalid phone number length');
-    }
-
-    return cleaned;
   },
 
   async sendWhatsAppMessage(appointment, user) {
     if (!twilioClient || !process.env.TWILIO_WHATSAPP_NUMBER) {
-      console.log('Skipping WhatsApp reminder - Twilio not configured');
+      console.log('Promemoria WhatsApp saltato - Twilio non configurato');
+      return false;
+    }
+
+    if (!user || !user.phone) {
+      console.error('Telefono utente mancante per invio WhatsApp');
       return false;
     }
 
     try {
       const formattedPhone = formatPhoneNumber(user.phone);
-      console.log('Attempting to send WhatsApp reminder to:', formattedPhone);
+      console.log('Tentativo di invio promemoria WhatsApp a:', formattedPhone);
 
-      console.log('WhatsApp Configuration:', {
-        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-        to: `whatsapp:${formattedPhone}`,
-        isTrial: true
-      });
+      // Costruisci un messaggio più dettagliato
+      const date = format(new Date(appointment.date), 'd MMMM yyyy', { locale: it });
+      const messageBody = `Your Style Barber: Promemoria appuntamento per ${date} alle ${appointment.time} ` +
+                         `con ${appointment.barber?.firstName} per ${appointment.service}. ` +
+                         `Ti aspettiamo in Via Example 123, Lugano.`;
 
-      const message = await twilioClient.messages.create({
-        body: `Your Style Barber: Promemoria appuntamento domani alle ${appointment.time} con ${appointment.barber?.firstName} per ${appointment.service}. Ti aspettiamo in Via Example 123, Lugano.`,
+      console.log('Contenuto messaggio WhatsApp:', messageBody);
+      console.log('Configurazione WhatsApp:', {
         from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
         to: `whatsapp:${formattedPhone}`
       });
 
-      console.log('WhatsApp message sent successfully:', {
+      const message = await twilioClient.messages.create({
+        body: messageBody,
+        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+        to: `whatsapp:${formattedPhone}`
+      });
+
+      console.log('Messaggio WhatsApp inviato con successo:', {
         messageId: message.sid,
         status: message.status
+      });
+
+      // Aggiorna l'appuntamento con l'ID del messaggio
+      await Appointment.findByIdAndUpdate(appointment._id, {
+        $push: {
+          whatsappNotifications: {
+            messageSid: message.sid,
+            status: message.status,
+            timestamp: new Date()
+          }
+        }
       });
 
       return true;  // Successo
 
     } catch (error) {
-      console.error('Error sending WhatsApp message:', error);
+      console.error('Errore invio messaggio WhatsApp:', error);
+
+      // Dettagli specifici sull'errore
+      if (error.code) {
+        console.error('Codice errore Twilio:', error.code);
+        console.error('Dettagli errore Twilio:', error.moreInfo);
+      }
+
       await Appointment.findByIdAndUpdate(appointment._id, {
         lastReminderAttempt: new Date(),
-        reminderError: error.message
+        reminderError: `Errore WhatsApp: ${error.message}`
       });
+
       return false;  // Fallimento
     }
-},
+  },
 
+  // Metodi aggiuntivi non modificati...
   async sendAppointmentUpdateEmail(appointment, user) {
     try {
       const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -282,16 +372,96 @@ export const notificationService = {
       };
 
       const info = await transporter.sendMail(emailContent);
-      console.log('Update confirmation email sent successfully:', info.messageId);
+      console.log('Email di conferma modifica inviata con successo:', info.messageId);
       return info;
     } catch (error) {
-      console.error('Error sending update confirmation email:', error);
+      console.error('Errore invio email di conferma modifica:', error);
+      return false;
     }
   },
+
+  // Per test e debug
+  async testNotificationSystem(phone) {
+    const testResults = {
+      sms: null,
+      whatsapp: null,
+      email: null
+    };
+
+    console.log('Test sistema di notifica con numero:', phone);
+
+    try {
+      // Test SMS
+      if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
+        const formattedPhone = formatPhoneNumber(phone);
+        console.log('Test SMS al numero formattato:', formattedPhone);
+
+        const smsMessage = await twilioClient.messages.create({
+          body: 'Questo è un SMS di test dal sistema Your Style Barber',
+          to: formattedPhone,
+          from: process.env.TWILIO_PHONE_NUMBER
+        });
+
+        testResults.sms = {
+          success: true,
+          messageId: smsMessage.sid,
+          status: smsMessage.status
+        };
+        console.log('SMS di test inviato con successo');
+      } else {
+        testResults.sms = {
+          success: false,
+          error: 'Twilio non configurato'
+        };
+      }
+
+      // Test WhatsApp
+      if (twilioClient && process.env.TWILIO_WHATSAPP_NUMBER) {
+        const formattedPhone = formatPhoneNumber(phone);
+        console.log('Test WhatsApp al numero formattato:', `whatsapp:${formattedPhone}`);
+
+        const whatsappMessage = await twilioClient.messages.create({
+          body: 'Questo è un messaggio WhatsApp di test dal sistema Your Style Barber',
+          from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+          to: `whatsapp:${formattedPhone}`
+        });
+
+        testResults.whatsapp = {
+          success: true,
+          messageId: whatsappMessage.sid,
+          status: whatsappMessage.status
+        };
+        console.log('WhatsApp di test inviato con successo');
+      } else {
+        testResults.whatsapp = {
+          success: false,
+          error: 'Twilio WhatsApp non configurato'
+        };
+      }
+    } catch (error) {
+      console.error('Errore nel test del sistema di notifica:', error);
+      return {
+        success: false,
+        error: error.message,
+        details: {
+          code: error.code,
+          moreInfo: error.moreInfo
+        }
+      };
+    }
+
+    return {
+      success: true,
+      results: testResults
+    };
+  },
+
+  formatPhoneNumber,
+
   async sendPasswordResetNotification(user, newPassword, admin) {
     // Controlla se l'utente ha un'email
     if (!user.email) {
-      throw new Error('User email is required for password reset notification');
+      throw new Error('Email utente richiesta per la notifica di reset password');
     }
 
     const emailSubject = 'La tua password è stata ripristinata';
@@ -332,10 +502,10 @@ export const notificationService = {
       };
 
       const info = await transporter.sendMail(mailOptions);
-      console.log(`Password reset email sent to ${user.email}: ${info.messageId}`);
+      console.log(`Email di reset password inviata a ${user.email}: ${info.messageId}`);
       return true;
     } catch (error) {
-      console.error(`Error sending password reset email to ${user.email}:`, error);
+      console.error(`Errore invio email di reset password a ${user.email}:`, error);
       throw error;
     }
   }

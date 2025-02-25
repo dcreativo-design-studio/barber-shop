@@ -77,6 +77,31 @@ const appointmentSchema = new mongoose.Schema({
     errorCode: String,
     errorMessage: String
   }],
+
+  // Aggiungi un array simile per le notifiche WhatsApp
+  whatsappNotifications: [{
+    messageSid: String,
+    status: String,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    errorCode: String,
+    errorMessage: String
+  }],
+
+  // Aggiungi un array per le notifiche email
+  emailNotifications: [{
+    messageId: String,
+    status: String,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    error: String
+  }],
+
+  // Campi per la gestione dei promemoria
   reminderRetries: {
     type: Number,
     default: 0
@@ -86,9 +111,24 @@ const appointmentSchema = new mongoose.Schema({
   },
   reminderError: {
     type: String
-  }
-}, {
-  timestamps: true
+  },
+
+  // Storia completa delle notifiche
+  notificationResults: [{
+    type: {
+      type: String,
+      enum: ['email', 'sms', 'whatsapp'],
+      required: true
+    },
+    success: Boolean,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    messageId: String,
+    error: String,
+    details: mongoose.Schema.Types.Mixed
+  }]
 });
 
 // Indici per ottimizzare le query
