@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@shadcn/ui": "^0.0.4"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^1.2.0"
   }
 }
