@@ -484,82 +484,38 @@ router.post('/force-reminder/:id', requireAdmin, async (req, res) => {
 });
 
 // Endpoint per eseguire manualmente lo scheduler dei promemoria
-router.post('/run-reminder-scheduler', requireAdmin, async (req, res) => {
+// Endpoint per eseguire manualmente lo scheduler dei promemoria
+router.post('/run-reminder-scheduler', async (req, res) => {
   try {
-    // Esegui manualmente lo scheduler dei promemoria
-    console.log('Esecuzione manuale dello scheduler dei promemoria...');
+    console.log('Esecuzione scheduler dei promemoria...');
 
-    const now = new Date();
-    const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+    // Verifica l'autenticazione
+    // Permetti l'accesso se la richiesta proviene da Vercel Cron
+    const isVercelCron = req.headers['x-vercel-cron'] === 'true';
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+    const validApiKey = process.env.REMINDER_API_KEY;
+    const isAdmin = req.user?.role === 'admin';
 
-    const appointments = await Appointment.find({
-      status: { $in: ['confirmed', 'pending'] },
-      reminderSent: false,
-      date: { $gte: now, $lte: in48Hours }
-    })
-    .populate('client', 'firstName lastName email phone')
-    .populate('barber', 'firstName lastName')
-    .lean();
-
-    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
-
-    const results = [];
-    for (const appointment of appointments) {
-      try {
-        const appointmentDate = new Date(appointment.date);
-        const [hours, minutes] = appointment.time.split(':').map(Number);
-        appointmentDate.setHours(hours, minutes, 0, 0);
-        const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
-
-        console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursDifference.toFixed(2)}`);
-
-        // Includi appuntamenti che sono nel range di 26-23 ore
-        const shouldSendReminder = hoursDifference <= 26 && hoursDifference > 23;
-
-        results.push({
-          id: appointment._id,
-          client: `${appointment.client?.firstName || 'N/A'} ${appointment.client?.lastName || 'N/A'}`,
-          date: appointment.date,
-          time: appointment.time,
-          hoursRemaining: parseFloat(hoursDifference.toFixed(2)),
-          shouldSendReminder,
-          processed: false
-        });
-
-        if (shouldSendReminder) {
-          // Crea una nuova istanza dell'appuntamento per il documento Mongoose
-          const appointmentDoc = await Appointment.findById(appointment._id)
-            .populate('client', 'firstName lastName email phone')
-            .populate('barber', 'firstName lastName');
-
-          // Invia i promemoria
-          if (appointmentDoc) {
-            await notificationService.sendReminderEmail(appointmentDoc, appointmentDoc.client);
-            await notificationService.sendReminderSMS(appointmentDoc, appointmentDoc.client);
-            await notificationService.sendWhatsAppMessage(appointmentDoc, appointmentDoc.client);
-
-            // Aggiorna lo stato
-            appointmentDoc.reminderSent = true;
-            appointmentDoc.lastReminderAttempt = new Date();
-            await appointmentDoc.save();
-
-            // Aggiorna il risultato
-            const index = results.findIndex(r => r.id.toString() === appointment._id.toString());
-            if (index >= 0) {
-              results[index].processed = true;
-            }
-          }
-        }
-      } catch (error) {
-        console.error(`Errore nell'elaborazione dell'appuntamento ${appointment._id}:`, error);
-      }
+    if (!isVercelCron && !isAdmin && apiKey !== validApiKey) {
+      console.log('Tentativo di accesso non autorizzato al job dei promemoria');
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
     }
+
+    // Elabora i promemoria con la nuova funzione
+    const reminderResults = await processReminders();
+
+    // Elabora le conferme automatiche con la nuova funzione
+    const confirmationResults = await processConfirmations();
 
     res.json({
       success: true,
-      message: 'Scheduler dei promemoria eseguito manualmente',
-      processed: results.filter(r => r.processed).length,
-      appointments: results
+      timestamp: new Date().toISOString(),
+      source: isVercelCron ? 'vercel-cron' : (isAdmin ? 'manual-admin' : 'external-service'),
+      reminders: reminderResults,
+      confirmations: confirmationResults
     });
   } catch (error) {
     console.error('Errore nell\'esecuzione dello scheduler:', error);
@@ -572,7 +528,7 @@ router.post('/run-reminder-scheduler', requireAdmin, async (req, res) => {
 
 // Webhook Twilio (solo admin)
 router.post('/webhook/twilio-status',
-  twilio.webhook({ validate: false }), // In produzione, impostare validate: true
+  twilio.webhook({ validate: true }), // In produzione, impostare validate: true
   async (req, res) => {
     try {
       const {

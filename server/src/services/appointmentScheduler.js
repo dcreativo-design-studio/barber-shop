@@ -1,4 +1,3 @@
-import cron from 'node-cron';
 import Appointment from '../models/Appointment.js';
 import { notificationService } from './notificationService.js';
 
@@ -154,53 +153,101 @@ const sendReminders = async (appointment) => {
   }
 };
 
-export const initializeScheduler = () => {
-  // Promemoria appuntamenti (ogni 5 minuti)
-  cron.schedule('*/5 * * * *', async () => {
-    try {
-      console.log('Controllo promemoria appuntamenti...');
+// Nuove funzioni per l'elaborazione di promemoria e conferme
+export const processReminders = async () => {
+  try {
+    console.log('Elaborazione promemoria appuntamenti...');
 
-      // Trova gli appuntamenti non ancora notificati
-      const appointments = await Appointment.find({
-        status: { $in: ['confirmed', 'pending'] },
-        reminderSent: false,
-        date: { $gte: new Date() }
-      })
-      .populate('client', 'firstName lastName email phone')
-      .populate('barber', 'firstName lastName')
-      .lean();
+    // Trova gli appuntamenti non ancora notificati nelle prossime 48 ore
+    const now = new Date();
+    const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-      console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
+    const appointments = await Appointment.find({
+      status: { $in: ['confirmed', 'pending'] },
+      reminderSent: false,
+      date: { $gte: now, $lte: in48Hours }
+    })
+    .populate('client', 'firstName lastName email phone')
+    .populate('barber', 'firstName lastName')
+    .lean();
 
-      for (const appointment of appointments) {
+    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria nelle prossime 48 ore`);
+
+    let sentCount = 0;
+    const results = [];
+
+    for (const appointment of appointments) {
+      try {
         const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
 
         // Log dettagliato per ogni appuntamento
         console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursRemaining?.toFixed(2) || 'Errore'}`);
 
-        // Estendi la finestra di tempo per l'invio dei promemoria
-        // Invia promemoria se mancano tra 26 e 23 ore all'appuntamento
-        if (hoursRemaining !== null && hoursRemaining <= 26 && hoursRemaining > 23) {
+        // Dato che il cron job viene eseguito solo una volta al giorno,
+        // inviamo promemoria per tutti gli appuntamenti nelle prossime 26 ore
+        if (hoursRemaining !== null && hoursRemaining <= 26) {
           console.log(`Invio promemoria per appuntamento ${appointment._id}, ore rimanenti: ${hoursRemaining.toFixed(2)}`);
-          await sendReminders(appointment);
+
+          // Ottieni l'istanza completa dell'appuntamento
+          const appointmentDoc = await Appointment.findById(appointment._id)
+            .populate('client', 'firstName lastName email phone')
+            .populate('barber', 'firstName lastName');
+
+          // Verifica che l'appuntamento abbia tutti i dati necessari
+          if (appointmentDoc && appointmentDoc.client) {
+            await sendReminders(appointmentDoc);
+            sentCount++;
+            results.push({
+              id: appointment._id,
+              client: `${appointment.client?.firstName || 'N/A'} ${appointment.client?.lastName || 'N/A'}`,
+              date: appointment.date,
+              time: appointment.time,
+              hoursRemaining: parseFloat(hoursRemaining.toFixed(2)),
+              success: true
+            });
+          }
         }
+      } catch (error) {
+        console.error(`Errore nell'elaborazione dell'appuntamento ${appointment._id}:`, error);
+        results.push({
+          id: appointment._id,
+          error: error.message,
+          success: false
+        });
       }
-    } catch (error) {
-      console.error('Errore nello scheduler dei promemoria:', error);
     }
-  });
 
-  // Conferma automatica appuntamenti (ogni 30 minuti)
-  cron.schedule('*/30 * * * *', async () => {
-    try {
-      const pendingAppointments = await Appointment.find({
-        status: 'pending',
-        date: { $gte: new Date() }
-      }).lean();
+    console.log(`Promemoria inviati per ${sentCount} appuntamenti`);
+    return {
+      success: true,
+      total: appointments.length,
+      sent: sentCount,
+      results: results
+    };
+  } catch (error) {
+    console.error('Errore nell\'elaborazione dei promemoria:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
 
-      console.log(`Trovati ${pendingAppointments.length} appuntamenti in attesa da confermare automaticamente`);
+export const processConfirmations = async () => {
+  try {
+    const now = new Date();
+    const pendingAppointments = await Appointment.find({
+      status: 'pending',
+      date: { $gte: now }
+    }).lean();
 
-      for (const appointment of pendingAppointments) {
+    console.log(`Trovati ${pendingAppointments.length} appuntamenti in attesa da confermare automaticamente`);
+
+    let confirmedCount = 0;
+    const results = [];
+
+    for (const appointment of pendingAppointments) {
+      try {
         const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
 
         if (hoursRemaining !== null && hoursRemaining <= 24) {
@@ -209,13 +256,48 @@ export const initializeScheduler = () => {
             updatedAt: new Date()
           });
 
+          confirmedCount++;
           console.log(`Appuntamento ${appointment._id} confermato automaticamente`);
+          results.push({
+            id: appointment._id,
+            date: appointment.date,
+            time: appointment.time,
+            hoursRemaining: parseFloat(hoursRemaining.toFixed(2)),
+            success: true
+          });
         }
+      } catch (error) {
+        console.error(`Errore nella conferma dell'appuntamento ${appointment._id}:`, error);
+        results.push({
+          id: appointment._id,
+          error: error.message,
+          success: false
+        });
       }
-    } catch (error) {
-      console.error('Errore nello scheduler di conferma automatica:', error);
     }
-  });
 
-  console.log('Scheduler degli appuntamenti inizializzato');
+    console.log(`${confirmedCount} appuntamenti confermati automaticamente`);
+    return {
+      success: true,
+      total: pendingAppointments.length,
+      confirmed: confirmedCount,
+      results: results
+    };
+  } catch (error) {
+    console.error('Errore nella conferma automatica degli appuntamenti:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Mantieni la funzione initializeScheduler per retrocompatibilità,
+// ma aggiornala per usare le nuove funzioni
+export const initializeScheduler = () => {
+  console.log('Scheduler funziona solo tramite Vercel Cron in produzione');
+  return {
+    success: true,
+    message: "In ambiente Vercel, lo scheduler funziona tramite endpoints /api/appointments/run-reminder-scheduler"
+  };
 };

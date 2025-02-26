@@ -11,5 +11,14 @@
       "src": "/(.*)",
       "dest": "src/index.js"
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/appointments/run-reminder-scheduler",
+      "schedule": "0 7 * * *"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "https://api.barbershop.dcreativo.ch"
+  }
 }
