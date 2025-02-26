@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import BarberDashboard from './components/barber/BarberDashboard';
+import BarberDashboard from './components/barber/BarberDashboard'; // Nuovo import
 import BookingCalendar from './components/BookingCalendar';
 import GuestBooking from './components/GuestBooking';
 import Navbar from './components/Navbar';
@@ -130,8 +130,8 @@ function App() {
       <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] theme-transition">
         <Navbar onThemeToggle={toggleTheme} isDark={theme === 'dark'} />
         <main className="container mx-auto px-4 navbar-offset">
-          {renderRoutes()}
-        </main>
+  {renderRoutes()}
+</main>
       </div>
     </TimezoneProvider>
   );
