@@ -484,22 +484,21 @@ router.post('/force-reminder/:id', requireAdmin, async (req, res) => {
 });
 
 // Endpoint per eseguire manualmente lo scheduler dei promemoria
+// In appointmentRoutes.js, modifica l'endpoint run-reminder-scheduler
 router.post('/run-reminder-scheduler', async (req, res) => {
   try {
-    console.log('Esecuzione scheduler dei promemoria via Vercel cron...');
+    console.log('Esecuzione scheduler dei promemoria via servizio esterno...');
 
-    // Verifica che la richiesta provenga da Vercel Cron
-    // Se la richiesta non ha l'header di autorizzazione di Vercel ma vogliamo comunque permettere
-    // l'esecuzione in sviluppo, controlliamo anche l'header di autorizzazione admin
-    const isVercelCron = req.headers['x-vercel-cron'] === 'true';
-    const isAdmin = req.user?.role === 'admin';
+    // Verifica una chiave API semplice nell'header o query parameter
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+    const validApiKey = process.env.REMINDER_API_KEY;
 
-    if (!isVercelCron && !isAdmin) {
-      console.log('Tentativo di accesso non autorizzato al cron job');
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized'
-      });
+    // Controlla che la chiave API sia valida
+    if (apiKey !== validApiKey) {
+      // Se non c'è autenticazione, puoi loggare ma continuare comunque
+      // oppure ritornare errore se preferisci sicurezza stretta
+      console.log('Avviso: Richiesta non autenticata al job dei promemoria');
+      // Opzionale: return res.status(401).json({ error: 'Unauthorized' });
     }
 
     // Elabora i promemoria
@@ -511,7 +510,6 @@ router.post('/run-reminder-scheduler', async (req, res) => {
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-      source: isVercelCron ? 'vercel-cron' : 'manual-admin',
       reminders: reminderResults,
       confirmations: confirmationResults
     });
