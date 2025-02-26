@@ -1,11 +1,5 @@
-import cron from 'node-cron';
 import Appointment from '../models/Appointment.js';
 import { notificationService } from './notificationService.js';
-
-const timeToMinutes = (timeString) => {
-  const [hours, minutes] = timeString.split(':').map(Number);
-  return hours * 60 + minutes;
-};
 
 // Funzione migliorata per calcolare le ore rimanenti
 const getHoursRemaining = (appointmentDate, appointmentTime) => {
@@ -154,68 +148,99 @@ const sendReminders = async (appointment) => {
   }
 };
 
+// Funzione da chiamare direttamente dall'endpoint cron di Vercel
+export const processReminders = async () => {
+  try {
+    console.log('Controllo promemoria appuntamenti...');
+
+    // Trova gli appuntamenti non ancora notificati
+    const appointments = await Appointment.find({
+      status: { $in: ['confirmed', 'pending'] },
+      reminderSent: false,
+      date: { $gte: new Date() }
+    })
+    .populate('client', 'firstName lastName email phone')
+    .populate('barber', 'firstName lastName')
+    .lean();
+
+    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
+
+    let processedCount = 0;
+    for (const appointment of appointments) {
+      const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
+
+      // Log dettagliato per ogni appuntamento
+      console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursRemaining?.toFixed(2) || 'Errore'}`);
+
+      // Estendi la finestra di tempo per l'invio dei promemoria
+      // Invia promemoria se mancano tra 26 e 23 ore all'appuntamento
+      if (hoursRemaining !== null && hoursRemaining <= 26 && hoursRemaining > 23) {
+        console.log(`Invio promemoria per appuntamento ${appointment._id}, ore rimanenti: ${hoursRemaining.toFixed(2)}`);
+        await sendReminders(appointment);
+        processedCount++;
+      }
+    }
+
+    console.log(`Elaborazione completata. ${processedCount} promemoria inviati.`);
+    return {
+      success: true,
+      processed: processedCount,
+      scanned: appointments.length
+    };
+  } catch (error) {
+    console.error('Errore nell\'elaborazione dei promemoria:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Conferma automatica appuntamenti
+export const processConfirmations = async () => {
+  try {
+    const pendingAppointments = await Appointment.find({
+      status: 'pending',
+      date: { $gte: new Date() }
+    }).lean();
+
+    console.log(`Trovati ${pendingAppointments.length} appuntamenti in attesa da confermare automaticamente`);
+
+    let confirmedCount = 0;
+    for (const appointment of pendingAppointments) {
+      const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
+
+      if (hoursRemaining !== null && hoursRemaining <= 24) {
+        await Appointment.findByIdAndUpdate(appointment._id, {
+          status: 'confirmed',
+          updatedAt: new Date()
+        });
+
+        confirmedCount++;
+        console.log(`Appuntamento ${appointment._id} confermato automaticamente`);
+      }
+    }
+
+    console.log(`Elaborazione completata. ${confirmedCount} appuntamenti confermati automaticamente.`);
+    return {
+      success: true,
+      confirmed: confirmedCount,
+      scanned: pendingAppointments.length
+    };
+  } catch (error) {
+    console.error('Errore nella conferma automatica:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Supporto per retrocompatibilità, ma non fa niente in ambiente Vercel
 export const initializeScheduler = () => {
-  // Promemoria appuntamenti (ogni 5 minuti)
-  cron.schedule('*/5 * * * *', async () => {
-    try {
-      console.log('Controllo promemoria appuntamenti...');
-
-      // Trova gli appuntamenti non ancora notificati
-      const appointments = await Appointment.find({
-        status: { $in: ['confirmed', 'pending'] },
-        reminderSent: false,
-        date: { $gte: new Date() }
-      })
-      .populate('client', 'firstName lastName email phone')
-      .populate('barber', 'firstName lastName')
-      .lean();
-
-      console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
-
-      for (const appointment of appointments) {
-        const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
-
-        // Log dettagliato per ogni appuntamento
-        console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursRemaining?.toFixed(2) || 'Errore'}`);
-
-        // Estendi la finestra di tempo per l'invio dei promemoria
-        // Invia promemoria se mancano tra 26 e 23 ore all'appuntamento
-        if (hoursRemaining !== null && hoursRemaining <= 26 && hoursRemaining > 23) {
-          console.log(`Invio promemoria per appuntamento ${appointment._id}, ore rimanenti: ${hoursRemaining.toFixed(2)}`);
-          await sendReminders(appointment);
-        }
-      }
-    } catch (error) {
-      console.error('Errore nello scheduler dei promemoria:', error);
-    }
-  });
-
-  // Conferma automatica appuntamenti (ogni 30 minuti)
-  cron.schedule('*/30 * * * *', async () => {
-    try {
-      const pendingAppointments = await Appointment.find({
-        status: 'pending',
-        date: { $gte: new Date() }
-      }).lean();
-
-      console.log(`Trovati ${pendingAppointments.length} appuntamenti in attesa da confermare automaticamente`);
-
-      for (const appointment of pendingAppointments) {
-        const hoursRemaining = getHoursRemaining(appointment.date, appointment.time);
-
-        if (hoursRemaining !== null && hoursRemaining <= 24) {
-          await Appointment.findByIdAndUpdate(appointment._id, {
-            status: 'confirmed',
-            updatedAt: new Date()
-          });
-
-          console.log(`Appuntamento ${appointment._id} confermato automaticamente`);
-        }
-      }
-    } catch (error) {
-      console.error('Errore nello scheduler di conferma automatica:', error);
-    }
-  });
-
-  console.log('Scheduler degli appuntamenti inizializzato');
+  console.log('Scheduler funziona solo tramite Vercel Cron in produzione');
+  return {
+    success: true,
+    message: "In ambiente Vercel, lo scheduler funziona tramite endpoints /api/appointments/run-reminder-scheduler"
+  };
 };
