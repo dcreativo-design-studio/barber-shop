@@ -10,32 +10,27 @@ const timeToMinutes = (timeString) => {
 // Funzione migliorata per calcolare le ore rimanenti
 const getHoursRemaining = (appointmentDate, appointmentTime) => {
   try {
-    // Ensure appointmentDate is a Date object
+    // Assicuriamo che appointmentDate sia un oggetto Date
     const appointmentDateTime = new Date(appointmentDate);
     if (isNaN(appointmentDateTime.getTime())) {
       console.error('Data non valida:', appointmentDate);
       return null;
     }
 
-    // Extract hours and minutes from the appointment time
+    // Estrai le ore e i minuti dall'orario dell'appuntamento
     const [hours, minutes] = appointmentTime.split(':').map(Number);
 
-    // Create a new date object to avoid timezone issues
-    const year = appointmentDateTime.getFullYear();
-    const month = appointmentDateTime.getMonth();
-    const day = appointmentDateTime.getDate();
+    // Imposta le ore e i minuti nell'oggetto date
+    appointmentDateTime.setHours(hours, minutes, 0, 0);
 
-    // Create a new date with these components to ensure correct timezone
-    const fullDateTime = new Date(year, month, day, hours, minutes, 0, 0);
-
-    // Get current timestamp
+    // Ottieni il timestamp corrente
     const now = new Date();
 
-    // Calculate the difference in hours
-    const hoursDiff = (fullDateTime - now) / (1000 * 60 * 60);
+    // Calcola la differenza in ore
+    const hoursDiff = (appointmentDateTime - now) / (1000 * 60 * 60);
 
-    // Detailed log for debugging
-    console.log(`Appuntamento: ${fullDateTime.toISOString()}, Ora attuale: ${now.toISOString()}, Differenza: ${hoursDiff.toFixed(2)} ore`);
+    // Log dettagliato per debugging
+    console.log(`Appuntamento: ${appointmentDateTime.toISOString()}, Ora attuale: ${now.toISOString()}, Differenza: ${hoursDiff.toFixed(2)} ore`);
 
     return hoursDiff;
   } catch (error) {
@@ -149,23 +144,11 @@ const sendReminders = async (appointment) => {
   } catch (error) {
     console.error(`Errore nell'invio dei promemoria per l'appuntamento ${appointment._id}:`, error);
 
-    // Add more specific error details for easier debugging
-    const errorDetails = {
-      message: error.message,
-      stack: error.stack,
-      appointment: appointment._id,
-      date: new Date(),
-      code: error.code || 'UNKNOWN'
-    };
-
-    console.error('Error details:', JSON.stringify(errorDetails));
-
     // Ripristina lo stato in caso di errore
     await Appointment.findByIdAndUpdate(appointment._id, {
       reminderSent: false,
       lastReminderAttempt: new Date(),
       reminderError: error.message,
-      errorDetails: JSON.stringify(errorDetails).substring(0, 500), // Limit string length
       $inc: { reminderRetries: 1 }
     });
   }
