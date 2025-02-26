@@ -300,7 +300,7 @@ router.put('/:id/notes', requireAdmin, appointmentController.updateNotes);
 router.get('/stats', requireAdmin, appointmentController.getStats);
 
 // Endpoint Scheduler
-// Add this endpoint to appointmentRoutes.js
+// Endpoint per eseguire lo scheduler manualmente
 router.post('/run-scheduler', requireAdmin, async (req, res) => {
   try {
     console.log('Manual scheduler trigger via API endpoint');
@@ -356,55 +356,49 @@ router.post('/run-scheduler', requireAdmin, async (req, res) => {
   }
 });
 
-// Endpoint per eseguire lo scheduler manualmente
-router.post('/run-scheduler', requireAdmin, async (req, res) => {
+// Endpoint di monitoraggio diagnostico
+router.get('/scheduler-status', requireAdmin, async (req, res) => {
   try {
-    console.log('Manual scheduler trigger via API endpoint');
-
+    // Find upcoming appointments
     const now = new Date();
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     const appointments = await Appointment.find({
       status: { $in: ['confirmed', 'pending'] },
-      reminderSent: false,
       date: { $gte: now, $lte: in48Hours }
     })
     .populate('client', 'firstName lastName email phone')
     .populate('barber', 'firstName lastName')
     .lean();
 
-    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
+    // Calculate hours remaining and check for upcoming reminders
+    const upcomingReminders = appointments.map(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      const [hours, minutes] = appointment.time.split(':').map(Number);
+      appointmentDate.setHours(hours, minutes, 0, 0);
 
-    const results = [];
-    for (const appointment of appointments) {
-      const hoursDifference = getHoursRemaining(appointment.date, appointment.time);
+      const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
 
-      // Log per ogni appuntamento
-      console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursDifference?.toFixed(2) || 'Errore'}`);
-
-      results.push({
+      return {
         id: appointment._id,
         client: `${appointment.client?.firstName || 'N/A'} ${appointment.client?.lastName || 'N/A'}`,
         date: appointment.date,
         time: appointment.time,
-        hoursRemaining: hoursDifference,
-        shouldSendReminder: hoursDifference !== null && hoursDifference <= 26 && hoursDifference > 23
-      });
-
-      // Invia promemoria se necessario
-      if (hoursDifference !== null && hoursDifference <= 26 && hoursDifference > 23) {
-        console.log(`Invio promemoria per appuntamento ${appointment._id}, ore rimanenti: ${hoursDifference.toFixed(2)}`);
-        await sendReminders(appointment);
-      }
-    }
+        hoursRemaining: parseFloat(hoursDifference.toFixed(2)),
+        reminderStatus: appointment.reminderSent ? 'Inviato' : 'Non inviato',
+        shouldSendReminder: hoursDifference <= 26 && hoursDifference > 23,
+        timeUntilReminder: hoursDifference > 26 ? `${(hoursDifference - 26).toFixed(2)} ore` : 'Pronto per l\'invio'
+      };
+    });
 
     res.json({
       success: true,
-      checked: appointments.length,
-      results
+      currentServerTime: now,
+      totalAppointments: appointments.length,
+      upcomingReminders: upcomingReminders.sort((a, b) => a.hoursRemaining - b.hoursRemaining)
     });
   } catch (error) {
-    console.error('Errore nell\'esecuzione dello scheduler:', error);
+    console.error('Errore nel controllo dello stato dello scheduler:', error);
     res.status(500).json({
       success: false,
       error: error.message
