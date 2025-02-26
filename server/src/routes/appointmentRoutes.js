@@ -484,131 +484,88 @@ router.post('/force-reminder/:id', requireAdmin, async (req, res) => {
 });
 
 // Endpoint per eseguire manualmente lo scheduler dei promemoria
-// In appointmentRoutes.js, modifica l'endpoint run-reminder-scheduler
-router.post('/run-reminder-scheduler', async (req, res) => {
+router.post('/run-reminder-scheduler', requireAdmin, async (req, res) => {
   try {
-    console.log('Esecuzione scheduler dei promemoria via servizio esterno...');
+    // Esegui manualmente lo scheduler dei promemoria
+    console.log('Esecuzione manuale dello scheduler dei promemoria...');
 
-    // Verifica una chiave API semplice nell'header o query parameter
-    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
-    const validApiKey = process.env.REMINDER_API_KEY;
+    const now = new Date();
+    const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    // Controlla che la chiave API sia valida
-    if (apiKey !== validApiKey) {
-      // Se non c'è autenticazione, puoi loggare ma continuare comunque
-      // oppure ritornare errore se preferisci sicurezza stretta
-      console.log('Avviso: Richiesta non autenticata al job dei promemoria');
-      // Opzionale: return res.status(401).json({ error: 'Unauthorized' });
+    const appointments = await Appointment.find({
+      status: { $in: ['confirmed', 'pending'] },
+      reminderSent: false,
+      date: { $gte: now, $lte: in48Hours }
+    })
+    .populate('client', 'firstName lastName email phone')
+    .populate('barber', 'firstName lastName')
+    .lean();
+
+    console.log(`Trovati ${appointments.length} appuntamenti da controllare per promemoria`);
+
+    const results = [];
+    for (const appointment of appointments) {
+      try {
+        const appointmentDate = new Date(appointment.date);
+        const [hours, minutes] = appointment.time.split(':').map(Number);
+        appointmentDate.setHours(hours, minutes, 0, 0);
+        const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
+
+        console.log(`Appuntamento ${appointment._id}: ${appointment.date} ${appointment.time}, ore rimanenti: ${hoursDifference.toFixed(2)}`);
+
+        // Includi appuntamenti che sono nel range di 26-23 ore
+        const shouldSendReminder = hoursDifference <= 26 && hoursDifference > 23;
+
+        results.push({
+          id: appointment._id,
+          client: `${appointment.client?.firstName || 'N/A'} ${appointment.client?.lastName || 'N/A'}`,
+          date: appointment.date,
+          time: appointment.time,
+          hoursRemaining: parseFloat(hoursDifference.toFixed(2)),
+          shouldSendReminder,
+          processed: false
+        });
+
+        if (shouldSendReminder) {
+          // Crea una nuova istanza dell'appuntamento per il documento Mongoose
+          const appointmentDoc = await Appointment.findById(appointment._id)
+            .populate('client', 'firstName lastName email phone')
+            .populate('barber', 'firstName lastName');
+
+          // Invia i promemoria
+          if (appointmentDoc) {
+            await notificationService.sendReminderEmail(appointmentDoc, appointmentDoc.client);
+            await notificationService.sendReminderSMS(appointmentDoc, appointmentDoc.client);
+            await notificationService.sendWhatsAppMessage(appointmentDoc, appointmentDoc.client);
+
+            // Aggiorna lo stato
+            appointmentDoc.reminderSent = true;
+            appointmentDoc.lastReminderAttempt = new Date();
+            await appointmentDoc.save();
+
+            // Aggiorna il risultato
+            const index = results.findIndex(r => r.id.toString() === appointment._id.toString());
+            if (index >= 0) {
+              results[index].processed = true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Errore nell'elaborazione dell'appuntamento ${appointment._id}:`, error);
+      }
     }
-
-    // Elabora i promemoria
-    const reminderResults = await processReminders();
-
-    // Elabora le conferme automatiche
-    const confirmationResults = await processConfirmations();
 
     res.json({
       success: true,
-      timestamp: new Date().toISOString(),
-      reminders: reminderResults,
-      confirmations: confirmationResults
+      message: 'Scheduler dei promemoria eseguito manualmente',
+      processed: results.filter(r => r.processed).length,
+      appointments: results
     });
   } catch (error) {
     console.error('Errore nell\'esecuzione dello scheduler:', error);
     res.status(500).json({
       success: false,
       error: error.message
-    });
-  }
-});
-
-// Debug endpoint per testare il calcolo delle ore rimanenti
-router.get('/debug-time-calculation', async (req, res) => {
-  try {
-    const { date, time } = req.query;
-
-    if (!date || !time) {
-      return res.status(400).json({
-        success: false,
-        message: 'Parametri richiesti: date (YYYY-MM-DD) e time (HH:MM)'
-      });
-    }
-
-    // Funzione di calcolo interna per il test
-    const calculateHours = (appointmentDate, appointmentTime) => {
-      try {
-        // Crea un oggetto Date per l'appuntamento
-        const appDate = new Date(appointmentDate);
-        if (isNaN(appDate.getTime())) {
-          throw new Error(`Data non valida: ${appointmentDate}`);
-        }
-
-        // Estrai ore e minuti
-        const [hours, minutes] = appointmentTime.split(':').map(Number);
-
-        // Imposta le ore e i minuti nella data dell'appuntamento
-        appDate.setHours(hours, minutes, 0, 0);
-
-        // Data e ora corrente
-        const now = new Date();
-
-        // Calcola la differenza in ore
-        const hoursDiff = (appDate - now) / (1000 * 60 * 60);
-
-        return {
-          inputDate: appointmentDate,
-          inputTime: appointmentTime,
-          parsedDate: appDate.toISOString(),
-          currentTime: now.toISOString(),
-          hoursRemaining: hoursDiff,
-          wouldSendReminder: hoursDiff <= 26 && hoursDiff > 23,
-          timeZoneOffset: appDate.getTimezoneOffset() / 60,
-          serverTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        };
-      } catch (error) {
-        return {
-          error: error.message,
-          stack: error.stack
-        };
-      }
-    };
-
-    // Trova appuntamenti in arrivo per testare il calcolo con dati reali
-    const appointments = await Appointment.find({
-      status: { $in: ['confirmed', 'pending'] },
-      reminderSent: false,
-      date: { $gte: new Date() }
-    })
-    .sort({ date: 1 })
-    .limit(5)
-    .lean();
-
-    // Calcola le ore per i parametri forniti
-    const manualCalculation = calculateHours(date, time);
-
-    // Calcola le ore per appuntamenti reali
-    const realAppointments = appointments.map(app => ({
-      id: app._id,
-      date: app.date,
-      time: app.time,
-      calculation: calculateHours(app.date, app.time)
-    }));
-
-    res.json({
-      success: true,
-      manualCalculation,
-      realAppointments,
-      serverTime: new Date().toISOString(),
-      serverTimeUnix: Math.floor(Date.now() / 1000),
-      environment: process.env.NODE_ENV,
-      isVercel: !!process.env.VERCEL
-    });
-  } catch (error) {
-    console.error('Errore nel debug del calcolo tempo:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      stack: error.stack
     });
   }
 });
