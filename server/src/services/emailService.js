@@ -219,7 +219,24 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
   }
 };
 
+// Funzione di test per verificare la configurazione email
+export const testEmailConfiguration = async () => {
+  try {
+    const testMailOptions = {
+      from: process.env.SMTP_USER,
+      to: process.env.SMTP_USER,
+      subject: 'Test Configurazione Email',
+      text: 'Se ricevi questa email, la configurazione SMTP funziona correttamente.'
+    };
 
+    await transporter.sendMail(testMailOptions);
+    console.log('Email di test inviata con successo');
+    return true;
+  } catch (error) {
+    console.error('Errore invio email di test:', error);
+    throw error;
+  }
+};
 
 export const sendCancellationNotification = async ({ appointment, user }) => {
  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
