@@ -1,6 +1,4 @@
 import { processConfirmations, processReminders } from '../services/appointmentScheduler.js';
-// oppure
-// import { processReminders, processConfirmations } from '../src/services/appointmentScheduler.js';
 
 export default async function handler(req, res) {
   try {
