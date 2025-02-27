@@ -48,6 +48,48 @@ router.get('/public/barbers/:barberId', async (req, res) => {                  /
 // Prenotazioni guest
 router.post('/public/appointments/guest', appointmentController.createGuestAppointment);
 
+// Endpoint per il cron job esterno
+router.all('/public/cron-reminder', async (req, res) => {
+  try {
+    // Verifica l'API key
+    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+    const validApiKey = process.env.REMINDER_API_KEY;
+
+    if (apiKey !== validApiKey) {
+      console.log('Tentativo di accesso non autorizzato al job dei promemoria');
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    console.log('Esecuzione scheduler dei promemoria via servizio esterno...');
+
+    // Importa le funzioni dal servizio
+    const { processReminders, processConfirmations } = await import('../services/appointmentScheduler.js');
+
+    // Elabora i promemoria
+    const reminderResults = await processReminders();
+
+    // Elabora le conferme automatiche
+    const confirmationResults = await processConfirmations();
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      source: 'external-cron',
+      reminders: reminderResults,
+      confirmations: confirmationResults
+    });
+  } catch (error) {
+    console.error('Errore nell\'esecuzione dello scheduler:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Webhook Twilio
 router.post('/webhook/twilio-status', (req, res) => {
   console.log('Webhook endpoint hit!');
