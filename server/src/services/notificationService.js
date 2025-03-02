@@ -2,7 +2,12 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import twilio from 'twilio';
 import Appointment from '../models/Appointment.js';
-import { sendCancellationEmailToAdmin, sendCancellationEmailToClient, transporter } from './emailService.js';
+import {
+  sendBarberCancellationNotification,
+  sendCancellationEmailToAdmin,
+  sendCancellationEmailToClient,
+  transporter
+} from './emailService.js';
 
 // Debug delle variabili d'ambiente Twilio con maggiori dettagli
 console.log('Twilio environment variables check:', {
@@ -92,13 +97,20 @@ try {
 }
 
 export const notificationService = {
-  // Funzioni email esistenti...
+  // Funzione per gestire cancellazione appuntamenti
   async sendCancellationEmail(appointment, user) {
     try {
+      // Invia email al cliente
       await sendCancellationEmailToClient(appointment, user);
+
+      // Invia email al barbiere (se esiste)
+      if (appointment.barber && appointment.barber.email) {
+        await sendBarberCancellationNotification(appointment, user);
+      }
+
       return true;
     } catch (error) {
-      console.error('Errore invio email di cancellazione al cliente:', error);
+      console.error('Errore invio email di cancellazione:', error);
       return false;
     }
   },
@@ -125,22 +137,38 @@ export const notificationService = {
       const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
+      // Contenuto HTML migliorato
+      const htmlContent = `
+        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <div style="background-color: #1a1a1a; color: #fff; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+            <h2 style="margin: 0; font-size: 24px;">Promemoria Appuntamento</h2>
+          </div>
+          <div style="padding: 20px;">
+            <p>Gentile ${user.firstName},</p>
+            <p>Ti ricordiamo che hai un appuntamento domani:</p>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+              <p><strong>Servizio:</strong> ${appointment.service}</p>
+              <p><strong>Data:</strong> ${formattedDate}</p>
+              <p><strong>Ora:</strong> ${appointment.time}</p>
+              <p><strong>Barbiere:</strong> ${appointment.barber?.firstName || ''} ${appointment.barber?.lastName || ''}</p>
+            </div>
+            <p style="font-style: italic;">Indirizzo: Via Example 123, Lugano</p>
+            <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
+            <p>Ti aspettiamo!</p>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+            <p>Your Style Barber Studio</p>
+            <p>Via Example 123, Lugano</p>
+            <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+          </div>
+        </div>
+      `;
+
       const mailOptions = {
         from: process.env.SMTP_USER,
         to: user.email,
         subject: 'Promemoria Appuntamento - Your Style Barber',
-        html: `
-          <h2>Promemoria Appuntamento</h2>
-          <p>Gentile ${user.firstName},</p>
-          <p>Ti ricordiamo che hai un appuntamento domani:</p>
-          <ul>
-            <li><strong>Servizio:</strong> ${appointment.service}</li>
-            <li><strong>Data:</strong> ${formattedDate}</li>
-            <li><strong>Ora:</strong> ${appointment.time}</li>
-            <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
-          </ul>
-          <p>Indirizzo: Via Example 123, Lugano</p>
-        `
+        html: htmlContent
       };
 
       const info = await transporter.sendMail(mailOptions);
@@ -168,8 +196,10 @@ export const notificationService = {
 
     const formatAppointmentMessage = (appointment) => {
       const date = format(new Date(appointment.date), 'd MMMM yyyy', { locale: it });
+      const barberInfo = appointment.barber ? `con ${appointment.barber.firstName} ${appointment.barber.lastName}` : '';
+
       return `Your Style Barber: Promemoria appuntamento per ${date} alle ${appointment.time} ` +
-             `con ${appointment.barber?.firstName} per ${appointment.service}. ` +
+             `${barberInfo} per ${appointment.service}. ` +
              `Indirizzo: Via Example 123, Lugano.`;
     };
 
@@ -293,8 +323,11 @@ export const notificationService = {
 
       // Costruisci un messaggio più dettagliato
       const date = format(new Date(appointment.date), 'd MMMM yyyy', { locale: it });
+      // Aggiungi informazioni sul barbiere se disponibili
+      const barberInfo = appointment.barber ? `con ${appointment.barber.firstName} ${appointment.barber.lastName}` : '';
+
       const messageBody = `Your Style Barber: Promemoria appuntamento per ${date} alle ${appointment.time} ` +
-                         `con ${appointment.barber?.firstName} per ${appointment.service}. ` +
+                         `${barberInfo} per ${appointment.service}. ` +
                          `Ti aspettiamo in Via Example 123, Lugano.`;
 
       console.log('Contenuto messaggio WhatsApp:', messageBody);
@@ -345,34 +378,86 @@ export const notificationService = {
     }
   },
 
-  // Metodi aggiuntivi non modificati...
   async sendAppointmentUpdateEmail(appointment, user) {
     try {
       const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
+      // Contenuto HTML migliorato
+      const htmlContent = `
+        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <div style="background-color: #1a1a1a; color: #fff; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+            <h2 style="margin: 0; font-size: 24px;">Conferma Modifica Appuntamento</h2>
+          </div>
+          <div style="padding: 20px;">
+            <p>Gentile ${user.firstName},</p>
+            <p>Il tuo appuntamento è stato modificato. Ecco i nuovi dettagli:</p>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+              <p><strong>Servizio:</strong> ${appointment.service}</p>
+              <p><strong>Data:</strong> ${formattedDate}</p>
+              <p><strong>Ora:</strong> ${appointment.time}</p>
+              <p><strong>Barbiere:</strong> ${appointment.barber?.firstName || ''} ${appointment.barber?.lastName || ''}</p>
+              <p><strong>Prezzo:</strong> CHF${appointment.price}</p>
+            </div>
+            <p style="font-style: italic;">Indirizzo: Via Example 123, Lugano</p>
+            <p>Ricorda che puoi modificare o cancellare l'appuntamento fino a 24 ore prima.</p>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+            <p>Your Style Barber Studio</p>
+            <p>Via Example 123, Lugano</p>
+            <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+          </div>
+        </div>
+      `;
+
       const emailContent = {
         from: process.env.SMTP_USER,
         to: user.email,
         subject: 'Appuntamento Modificato - Your Style Barber',
-        html: `
-          <h2>Conferma Modifica Appuntamento</h2>
-          <p>Gentile ${user.firstName},</p>
-          <p>Il tuo appuntamento è stato modificato. Ecco i nuovi dettagli:</p>
-          <ul>
-            <li><strong>Servizio:</strong> ${appointment.service}</li>
-            <li><strong>Data:</strong> ${formattedDate}</li>
-            <li><strong>Ora:</strong> ${appointment.time}</li>
-            <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
-            <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
-          </ul>
-          <p>Indirizzo: Via Example 123, Lugano</p>
-          <p>Ricorda che puoi modificare o cancellare l'appuntamento fino a 24 ore prima.</p>
-        `
+        html: htmlContent
       };
 
       const info = await transporter.sendMail(emailContent);
       console.log('Email di conferma modifica inviata con successo:', info.messageId);
+
+      // Se c'è un barbiere associato all'appuntamento, inviamo anche a lui una notifica
+      if (appointment.barber && appointment.barber.email) {
+        // Contenuto HTML per il barbiere
+        const barberHtmlContent = `
+          <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <div style="background-color: #1a1a1a; color: #fff; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+              <h2 style="margin: 0; font-size: 24px;">Modifica Appuntamento</h2>
+            </div>
+            <div style="padding: 20px;">
+              <p>Ciao ${appointment.barber.firstName},</p>
+              <p>Un appuntamento è stato modificato. Ecco i nuovi dettagli:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</p>
+                <p><strong>Servizio:</strong> ${appointment.service}</p>
+                <p><strong>Data:</strong> ${formattedDate}</p>
+                <p><strong>Ora:</strong> ${appointment.time}</p>
+                <p><strong>Prezzo:</strong> CHF${appointment.price}</p>
+              </div>
+            </div>
+            <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+              <p>Your Style Barber Studio</p>
+              <p>Via Example 123, Lugano</p>
+              <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+            </div>
+          </div>
+        `;
+
+        const barberEmailContent = {
+          from: process.env.SMTP_USER,
+          to: appointment.barber.email,
+          subject: 'Modifica Appuntamento - Your Style Barber',
+          html: barberHtmlContent
+        };
+
+        await transporter.sendMail(barberEmailContent);
+        console.log('Email di notifica modifica inviata al barbiere con successo');
+      }
+
       return info;
     } catch (error) {
       console.error('Errore invio email di conferma modifica:', error);
@@ -474,21 +559,28 @@ export const notificationService = {
       greeting = 'Gentile Amministratore';
     }
 
-    const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
-        <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">${emailSubject}</h2>
-        <p>${greeting} ${user.firstName} ${user.lastName},</p>
-        <p>Ti informiamo che la tua password è stata ripristinata da un amministratore del sistema.</p>
-        <p>Le tue nuove credenziali di accesso sono:</p>
-        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
-          <p><strong>Email:</strong> ${user.email}</p>
-          <p><strong>Password:</strong> ${newPassword}</p>
+    const htmlContent = `
+      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+        <div style="background-color: #1a1a1a; color: #fff; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+          <h2 style="margin: 0; font-size: 24px;">${emailSubject}</h2>
         </div>
-        <p>Ti consigliamo di modificare la password al primo accesso per mantenere sicuro il tuo account.</p>
-        <p>Se non hai richiesto questo ripristino o hai domande, ti preghiamo di contattarci immediatamente.</p>
-        <p style="margin-top: 30px; color: #777; font-size: 12px;">
-          Questo è un messaggio automatico, si prega di non rispondere a questa email.
-        </p>
+        <div style="padding: 20px;">
+          <p>${greeting} ${user.firstName} ${user.lastName},</p>
+          <p>Ti informiamo che la tua password è stata ripristinata da un amministratore del sistema.</p>
+          <p>Le tue nuove credenziali di accesso sono:</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Password:</strong> ${newPassword}</p>
+          </div>
+          <p>Ti consigliamo di modificare la password al primo accesso per mantenere sicuro il tuo account.</p>
+          <p>Se non hai richiesto questo ripristino o hai domande, ti preghiamo di contattarci immediatamente.</p>
+        </div>
+        <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+          <p>Your Style Barber Studio</p>
+          <p>Via Example 123, Lugano</p>
+          <p>Questo è un messaggio automatico, si prega di non rispondere a questa email.</p>
+          <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+        </div>
       </div>
     `;
 
@@ -498,7 +590,7 @@ export const notificationService = {
         from: process.env.SMTP_USER,
         to: user.email,
         subject: emailSubject,
-        html: emailContent
+        html: htmlContent
       };
 
       const info = await transporter.sendMail(mailOptions);

@@ -50,7 +50,140 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
+// Template HTML condiviso per tutte le email
+const createEmailTemplate = (content) => {
+  return `
+  <!DOCTYPE html>
+  <html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Style Barber Studio</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+      .header {
+        background-color: #1a1a1a;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .footer {
+        background-color: #f5f5f5;
+        padding: 15px;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        margin-top: 20px;
+      }
+      h1, h2 {
+        color: #1a1a1a;
+        margin-top: 0;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #fff;
+        text-decoration: none;
+      }
+      .content {
+        padding: 0 20px;
+      }
+      .details {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .details ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      .details li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .details li:last-child {
+        border-bottom: none;
+      }
+      .button {
+        display: inline-block;
+        background-color: #1a1a1a;
+        color: #fff;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 15px;
+      }
+      .address {
+        margin-top: 15px;
+        font-style: italic;
+      }
+      .social {
+        margin-top: 15px;
+      }
+      .social a {
+        margin: 0 10px;
+        color: #333;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">Your Style Barber Studio</div>
+      </div>
+      <div class="content">
+        ${content}
+      </div>
+      <div class="footer">
+        <p>Your Style Barber Studio</p>
+        <p class="address">Via Example 123, Lugano, Svizzera</p>
+        <p>Tel: +41 XX XXX XX XX</p>
+        <div class="social">
+          <a href="#">Instagram</a> | <a href="#">Facebook</a> | <a href="#">Website</a>
+        </div>
+        <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+};
+
 export const sendRegistrationEmail = async ({ to, user }) => {
+  const content = `
+    <h2>Registrazione completata con successo!</h2>
+    <p>Ciao ${user.firstName},</p>
+    <p>Grazie per esserti registrato. Ecco le tue credenziali di accesso:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Email:</strong> ${user.email}</li>
+        <li><strong>Password:</strong> ${user.password}</li>
+      </ul>
+    </div>
+    <p>Accedi per prenotare il tuo appuntamento.</p>
+    <a href="${process.env.FRONTEND_URL}/login" class="button">Accedi Ora</a>
+  `;
+
   const mailOptions = {
     from: {
       name: 'Your Style Barber Studio',
@@ -58,16 +191,7 @@ export const sendRegistrationEmail = async ({ to, user }) => {
     },
     to: to,
     subject: 'Benvenuto in Your Style Barber Studio',
-    html: `
-      <h2>Registrazione completata con successo!</h2>
-      <p>Ciao ${user.firstName},</p>
-      <p>Grazie per esserti registrato. Ecco le tue credenziali di accesso:</p>
-      <ul>
-        <li><strong>Email:</strong> ${user.email}</li>
-        <li><strong>Password:</strong> ${user.password}</li>
-      </ul>
-      <p>Accedi per prenotare il tuo appuntamento.</p>
-    `
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -89,57 +213,108 @@ export const sendRegistrationEmail = async ({ to, user }) => {
 };
 
 export const sendBookingConfirmation = async ({ appointment, user }) => {
- const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
- const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
- const barberMail = {
-   from: process.env.SMTP_USER,
-   to: process.env.BARBER_EMAIL,
-   subject: 'Nuova Prenotazione - Your Style Barber',
-   html: `
-     <h2>Nuova Prenotazione</h2>
-     <p>È stata effettuata una nuova prenotazione:</p>
-     <ul>
-       <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
-       <li><strong>Email Cliente:</strong> ${user.email}</li>
-       <li><strong>Telefono:</strong> ${user.phone}</li>
-       <li><strong>Servizio:</strong> ${appointment.service}</li>
-       <li><strong>Data:</strong> ${formattedDate}</li>
-       <li><strong>Ora:</strong> ${appointment.time}</li>
-       <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
-     </ul>
-   `
- };
+  // Contenuto email per l'amministratore
+  const adminContent = `
+    <h2>Nuova Prenotazione</h2>
+    <p>È stata effettuata una nuova prenotazione:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
+        <li><strong>Email Cliente:</strong> ${user.email}</li>
+        <li><strong>Telefono:</strong> ${user.phone}</li>
+        <li><strong>Servizio:</strong> ${appointment.service}</li>
+        <li><strong>Data:</strong> ${formattedDate}</li>
+        <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
+        <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
+      </ul>
+    </div>
+    <p>Puoi visualizzare tutti gli appuntamenti nel pannello di amministrazione.</p>
+  `;
 
- const clientMail = {
-   from: process.env.SMTP_USER,
-   to: user.email,
-   subject: 'Conferma Prenotazione - Your Style Barber',
-   html: `
-     <h2>Conferma Prenotazione</h2>
-     <p>Gentile ${user.firstName},</p>
-     <p>La tua prenotazione è stata confermata con i seguenti dettagli:</p>
-     <ul>
-       <li><strong>Servizio:</strong> ${appointment.service}</li>
-       <li><strong>Data:</strong> ${formattedDate}</li>
-       <li><strong>Ora:</strong> ${appointment.time}</li>
-       <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
-     </ul>
-     <p>Indirizzo: Via Example 123, Lugano</p>
-     <p>Per cancellare o modificare l'appuntamento, accedi al tuo account.</p>
-   `
- };
+  // Contenuto email per il cliente
+  const clientContent = `
+    <h2>Conferma Prenotazione</h2>
+    <p>Gentile ${user.firstName},</p>
+    <p>La tua prenotazione è stata confermata con i seguenti dettagli:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Servizio:</strong> ${appointment.service}</li>
+        <li><strong>Data:</strong> ${formattedDate}</li>
+        <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
+        <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
+      </ul>
+    </div>
+    <p class="address">Ti aspettiamo in Via Example 123, Lugano</p>
+    <p>Per cancellare o modificare l'appuntamento, accedi al tuo account.</p>
+    <a href="${process.env.FRONTEND_URL}/appointments" class="button">Gestisci Appuntamenti</a>
+  `;
 
- try {
-   const results = await Promise.all([
-     transporter.sendMail(barberMail),
-     transporter.sendMail(clientMail)
-   ]);
-   console.log('Email di conferma inviate con successo');
- } catch (error) {
-   console.error('Errore invio email:', error);
-   throw new Error('Errore invio email di conferma');
- }
+  // Contenuto email per il barbiere
+  const barberContent = `
+    <h2>Nuovo Appuntamento Prenotato</h2>
+    <p>Ciao ${appointment.barber?.firstName},</p>
+    <p>È stato prenotato un nuovo appuntamento con te:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
+        <li><strong>Servizio:</strong> ${appointment.service}</li>
+        <li><strong>Data:</strong> ${formattedDate}</li>
+        <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
+      </ul>
+    </div>
+    <p>Puoi visualizzare tutti i tuoi appuntamenti nel tuo pannello personale.</p>
+    <a href="${process.env.FRONTEND_URL}/barber/appointments" class="button">Visualizza Agenda</a>
+  `;
+
+  const barberMail = {
+    from: process.env.SMTP_USER,
+    to: process.env.BARBER_EMAIL,
+    subject: 'Nuova Prenotazione - Your Style Barber',
+    html: createEmailTemplate(adminContent)
+  };
+
+  const clientMail = {
+    from: process.env.SMTP_USER,
+    to: user.email,
+    subject: 'Conferma Prenotazione - Your Style Barber',
+    html: createEmailTemplate(clientContent)
+  };
+
+  // Email al barbiere selezionato (se esiste)
+  const barberPersonalMail = {
+    from: process.env.SMTP_USER,
+    to: appointment.barber?.email,
+    subject: 'Nuovo Appuntamento - Your Style Barber',
+    html: createEmailTemplate(barberContent)
+  };
+
+  try {
+    const emailPromises = [
+      transporter.sendMail(barberMail),
+      transporter.sendMail(clientMail)
+    ];
+
+    // Aggiungi l'email al barbiere se è presente l'informazione
+    if (appointment.barber && appointment.barber.email) {
+      emailPromises.push(transporter.sendMail(barberPersonalMail));
+      console.log('Invio email di notifica al barbiere:', appointment.barber.email);
+    } else {
+      console.log('Nessuna email del barbiere trovata per la notifica');
+    }
+
+    const results = await Promise.all(emailPromises);
+    console.log('Email di conferma inviate con successo');
+    return results;
+  } catch (error) {
+    console.error('Errore invio email:', error);
+    throw new Error('Errore invio email di conferma');
+  }
 };
 
 // Nuova funzione per l'email di cancellazione al cliente
@@ -147,23 +322,29 @@ export const sendCancellationEmailToClient = async (appointment, user) => {
   const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
-  const mailOptions = {
-    from: process.env.SMTP_USER,
-    to: user.email,
-    subject: 'Cancellazione Appuntamento - Your Style Barber',
-    html: `
-      <h2>Cancellazione Appuntamento</h2>
-      <p>Gentile ${user.firstName},</p>
-      <p>Il tuo appuntamento è stato cancellato:</p>
+  const content = `
+    <h2>Cancellazione Appuntamento</h2>
+    <p>Gentile ${user.firstName},</p>
+    <p>Il tuo appuntamento è stato cancellato:</p>
+    <div class="details">
       <ul>
         <li><strong>Servizio:</strong> ${appointment.service}</li>
         <li><strong>Data:</strong> ${formattedDate}</li>
         <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
-      <p>Motivo: ${appointment.cancellationReason || 'Non specificato'}</p>
-      <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online.</p>
-    `
+    </div>
+    <p><strong>Motivo:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
+    <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online.</p>
+    <a href="${process.env.FRONTEND_URL}/booking" class="button">Prenota Nuovo Appuntamento</a>
+  `;
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: user.email,
+    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -180,13 +361,10 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
   const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
-  const mailOptions = {
-    from: process.env.SMTP_USER,
-    to: process.env.BARBER_EMAIL,
-    subject: 'Cancellazione Appuntamento - Your Style Barber',
-    html: `
-      <h2>Cancellazione Appuntamento</h2>
-      <p>Un appuntamento è stato cancellato:</p>
+  const content = `
+    <h2>Cancellazione Appuntamento</h2>
+    <p>Un appuntamento è stato cancellato:</p>
+    <div class="details">
       <ul>
         <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
         <li><strong>Email Cliente:</strong> ${user.email}</li>
@@ -194,11 +372,19 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
         <li><strong>Servizio:</strong> ${appointment.service}</li>
         <li><strong>Data:</strong> ${formattedDate}</li>
         <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
-      <p><strong>Motivo cancellazione:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
-      <p>Lo slot è ora disponibile per nuove prenotazioni.</p>
-    `
+    </div>
+    <p><strong>Motivo cancellazione:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
+    <p>Lo slot è ora disponibile per nuove prenotazioni.</p>
+  `;
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: process.env.BARBER_EMAIL,
+    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -210,7 +396,6 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
   }
 };
 
-// Funzione di test per verificare la configurazione email
 // Funzione di test per verificare la configurazione email
 export const testEmailConfiguration = async () => {
   try {
@@ -226,57 +411,67 @@ export const testEmailConfiguration = async () => {
 };
 
 export const sendCancellationNotification = async ({ appointment, user }) => {
- const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
- const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
- const barberMail = {
-   from: process.env.SMTP_USER,
-   to: process.env.BARBER_EMAIL,
-   subject: 'Cancellazione Appuntamento - Your Style Barber',
-   html: `
-     <h2>Cancellazione Appuntamento</h2>
-     <p>Un appuntamento è stato cancellato:</p>
-     <ul>
-       <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
-       <li><strong>Servizio:</strong> ${appointment.service}</li>
-       <li><strong>Data:</strong> ${formattedDate}</li>
-       <li><strong>Ora:</strong> ${appointment.time}</li>
-     </ul>
-   `
- };
+  const content = `
+    <h2>Cancellazione Appuntamento</h2>
+    <p>Un appuntamento è stato cancellato:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
+        <li><strong>Servizio:</strong> ${appointment.service}</li>
+        <li><strong>Data:</strong> ${formattedDate}</li>
+        <li><strong>Ora:</strong> ${appointment.time}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
+      </ul>
+    </div>
+  `;
 
- try {
-   await transporter.sendMail(barberMail);
-   console.log('Email di cancellazione inviata con successo');
- } catch (error) {
-   console.error('Errore invio email cancellazione:', error);
-   throw new Error('Errore invio email di cancellazione');
- }
+  const barberMail = {
+    from: process.env.SMTP_USER,
+    to: process.env.BARBER_EMAIL,
+    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    html: createEmailTemplate(content)
+  };
+
+  try {
+    await transporter.sendMail(barberMail);
+    console.log('Email di cancellazione inviata con successo');
+  } catch (error) {
+    console.error('Errore invio email cancellazione:', error);
+    throw new Error('Errore invio email di cancellazione');
+  }
 };
 
 export const sendReminderEmail = async (appointment, user) => {
   const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
 
-  const mailOptions = {
-    from: process.env.SMTP_USER,
-    to: user.email,
-    subject: 'Promemoria Appuntamento - Your Style Barber',
-    html: `
-      <h2>Promemoria Appuntamento</h2>
-      <p>Gentile ${user.firstName},</p>
-      <p>Ti ricordiamo che hai un appuntamento domani:</p>
+  const content = `
+    <h2>Promemoria Appuntamento</h2>
+    <p>Gentile ${user.firstName},</p>
+    <p>Ti ricordiamo che hai un appuntamento domani:</p>
+    <div class="details">
       <ul>
         <li><strong>Servizio:</strong> ${appointment.service}</li>
         <li><strong>Data:</strong> ${formattedDate}</li>
         <li><strong>Ora:</strong> ${appointment.time}</li>
-        <li><strong>Barbiere:</strong> ${appointment.barber.firstName} ${appointment.barber.lastName}</li>
+        <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
-      <p><strong>Indirizzo:</strong> Via Example 123, Lugano</p>
-      <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
-      <p>Ti aspettiamo!</p>
-    `
+    </div>
+    <p><strong>Indirizzo:</strong> Via Example 123, Lugano</p>
+    <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
+    <p>Ti aspettiamo!</p>
+    <a href="${process.env.FRONTEND_URL}/appointments" class="button">Gestisci Appuntamenti</a>
+  `;
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: user.email,
+    subject: 'Promemoria Appuntamento - Your Style Barber',
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -301,17 +496,20 @@ export const sendPasswordChangeEmail = async (user) => {
     timeZone: 'Europe/Rome'
   };
 
+  const content = `
+    <h2>Conferma Cambio Password</h2>
+    <p>Gentile ${user.firstName},</p>
+    <p>La tua password è stata modificata con successo il ${new Date().toLocaleDateString('it-IT', dateOptions)}.</p>
+    <p>Se non hai effettuato tu questa modifica, contatta immediatamente il nostro supporto.</p>
+    <a href="${process.env.FRONTEND_URL}/contact" class="button">Contatta Supporto</a>
+    <p>Your Style Barber Team</p>
+  `;
+
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
     subject: 'Conferma Cambio Password - Your Style Barber',
-    html: `
-      <h2>Conferma Cambio Password</h2>
-      <p>Gentile ${user.firstName},</p>
-      <p>La tua password è stata modificata con successo il ${new Date().toLocaleDateString('it-IT', dateOptions)}.</p>
-      <p>Se non hai effettuato tu questa modifica, contatta immediatamente il nostro supporto.</p>
-      <p>Your Style Barber Team</p>
-    `
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -324,6 +522,29 @@ export const sendPasswordChangeEmail = async (user) => {
 };
 
 export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
+  const content = `
+    <h2>Benvenuto in Your Style Barber Studio!</h2>
+    <p>Ciao ${barber.firstName},</p>
+    <p>Sei stato registrato come barbiere nel nostro sistema.</p>
+    <div class="details">
+      <ul>
+        <li><strong>Email:</strong> ${barber.email}</li>
+        <li><strong>Password:</strong> ${password}</li>
+      </ul>
+    </div>
+    <p>Puoi accedere al tuo pannello personale visitando il nostro sito web e cliccando su "Login".</p>
+    <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
+    <p>Nel tuo pannello personale potrai:</p>
+    <ul>
+      <li>Visualizzare e gestire i tuoi appuntamenti</li>
+      <li>Modificare i tuoi orari di lavoro</li>
+      <li>Impostare periodi di ferie o vacanza</li>
+      <li>Gestire i servizi che offri</li>
+    </ul>
+    <p>Per qualsiasi domanda, non esitare a contattarci.</p>
+    <a href="${process.env.FRONTEND_URL}/login" class="button">Accedi al Tuo Account</a>
+  `;
+
   const mailOptions = {
     from: {
       name: 'Your Style Barber Studio',
@@ -331,27 +552,7 @@ export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
     },
     to: to,
     subject: 'Benvenuto in Your Style Barber Studio - Credenziali di accesso',
-    html: `
-      <h2>Benvenuto in Your Style Barber Studio!</h2>
-      <p>Ciao ${barber.firstName},</p>
-      <p>Sei stato registrato come barbiere nel nostro sistema.</p>
-      <p>Ecco le tue credenziali di accesso:</p>
-      <ul>
-        <li><strong>Email:</strong> ${barber.email}</li>
-        <li><strong>Password:</strong> ${password}</li>
-      </ul>
-      <p>Puoi accedere al tuo pannello personale visitando il nostro sito web e cliccando su "Login".</p>
-      <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
-      <p>Nel tuo pannello personale potrai:</p>
-      <ul>
-        <li>Visualizzare e gestire i tuoi appuntamenti</li>
-        <li>Modificare i tuoi orari di lavoro</li>
-        <li>Impostare periodi di ferie o vacanza</li>
-        <li>Gestire i servizi che offri</li>
-      </ul>
-      <p>Per qualsiasi domanda, non esitare a contattarci.</p>
-      <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
-    `
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -371,16 +572,18 @@ export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
 };
 
 export const sendBarberScheduleUpdateEmail = async (barber) => {
+  const content = `
+    <h2>Aggiornamento Orari Barbiere</h2>
+    <p>Il barbiere ${barber.firstName} ${barber.lastName} ha aggiornato i suoi orari di lavoro o periodi di vacanza.</p>
+    <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
+    <a href="${process.env.FRONTEND_URL}/admin/barbers" class="button">Visualizza Dettagli</a>
+  `;
+
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: process.env.ADMIN_EMAIL,
     subject: 'Aggiornamento Orari Barbiere - Your Style Barber',
-    html: `
-      <h2>Aggiornamento Orari Barbiere</h2>
-      <p>Il barbiere ${barber.firstName} ${barber.lastName} ha aggiornato i suoi orari di lavoro o periodi di vacanza.</p>
-      <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
-      <p>Cordiali saluti,<br/>Il sistema Your Style Barber Studio</p>
-    `
+    html: createEmailTemplate(content)
   };
 
   try {
@@ -393,6 +596,50 @@ export const sendBarberScheduleUpdateEmail = async (barber) => {
   }
 };
 
+// Funzione per notificare il barbiere in caso di cancellazione dell'appuntamento
+export const sendBarberCancellationNotification = async (appointment, user) => {
+  // Verificare che il barbiere esista nell'appuntamento
+  if (!appointment.barber || !appointment.barber.email) {
+    console.log('Nessuna email del barbiere trovata per la notifica di cancellazione');
+    return false;
+  }
+
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = new Date(appointment.date).toLocaleDateString('it-IT', dateOptions);
+
+  const content = `
+    <h2>Appuntamento Cancellato</h2>
+    <p>Ciao ${appointment.barber.firstName},</p>
+    <p>Un appuntamento è stato cancellato:</p>
+    <div class="details">
+      <ul>
+        <li><strong>Cliente:</strong> ${user.firstName} ${user.lastName}</li>
+        <li><strong>Servizio:</strong> ${appointment.service}</li>
+        <li><strong>Data:</strong> ${formattedDate}</li>
+        <li><strong>Ora:</strong> ${appointment.time}</li>
+      </ul>
+    </div>
+    <p><strong>Motivo cancellazione:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
+    <p>Lo slot è ora disponibile per nuove prenotazioni.</p>
+    <a href="${process.env.FRONTEND_URL}/barber/appointments" class="button">Visualizza Agenda</a>
+  `;
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: appointment.barber.email,
+    subject: 'Appuntamento Cancellato - Your Style Barber',
+    html: createEmailTemplate(content)
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Email di cancellazione inviata al barbiere con successo');
+    return true;
+  } catch (error) {
+    console.error('Errore invio email di cancellazione al barbiere:', error);
+    return false;
+  }
+};
 
 export default {
   sendEmail,
@@ -405,5 +652,6 @@ export default {
   testEmailConfiguration,
   sendPasswordChangeEmail,
   sendBarberRegistrationEmail,
-  sendBarberScheduleUpdateEmail
+  sendBarberScheduleUpdateEmail,
+  sendBarberCancellationNotification
 };
