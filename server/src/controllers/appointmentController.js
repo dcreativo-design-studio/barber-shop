@@ -791,7 +791,7 @@ async getBarberAppointments(req, res) {
     });
   }
 },
-// Da aggiungere/aggiornare nel appointmentController.js
+// Filtro appuntamenti
 
 async getFilteredAppointments(req, res) {
   try {
@@ -847,7 +847,7 @@ async getFilteredAppointments(req, res) {
     });
   }
 },
-// Aggiungi questo metodo all'oggetto appointmentController
+// creazione appuntamenti come Guest
 
 createGuestAppointment: async (req, res) => {
   try {
@@ -1005,7 +1005,7 @@ createGuestAppointment: async (req, res) => {
     });
   }
 },
-// Aggiungi anche questo metodo per ottenere i barbieri pubblicamente
+// metodo per ottenere i barbieri pubblicamente
 getPublicBarbers: async (req, res) => {
   try {
     const barbers = await Barber.find({ isActive: true })

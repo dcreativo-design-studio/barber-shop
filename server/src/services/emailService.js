@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 export const transporter = nodemailer.createTransport({
-  service: 'gmail',  // Usa il servizio predefinito Gmail invece di configurare host e port
+  service: 'gmail',  // servizio predefinito Gmail invece di configurare host e port
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD
@@ -15,18 +15,9 @@ export const transporter = nodemailer.createTransport({
 // Funzione di verifica migliorata
 export const verifyEmailConfig = async () => {
   try {
+    // Solo verifica della configurazione senza invio email di test
     await transporter.verify();
     console.log('✅ Email configuration verified successfully');
-
-    // Test email di verifica
-    const testResult = await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: process.env.SMTP_USER,
-      subject: 'Test Email Configuration',
-      text: 'If you receive this email, the SMTP configuration is working correctly.'
-    });
-
-    console.log('✅ Test email sent successfully:', testResult.messageId);
     return true;
   } catch (error) {
     console.error('❌ Email configuration error:', {
@@ -220,20 +211,16 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
 };
 
 // Funzione di test per verificare la configurazione email
+// Funzione di test per verificare la configurazione email
 export const testEmailConfiguration = async () => {
   try {
-    const testMailOptions = {
-      from: process.env.SMTP_USER,
-      to: process.env.SMTP_USER,
-      subject: 'Test Configurazione Email',
-      text: 'Se ricevi questa email, la configurazione SMTP funziona correttamente.'
-    };
-
-    await transporter.sendMail(testMailOptions);
-    console.log('Email di test inviata con successo');
+    // Sostituiamo il test con la semplice verifica della configurazione
+    // senza inviare l'email di test
+    await transporter.verify();
+    console.log('Configurazione email verificata con successo');
     return true;
   } catch (error) {
-    console.error('Errore invio email di test:', error);
+    console.error('Errore verifica configurazione email:', error);
     throw error;
   }
 };
