@@ -153,7 +153,7 @@ export const notificationService = {
               <p><strong>Barbiere:</strong> ${appointment.barber?.firstName || ''} ${appointment.barber?.lastName || ''}</p>
             </div>
             <p style="font-style: italic;">Indirizzo: Via Example 123, Lugano</p>
-            <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo accedendo al tuo account.</p>
+            <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
             <p>Ti aspettiamo!</p>
           </div>
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
