@@ -181,7 +181,7 @@ export const sendRegistrationEmail = async ({ to, user }) => {
       </ul>
     </div>
     <p>Accedi per prenotare il tuo appuntamento.</p>
-    <a href="${process.env.FRONTEND_URL}/login" class="button">Accedi Ora</a>
+    <p>Visita il nostro sito web e accedi per iniziare a prenotare i tuoi appuntamenti.</p>
   `;
 
   const mailOptions = {
@@ -250,8 +250,7 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
       </ul>
     </div>
     <p class="address">Ti aspettiamo in Via Example 123, Lugano</p>
-    <p>Per cancellare o modificare l'appuntamento, accedi al tuo account.</p>
-    <a href="${process.env.FRONTEND_URL}/appointments" class="button">Gestisci Appuntamenti</a>
+    <p>Per cancellare o modificare l'appuntamento, accedi al tuo account e visita la sezione "I miei appuntamenti" nel tuo profilo personale.</p>
   `;
 
   // Contenuto email per il barbiere
@@ -268,8 +267,7 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
     </div>
-    <p>Puoi visualizzare tutti i tuoi appuntamenti nel tuo pannello personale.</p>
-    <a href="${process.env.FRONTEND_URL}/barber/appointments" class="button">Visualizza Agenda</a>
+    <p>Puoi visualizzare tutti i tuoi appuntamenti accedendo al tuo account e consultando la sezione "Agenda" nel tuo pannello personale.</p>
   `;
 
   const barberMail = {
@@ -336,8 +334,7 @@ export const sendCancellationEmailToClient = async (appointment, user) => {
       </ul>
     </div>
     <p><strong>Motivo:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
-    <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online.</p>
-    <a href="${process.env.FRONTEND_URL}/booking" class="button">Prenota Nuovo Appuntamento</a>
+    <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online accedendo al tuo account.</p>
   `;
 
   const mailOptions = {
@@ -542,7 +539,7 @@ export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
       <li>Gestire i servizi che offri</li>
     </ul>
     <p>Per qualsiasi domanda, non esitare a contattarci.</p>
-    <a href="${process.env.FRONTEND_URL}/login" class="button">Accedi al Tuo Account</a>
+    <p>Per accedere al tuo pannello personale, visita il nostro sito web e utilizza le credenziali fornite.</p>
   `;
 
   const mailOptions = {
@@ -576,7 +573,7 @@ export const sendBarberScheduleUpdateEmail = async (barber) => {
     <h2>Aggiornamento Orari Barbiere</h2>
     <p>Il barbiere ${barber.firstName} ${barber.lastName} ha aggiornato i suoi orari di lavoro o periodi di vacanza.</p>
     <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
-    <a href="${process.env.FRONTEND_URL}/admin/barbers" class="button">Visualizza Dettagli</a>
+    <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
   `;
 
   const mailOptions = {
