@@ -2,7 +2,7 @@ import bcryptjs from 'bcryptjs'; // Modificato qui
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authService } from '../services/authService.js';
-import { sendEmail, sendRegistrationEmail } from '../services/emailService.js';
+import { sendEmail, sendPasswordChangeEmail, sendRegistrationEmail } from '../services/emailService.js';
 
 export const authController = {
   async register(req, res) {
@@ -180,7 +180,7 @@ export const authController = {
     }
   },
 
-  // Aggiungi qui la nuova funzione changePassword
+  // Funzione changePassword con notifica email aggiornata
   async changePassword(req, res) {
     try {
       const { userId, currentPassword, newPassword } = req.body;
@@ -213,9 +213,11 @@ export const authController = {
       user.updatedAt = new Date();
       await user.save();
 
-      // Invia email di conferma
+      // Invia email di conferma del cambio password
       try {
+        console.log('Sending password change confirmation email to:', user.email);
         await sendPasswordChangeEmail(user);
+        console.log('Password change confirmation email sent successfully');
       } catch (emailError) {
         console.error('Error sending password change confirmation email:', emailError);
         // Non blocchiamo il flusso se l'email fallisce

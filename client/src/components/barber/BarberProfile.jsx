@@ -11,7 +11,11 @@ function BarberProfile({ barberId }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  });
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -32,6 +36,17 @@ function BarberProfile({ barberId }) {
       fetchBarberData();
     }
   }, [barberId]);
+
+  // Auto-hide success message after a few seconds
+  useEffect(() => {
+    let timer;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess('');
+      }, 5000); // Hide after 5 seconds
+    }
+    return () => clearTimeout(timer);
+  }, [success]);
 
   const fetchBarberData = async () => {
     try {
@@ -70,6 +85,13 @@ function BarberProfile({ barberId }) {
     setPasswordData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [field]: !prev[field]
     }));
   };
 
@@ -122,13 +144,6 @@ function BarberProfile({ barberId }) {
       setError('Errore durante l\'aggiornamento del profilo. Riprova più tardi.');
     } finally {
       setSaving(false);
-
-      // Nascondi il messaggio di successo dopo 3 secondi
-      if (success) {
-        setTimeout(() => {
-          setSuccess('');
-        }, 3000);
-      }
     }
   };
 
@@ -165,7 +180,8 @@ function BarberProfile({ barberId }) {
         newPassword: passwordData.newPassword
       });
 
-      setSuccess('Password cambiata con successo!');
+      // Mostra messaggio di successo con animazione
+      setSuccess('Password cambiata con successo! Una email di conferma è stata inviata al tuo indirizzo email.');
 
       // Reset del form
       setPasswordData({
@@ -187,7 +203,6 @@ function BarberProfile({ barberId }) {
       setSaving(false);
     }
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -211,16 +226,17 @@ function BarberProfile({ barberId }) {
         Profilo Barbiere
       </h2>
 
+      {/* Messaggi di errore e successo migliorati */}
       {error && (
-        <div className="bg-red-500 text-white p-4 rounded-lg flex items-start">
-          <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+        <div className="notification-error">
+          <AlertCircle className="notification-icon w-5 h-5" />
           <p>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-500 text-white p-4 rounded-lg flex items-center">
-          <Check className="w-5 h-5 mr-2 flex-shrink-0" />
+        <div className="notification-success animate-fadeInSlideDown">
+          <Check className="notification-icon w-5 h-5" />
           <p>{success}</p>
         </div>
       )}
@@ -372,12 +388,12 @@ function BarberProfile({ barberId }) {
               <label className="block text-sm font-medium mb-1">
                 Password Attuale *
               </label>
-              <div className="relative">
+              <div className="relative password-field-focus">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={passwordVisibility.currentPassword ? "text" : "password"}
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
@@ -387,10 +403,10 @@ function BarberProfile({ barberId }) {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
+                  onClick={() => togglePasswordVisibility('currentPassword')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 password-toggle-icon"
                 >
-                  {showPassword ? (
+                  {passwordVisibility.currentPassword ? (
                     <EyeOff className="w-5 h-5" />
                   ) : (
                     <Eye className="w-5 h-5" />
@@ -403,12 +419,12 @@ function BarberProfile({ barberId }) {
               <label className="block text-sm font-medium mb-1">
                 Nuova Password *
               </label>
-              <div className="relative">
+              <div className="relative password-field-focus">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={passwordVisibility.newPassword ? "text" : "password"}
                   name="newPassword"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
@@ -417,6 +433,17 @@ function BarberProfile({ barberId }) {
                   required
                   minLength={8}
                 />
+                <button
+                  type="button"
+                  onClick={() => togglePasswordVisibility('newPassword')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 password-toggle-icon"
+                >
+                  {passwordVisibility.newPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
               <p className="text-xs text-gray-400 mt-1">
                 La password deve essere di almeno 8 caratteri.
@@ -427,12 +454,12 @@ function BarberProfile({ barberId }) {
               <label className="block text-sm font-medium mb-1">
                 Conferma Nuova Password *
               </label>
-              <div className="relative">
+              <div className="relative password-field-focus">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={passwordVisibility.confirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
@@ -440,6 +467,17 @@ function BarberProfile({ barberId }) {
                   placeholder="Conferma la nuova password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => togglePasswordVisibility('confirmPassword')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 password-toggle-icon"
+                >
+                  {passwordVisibility.confirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 

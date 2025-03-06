@@ -49,6 +49,18 @@
   to { transform: rotate(360deg); }
 }
 
+/* Nuova animazione per il messaggio di cambio password */
+@keyframes fadeInSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Classi di animazione */
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
@@ -68,6 +80,29 @@
 
 .animate-spin-custom {
   animation: spin 1s linear infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fadeInSlideDown {
+  animation: fadeInSlideDown 0.3s ease-out forwards;
+}
+
+/* Notifiche e messaggi di stato per il profilo barbiere */
+.notification-success {
+  @apply bg-green-500 text-white p-4 rounded-lg flex items-center shadow-lg;
+  animation: fadeInSlideDown 0.3s ease-out forwards;
+}
+
+.notification-error {
+  @apply bg-red-500 text-white p-4 rounded-lg flex items-start shadow-lg;
+  animation: fadeInSlideDown 0.3s ease-out forwards;
+}
+
+.notification-icon {
+  @apply mr-2 flex-shrink-0;
 }
 
 /* Effetti hover */
@@ -151,6 +186,20 @@
 .loading-overlay {
   @apply absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center;
   backdrop-filter: blur(4px);
+}
+
+/* Password toggle icon styling */
+.password-toggle-icon {
+  @apply cursor-pointer text-gray-400 hover:text-gray-300 transition-colors;
+}
+
+/* Password field animation */
+.password-field-focus {
+  @apply transition-all duration-200;
+}
+
+.password-field-focus:focus-within {
+  @apply ring-2 ring-opacity-50 ring-cyan-400;
 }
 
 /* Accessibility */

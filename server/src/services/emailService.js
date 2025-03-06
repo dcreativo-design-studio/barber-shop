@@ -498,20 +498,22 @@ export const sendPasswordChangeEmail = async (user) => {
     <p>Gentile ${user.firstName},</p>
     <p>La tua password è stata modificata con successo il ${new Date().toLocaleDateString('it-IT', dateOptions)}.</p>
     <p>Se non hai effettuato tu questa modifica, contatta immediatamente il nostro supporto.</p>
-    <a href="${process.env.FRONTEND_URL}/contact" class="button">Contatta Supporto</a>
     <p>Your Style Barber Team</p>
   `;
+
+  const htmlContent = createEmailTemplate(content);
 
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
     subject: 'Conferma Cambio Password - Your Style Barber',
-    html: createEmailTemplate(content)
+    html: htmlContent
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Email di conferma cambio password inviata con successo');
+    console.log('Email di conferma cambio password inviata con successo a:', user.email);
+    return true;
   } catch (error) {
     console.error('Errore invio email conferma cambio password:', error);
     throw new Error('Errore invio email conferma cambio password');
