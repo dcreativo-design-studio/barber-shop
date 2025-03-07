@@ -487,7 +487,7 @@ function BookingCalendar() {
   const maxDate = addDays(new Date(), 30).toISOString().split('T')[0];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 animate-fade-in pt-4">
+    <div className="max-w-4xl mx-auto px-4">
       {/* Form prenotazione */}
       <div className="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-xl mb-8">
         <h2 className="text-2xl font-bold mb-6 text-center text-[var(--accent)]">

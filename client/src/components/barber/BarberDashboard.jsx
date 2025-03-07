@@ -27,8 +27,8 @@ function BarberDashboard() {
           return;
         }
 
-        if (user?.role !== 'barber' && user?.role !== 'admin') {
-          setError('Accesso non autorizzato. Questa pagina è riservata ai barbieri e agli amministratori.');
+        if (user?.role !== 'barber') {
+          setError('Accesso non autorizzato. Questa pagina è riservata ai barbieri.');
           return;
         }
 
@@ -94,7 +94,7 @@ function BarberDashboard() {
       );
     }
 
-    if (!barberId && user?.role !== 'admin') {
+    if (!barberId) {
       return (
         <div className="text-center p-8">
           <h2 className="text-2xl text-red-500">Profilo barbiere non trovato</h2>
@@ -112,28 +112,24 @@ function BarberDashboard() {
       );
     }
 
-    // Se siamo qui e l'utente è un admin senza barberId, utilizziamo un ID default o assegniamo null
-    // Questo permette all'admin di vedere il pannello anche senza essere un barbiere
-    const effectiveBarberId = user?.role === 'admin' && !barberId ? 'admin-view' : barberId;
-
     switch (activeTab) {
       case 'appointments':
-        return <BarberAppointments barberId={effectiveBarberId} />;
+        return <BarberAppointments barberId={barberId} />;
       case 'schedule':
-        return <BarberSchedule barberId={effectiveBarberId} />;
+        return <BarberSchedule barberId={barberId} />;
       case 'services':
-        return <BarberServices barberId={effectiveBarberId} />;
+        return <BarberServices barberId={barberId} />;
       case 'profile':
-        return <BarberProfile barberId={effectiveBarberId} />;
+        return <BarberProfile barberId={barberId} />;
       case 'stats':
-        return <BarberStats barberId={effectiveBarberId} />;
+        return <BarberStats barberId={barberId} />;
       default:
-        return <BarberAppointments barberId={effectiveBarberId} />;
+        return <BarberAppointments barberId={barberId} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] p-6 pt-20 animate-fade-in">
+    <div className="min-h-screen bg-[var(--bg-primary)] p-6 pt-20"> {/* Aggiunto pt-20 */}
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-[var(--accent)] mb-8">
           Pannello Barbiere
@@ -144,7 +140,7 @@ function BarberDashboard() {
           )}
         </h1>
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-2">
+        <div className="flex flex-wrap gap-2 mb-8">
           <button
             onClick={() => setActiveTab('appointments')}
             className={`flex items-center px-4 py-2 rounded-lg transition-all ${
