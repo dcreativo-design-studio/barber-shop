@@ -1,5 +1,5 @@
 import { CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../../context/AuthContext';
@@ -16,6 +16,28 @@ function Login() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Check for theme from localStorage or system preference
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  });
+
+  // Update theme when it changes elsewhere in the app
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    };
+
+    window.addEventListener('storage', handleThemeChange);
+    // Optional: listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', handleThemeChange);
+
+    return () => {
+      window.removeEventListener('storage', handleThemeChange);
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', handleThemeChange);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,15 +118,28 @@ function Login() {
     setShowPassword(!showPassword);
   };
 
+  // Dynamic class names based on theme
+  const bgClass = theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100';
+  const cardBgClass = theme === 'dark' ? 'bg-gray-800' : 'bg-white';
+  const inputBgClass = theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50';
+  const inputBorderClass = theme === 'dark' ? 'border-gray-600' : 'border-gray-300';
+  const textClass = theme === 'dark' ? 'text-white' : 'text-gray-900';
+  const textSecondaryClass = theme === 'dark' ? 'text-gray-300' : 'text-gray-600';
+  const buttonHoverClass = theme === 'dark' ? 'hover:bg-cyan-700' : 'hover:bg-cyan-500';
+  const iconColorClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  const iconHoverClass = theme === 'dark' ? 'hover:text-gray-200' : 'hover:text-gray-700';
+  const titleColorClass = theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600';
+  const shadowClass = theme === 'dark' ? 'shadow-lg' : 'shadow-md';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="max-w-md w-full space-y-8 p-8 bg-gray-800 rounded-lg shadow-lg relative overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center ${bgClass} transition-colors duration-200`}>
+      <div className={`max-w-md w-full space-y-8 p-8 ${cardBgClass} rounded-lg ${shadowClass} relative overflow-hidden transition-colors duration-200`}>
         {/* Animazione di successo */}
         {loginSuccess && (
           <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
             <div className="text-center space-y-4">
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto animate-bounce" />
-              <p className="text-white text-lg font-semibold">
+              <p className={`${textClass} text-lg font-semibold`}>
                 Accesso effettuato con successo!
               </p>
             </div>
@@ -112,7 +147,7 @@ function Login() {
         )}
 
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-cyan-400">
+          <h2 className={`mt-6 text-center text-3xl font-extrabold ${titleColorClass}`}>
             {showResetForm ? 'Reset Password' : 'Accedi al tuo account'}
           </h2>
         </div>
@@ -138,7 +173,7 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                  className={`w-full p-3 rounded ${inputBgClass} ${textClass} border ${inputBorderClass} focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all`}
                   placeholder="Email"
                 />
               </div>
@@ -148,13 +183,13 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                  className={`w-full p-3 rounded ${inputBgClass} ${textClass} border ${inputBorderClass} focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all`}
                   placeholder="Password"
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors"
+                  className={`absolute inset-y-0 right-0 pr-3 flex items-center ${iconColorClass} ${iconHoverClass} transition-colors`}
                 >
                   {showPassword ? (
                     <Eye className="h-5 w-5" aria-label="Nascondi password" />
@@ -168,7 +203,7 @@ function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded transition duration-300 flex items-center justify-center space-x-2 disabled:opacity-50"
+                className={`w-full bg-cyan-600 ${buttonHoverClass} text-white font-bold py-3 px-4 rounded transition duration-300 flex items-center justify-center space-x-2 disabled:opacity-50`}
               >
                 {isLoading ? (
                   <>
@@ -179,13 +214,22 @@ function Login() {
                   <span>Accedi</span>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={() => setShowResetForm(true)}
-                className="text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors"
-              >
-                Password dimenticata?
-              </button>
+              <div className="flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => setShowResetForm(true)}
+                  className={`text-cyan-500 hover:text-cyan-600 text-sm font-medium transition-colors`}
+                >
+                  Password dimenticata?
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/register')}
+                  className={`text-cyan-500 hover:text-cyan-600 text-sm font-medium transition-colors`}
+                >
+                  Crea account
+                </button>
+              </div>
             </div>
           </form>
         ) : (
@@ -196,7 +240,7 @@ function Login() {
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 required
-                className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                className={`w-full p-3 rounded ${inputBgClass} ${textClass} border ${inputBorderClass} focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all`}
                 placeholder="Inserisci la tua email"
               />
             </div>
@@ -204,7 +248,7 @@ function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded transition duration-300 flex items-center justify-center space-x-2 disabled:opacity-50"
+                className={`w-full bg-cyan-600 ${buttonHoverClass} text-white font-bold py-3 px-4 rounded transition duration-300 flex items-center justify-center space-x-2 disabled:opacity-50`}
               >
                 {isLoading ? (
                   <>
@@ -222,7 +266,7 @@ function Login() {
                   setError('');
                   setResetMessage('');
                 }}
-                className="text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors"
+                className={`text-cyan-500 hover:text-cyan-600 text-sm font-medium transition-colors`}
               >
                 Torna al login
               </button>
