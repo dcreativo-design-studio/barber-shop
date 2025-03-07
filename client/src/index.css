@@ -219,3 +219,96 @@
 [data-theme='dark'] {
   --calendar-invert: 1;
 }
+
+/* Stabilizzare l'output del rendering per prevenire flickering */
+.stabilize-render {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  will-change: auto;
+  contain: content;
+}
+
+/* Prevenzione di layout shifts */
+.content-stable {
+  min-height: 100vh;
+  isolation: isolate;
+  position: relative;
+}
+
+/* Fix per evitare sfarfallio nelle animazioni sui vari browser */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .stabilize-render {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+}
+
+@supports (-moz-appearance:none) {
+  .stabilize-render {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Prevenire problemi di TILT (sfarfallio continuo) */
+.prevent-tilt {
+  transform: translateZ(0);
+  min-height: calc(100vh - 4rem);
+  animation-fill-mode: both;
+  transform-style: preserve-3d;
+  contain: layout style paint;
+}
+
+/* Miglioramenti per la tab UI nei pannelli */
+.tab-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.tab-button.active::after {
+  transform: scaleX(1);
+}
+
+/* Pannelli amministrativi */
+.admin-panel-container,
+.panel-container {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  will-change: transform, opacity;
+}
+
+/* Rimuovi scrollbar nelle liste orizzontali ma mantieni la funzionalità */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Effetto 3D per pulsanti */
+.button-3d {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+}
+
+.button-3d:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(50, 50, 93, 0.11), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
