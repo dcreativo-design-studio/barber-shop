@@ -1,6 +1,6 @@
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
 import { it } from 'date-fns/locale';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useTimezone } from '../../context/TimezoneContext';
 import { appointmentService } from '../../services/appointmentService';
@@ -16,58 +16,36 @@ const AppointmentCalendar = () => {
   const [selectedBarber, setSelectedBarber] = useState('');
   const [barbers, setBarbers] = useState([]);
 
-  // Refs per monitorare i cambiamenti dei parametri
-  const prevParams = useRef({ selectedDate, viewType, selectedBarber, timezone });
-  const isMounted = useRef(true);
-  const fetchInProgress = useRef(false);
-
   // Helper functions
-  const getStatusBadgeColor = useCallback((status) => ({
+  const getStatusBadgeColor = (status) => ({
     pending: 'bg-yellow-500',
     confirmed: 'bg-green-500',
     completed: 'bg-blue-500',
     cancelled: 'bg-red-500'
-  }[status] || 'bg-gray-500'), []); // Default color for unknown status
+  }[status] || 'bg-gray-500'); // Default color for unknown status
 
-  const getStatusLabel = useCallback((status) => ({
+  const getStatusLabel = (status) => ({
     pending: 'In attesa',
     confirmed: 'Confermato',
     completed: 'Completato',
     cancelled: 'Cancellato'
-  }[status] || 'Sconosciuto'), []); // Default label for unknown status
+  }[status] || 'Sconosciuto'); // Default label for unknown status
 
   // Fetch barbers on component mount
   useEffect(() => {
-    isMounted.current = true;
-
     const fetchBarbers = async () => {
       try {
-        if (fetchInProgress.current) return;
-        fetchInProgress.current = true;
-
         const response = await appointmentService.getBarbers();
-
-        if (isMounted.current) {
-          setBarbers(response);
-        }
+        setBarbers(response);
       } catch (err) {
         console.error('Error fetching barbers:', err);
-        if (isMounted.current) {
-          setError('Errore nel caricamento dei barbieri');
-        }
-      } finally {
-        fetchInProgress.current = false;
+        setError('Errore nel caricamento dei barbieri');
       }
     };
-
     fetchBarbers();
-
-    return () => {
-      isMounted.current = false;
-    };
   }, []);
 
-  const getDateRange = useCallback(() => {
+  const getDateRange = () => {
     const date = new Date(selectedDate);
     switch (viewType) {
       case 'week':
@@ -86,22 +64,10 @@ const AppointmentCalendar = () => {
           end: date
         };
     }
-  }, [selectedDate, viewType]);
+  };
 
-  const fetchAppointments = useCallback(async () => {
-    // Evita chiamate duplicate o non necessarie
-    if (
-      fetchInProgress.current ||
-      (prevParams.current.selectedDate === selectedDate &&
-      prevParams.current.viewType === viewType &&
-      prevParams.current.selectedBarber === selectedBarber &&
-      prevParams.current.timezone === timezone)
-    ) {
-      return;
-    }
-
+  const fetchAppointments = async () => {
     try {
-      fetchInProgress.current = true;
       setLoading(true);
       setError('');
 
@@ -111,9 +77,10 @@ const AppointmentCalendar = () => {
         selectedBarber
       );
 
-      if (!isMounted.current) return;
+      console.log('Received appointments response type:', typeof response);
+      console.log('Is response an array?', Array.isArray(response));
 
-      // Assicurati che stiamo lavorando con un array
+      // Ensure we're working with an array
       if (Array.isArray(response)) {
         if (viewType === 'day') {
           // Day view - ensure all appointments have the necessary properties
@@ -184,34 +151,17 @@ const AppointmentCalendar = () => {
         setAppointments([]);
       }
     } catch (err) {
-      if (!isMounted.current) return;
-
       console.error('Error fetching appointments:', err);
       setError('Errore nel caricamento degli appuntamenti: ' + (err.message || 'errore sconosciuto'));
       setAppointments([]);
     } finally {
-      if (isMounted.current) {
-        setLoading(false);
-        // Aggiorna i parametri precedenti
-        prevParams.current = { selectedDate, viewType, selectedBarber, timezone };
-      }
-      fetchInProgress.current = false;
+      setLoading(false);
     }
-  }, [selectedDate, viewType, selectedBarber, timezone]);
+  };
 
-  // Fetch appointments when dependencies change or component mounts
   useEffect(() => {
-    // Verifica se è necessario aggiornare i dati
-    const paramsChanged =
-      prevParams.current.selectedDate !== selectedDate ||
-      prevParams.current.viewType !== viewType ||
-      prevParams.current.selectedBarber !== selectedBarber ||
-      prevParams.current.timezone !== timezone;
-
-    if (paramsChanged && isMounted.current) {
-      fetchAppointments();
-    }
-  }, [selectedDate, viewType, selectedBarber, timezone, fetchAppointments]);
+    fetchAppointments();
+  }, [selectedDate, viewType, selectedBarber, timezone]);
 
   // API calls and handlers
   const handleStatusChange = async (appointment, newStatus) => {
@@ -235,11 +185,27 @@ const AppointmentCalendar = () => {
     }
   };
 
-  const handleDateChange = (newDate) => {
-    setSelectedDate(newDate);
+  const getServiceDuration = (serviceName) => {
+    const serviceDurations = {
+      'Taglio': 30,
+      'Barba': 20,
+      'Taglio + Barba': 45,
+      'Taglio Bambino': 25
+    };
+    return serviceDurations[serviceName] || 30;
   };
 
-  const renderAppointmentCard = useCallback((appointment) => {
+  const handleDateChange = async (newDate) => {
+    try {
+      setSelectedDate(newDate);
+      // We'll let the useEffect trigger the data fetch
+    } catch (error) {
+      console.error('Error handling date change:', error);
+      setError('Errore nella gestione del cambio data');
+    }
+  };
+
+  const renderAppointmentCard = (appointment) => {
     // Safely access nested properties
     const clientFirstName = appointment?.client?.firstName || 'Cliente';
     const clientLastName = appointment?.client?.lastName || 'Sconosciuto';
@@ -295,9 +261,9 @@ const AppointmentCalendar = () => {
         </div>
       </div>
     );
-  }, [getStatusBadgeColor, getStatusLabel]);
+  };
 
-  const renderAppointments = useCallback(() => {
+  const renderAppointments = () => {
     if (loading) return <div className="text-center py-4">Caricamento...</div>;
 
     if (!appointments || appointments.length === 0) {
@@ -311,7 +277,9 @@ const AppointmentCalendar = () => {
     if (viewType === 'day') {
       return (
         <div className="grid gap-4">
-          {appointments.map((appointment) => renderAppointmentCard(appointment))}
+          {appointments.map((appointment, index) =>
+            renderAppointmentCard(appointment)
+          )}
         </div>
       );
     }
@@ -342,7 +310,9 @@ const AppointmentCalendar = () => {
                   {format(new Date(date), 'EEEE d MMMM yyyy', { locale: it })}
                 </h3>
                 <div className="space-y-4">
-                  {dayAppointments.map((appointment) => renderAppointmentCard(appointment))}
+                  {dayAppointments.map((appointment, index) =>
+                    renderAppointmentCard(appointment)
+                  )}
                 </div>
               </div>
             ))}
@@ -356,7 +326,7 @@ const AppointmentCalendar = () => {
         </div>
       );
     }
-  }, [appointments, loading, renderAppointmentCard, selectedBarber, viewType]);
+  };
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,4 @@
-import { BarChart2, Calendar, Clipboard, Clock, Scissors, Users } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import AppointmentCalendar from './AppointmentCalendar';
 import BarberManager from './BarberManager';
@@ -11,60 +10,8 @@ import WaitingListManager from './WaitingListManager';
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('appointments');
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [contentVisible, setContentVisible] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(true);
 
-  // Miglioramento: useCallback per prevenire ricreazioni della funzione ad ogni render
-  const renderContent = useCallback(() => {
-    switch (activeTab) {
-      case 'appointments':
-        return <AppointmentCalendar key="appointments" />;
-      case 'services':
-        return <ServiceManager key="services" />;
-      case 'users':
-        return <UserManager key="users" />;
-      case 'barbers':
-        return <BarberManager key="barbers" />;
-      case 'waitinglist':
-        return <WaitingListManager key="waitinglist" />;
-      case 'stats':
-        return <Stats key="stats" />;
-      default:
-        return <AppointmentCalendar key="appointments" />;
-    }
-  }, [activeTab]);
-
-  // Miglioramento: useEffect con migliore gestione rendering iniziale
-  useEffect(() => {
-    if (isInitialRender) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-
-        // Aggiungi un piccolo ritardo per l'effetto di fade in
-        setTimeout(() => {
-          setContentVisible(true);
-          setIsInitialRender(false);
-        }, 50);
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [isInitialRender]);
-
-  // Renderizza il contenuto una sola volta all'avvio
-  useEffect(() => {
-    if (!isInitialRender && !isLoading) {
-      // Evita di impostare contentVisible se è già true
-      if (!contentVisible) {
-        setContentVisible(true);
-      }
-    }
-  }, [isInitialRender, isLoading, contentVisible]);
-
-  // Previene il rendering se l'utente non è admin
+  // Verifica se l'utente è admin
   if (user?.role !== 'admin') {
     return (
       <div className="text-center p-8">
@@ -74,111 +21,98 @@ function AdminDashboard() {
     );
   }
 
-  // Mostra uno spinner durante il caricamento
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)]"></div>
-      </div>
-    );
-  }
-
-  // Gestione tab migliorata
-  const handleTabChange = (tabName) => {
-    if (activeTab !== tabName) {
-      // Facoltativo: aggiungi una piccola transizione
-      setContentVisible(false);
-      setTimeout(() => {
-        setActiveTab(tabName);
-        setContentVisible(true);
-      }, 100);
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'appointments':
+        return <AppointmentCalendar />;
+      case 'services':
+        return <ServiceManager />;
+      case 'users':
+        return <UserManager />;
+      case 'barbers':
+        return <BarberManager />;
+      case 'waitinglist':  // Nuovo case
+        return <WaitingListManager />;
+      case 'stats':
+        return <Stats />;
+      default:
+        return <AppointmentCalendar />;
     }
   };
 
   return (
-    <div
-      className={`min-h-screen bg-[var(--bg-primary)] p-6 pt-20 transition-opacity duration-300 ${
-        contentVisible ? 'opacity-100' : 'opacity-0'
-      } admin-panel-container prevent-tilt`}
-    >
+    <div className="min-h-screen bg-[var(--bg-primary)] p-6 pt-20">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-[var(--accent)] mb-8 flex items-center">
-          <Clipboard className="mr-2 h-8 w-8" />
+        <h1 className="text-3xl font-bold text-[var(--accent)] mb-8">
           Pannello Amministrativo
         </h1>
 
-        {/* Tabs - versione migliorata con icone */}
-        <div className="flex flex-wrap gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-4 mb-8">
           <button
-            onClick={() => handleTabChange('appointments')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('appointments')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'appointments'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <Calendar className="w-5 h-5 mr-2" />
-            <span>Appuntamenti</span>
+            Appuntamenti
           </button>
           <button
-            onClick={() => handleTabChange('services')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('services')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'services'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <Scissors className="w-5 h-5 mr-2" />
-            <span>Servizi</span>
+            Servizi
           </button>
           <button
-            onClick={() => handleTabChange('barbers')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('barbers')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'barbers'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <Users className="w-5 h-5 mr-2" />
-            <span>Barbieri</span>
+            Barbieri
           </button>
           <button
-            onClick={() => handleTabChange('users')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'users'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <Users className="w-5 h-5 mr-2" />
-            <span>Utenti</span>
+            Utenti
           </button>
           <button
-            onClick={() => handleTabChange('waitinglist')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('waitinglist')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'waitinglist'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <Clock className="w-5 h-5 mr-2" />
-            <span>Lista d'attesa</span>
+            Lista d'attesa
           </button>
           <button
-            onClick={() => handleTabChange('stats')}
-            className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
+            onClick={() => setActiveTab('stats')}
+            className={`px-4 py-2 rounded-lg transition-all ${
               activeTab === 'stats'
-                ? 'bg-[var(--accent)] text-white active'
+                ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            <BarChart2 className="w-5 h-5 mr-2" />
-            <span>Statistiche</span>
+            Statistiche
           </button>
         </div>
 
-        {/* Content container with improved stability */}
-        <div className="bg-[var(--bg-secondary)] rounded-lg shadow-lg p-6 panel-container transition-all duration-200">
+        {/* Content */}
+        <div className="bg-[var(--bg-secondary)] rounded-lg shadow-lg p-6">
           {renderContent()}
         </div>
       </div>

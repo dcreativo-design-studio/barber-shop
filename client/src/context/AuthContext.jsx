@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../config/api';
 
@@ -16,31 +16,21 @@ export function AuthProvider({ children }) {
   const [lastActivity, setLastActivity] = useState(Date.now());
   const navigate = useNavigate();
   const location = useLocation();
-  // Aggiungi un riferimento per prevenire renderizzazioni multiple
-  const isInitialized = useRef(false);
-  const refreshTokenTimeoutRef = useRef(null);
-  const sessionTimeoutRef = useRef(null);
 
-  // Memoizza le funzioni per evitare di ricrearle a ogni render
-  const isPublicRoute = useCallback((path) => PUBLIC_ROUTES.includes(path), []);
+  const isPublicRoute = (path) => PUBLIC_ROUTES.includes(path);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     if (!isPublicRoute(location.pathname)) {
       navigate('/login');
     }
-  }, [navigate, location.pathname, isPublicRoute]);
+  };
 
   // Carica utente dal localStorage all'avvio
   useEffect(() => {
     const checkAuth = async () => {
-      // Evita check multipli durante la navigazione
-      if (isInitialized.current && user) {
-        return;
-      }
-
       if (isPublicRoute(location.pathname)) {
         setLoading(false);
         return;
@@ -52,10 +42,7 @@ export function AuthProvider({ children }) {
 
         if (savedUser && token) {
           const response = await apiRequest.get('/auth/me');
-          // Imposta lo stato solo se è cambiato, evitando render inutili
-          if (JSON.stringify(response) !== JSON.stringify(user)) {
-            setUser(response);
-          }
+          setUser(response);
         } else {
           navigate('/login');
         }
@@ -64,12 +51,11 @@ export function AuthProvider({ children }) {
         handleLogout();
       } finally {
         setLoading(false);
-        isInitialized.current = true;
       }
     };
 
     checkAuth();
-  }, [location.pathname, isPublicRoute, handleLogout, navigate, user]);
+  }, [location.pathname]);
 
   // Gestione del timeout di sessione solo per utenti autenticati
   useEffect(() => {
@@ -81,18 +67,9 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Pulisci il timeout precedente
-    if (sessionTimeoutRef.current) {
-      clearInterval(sessionTimeoutRef.current);
-    }
-
-    sessionTimeoutRef.current = setInterval(checkTimeout, 1000);
-    return () => {
-      if (sessionTimeoutRef.current) {
-        clearInterval(sessionTimeoutRef.current);
-      }
-    };
-  }, [user, lastActivity, handleLogout]);
+    const timeoutInterval = setInterval(checkTimeout, 1000);
+    return () => clearInterval(timeoutInterval);
+  }, [user, lastActivity]);
 
   // Aggiorna lastActivity solo per utenti autenticati
   useEffect(() => {
@@ -121,11 +98,7 @@ export function AuthProvider({ children }) {
       try {
         const response = await apiRequest.post('/auth/refresh-token');
         localStorage.setItem('token', response.token);
-
-        // Evita aggiornamenti non necessari dello stato
-        if (JSON.stringify(response.user) !== JSON.stringify(user)) {
-          setUser(response.user);
-        }
+        setUser(response.user);
       } catch (error) {
         if (error.response?.status === 401 && !isPublicRoute(location.pathname)) {
           handleLogout();
@@ -133,25 +106,15 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Pulisci l'intervallo precedente
-    if (refreshTokenTimeoutRef.current) {
-      clearInterval(refreshTokenTimeoutRef.current);
-    }
+    const tokenInterval = setInterval(refreshToken, TOKEN_REFRESH_INTERVAL);
+    return () => clearInterval(tokenInterval);
+  }, [user]);
 
-    refreshTokenTimeoutRef.current = setInterval(refreshToken, TOKEN_REFRESH_INTERVAL);
-    return () => {
-      if (refreshTokenTimeoutRef.current) {
-        clearInterval(refreshTokenTimeoutRef.current);
-      }
-    };
-  }, [user, location.pathname, isPublicRoute, handleLogout]);
-
-  // Memoizza anche questa funzione
-  const login = useCallback((userData) => {
+  const login = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     setLastActivity(Date.now());
-  }, []);
+  };
 
   if (loading) {
     return (
@@ -161,16 +124,8 @@ export function AuthProvider({ children }) {
     );
   }
 
-  // Evita ri-renderizzazioni memoizzando il valore del contesto
-  const contextValue = {
-    user,
-    login,
-    logout: handleLogout,
-    isAuthenticated: !!user
-  };
-
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={{ user, login, logout: handleLogout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
