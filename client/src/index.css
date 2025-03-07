@@ -576,3 +576,76 @@
 .toast-info {
   border-left: 4px solid var(--accent);
 }
+
+/* Transizioni più fluide per pannelli e sezioni */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* Miglioramenti per le tabs dei pannelli admin e barbiere */
+.tab-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.tab-button.active::after {
+  transform: scaleX(1);
+}
+
+/* Prevenire flickering durante le transizioni */
+.no-flickering {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Miglioramento per la navbar durante lo scroll */
+.navbar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* Fix specifico per il problema di "tilt" */
+.prevent-tilt {
+  transform: translateZ(0); /* Force hardware acceleration */
+  min-height: calc(100vh - 4rem); /* Previene salti di altezza */
+  animation-fill-mode: both;
+}
+
+/* Contenitori per i pannelli amministrativi */
+.admin-panel-container {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Assicurati che i contenitori di pannelli abbiano una altezza minima per evitare salti */
+.panel-container {
+  min-height: calc(100vh - 10rem);
+}

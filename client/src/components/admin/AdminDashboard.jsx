@@ -1,3 +1,4 @@
+import { BarChart2, Calendar, ClipboardList, Clock, Scissors, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import AppointmentCalendar from './AppointmentCalendar';
@@ -31,7 +32,7 @@ function AdminDashboard() {
         return <UserManager />;
       case 'barbers':
         return <BarberManager />;
-      case 'waitinglist':  // Nuovo case
+      case 'waitinglist':
         return <WaitingListManager />;
       case 'stats':
         return <Stats />;
@@ -41,73 +42,79 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] p-6 pt-20">
+    <div className="min-h-screen bg-[var(--bg-primary)] p-6 pt-20 animate-fade-in">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-[var(--accent)] mb-8">
           Pannello Amministrativo
         </h1>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-4 mb-8">
+        {/* Tabs - versione migliorata */}
+        <div className="flex flex-wrap gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
           <button
             onClick={() => setActiveTab('appointments')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'appointments'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Appuntamenti
+            <Calendar className="w-4 h-4 mr-2" />
+            <span>Appuntamenti</span>
           </button>
           <button
             onClick={() => setActiveTab('services')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'services'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Servizi
+            <Scissors className="w-4 h-4 mr-2" />
+            <span>Servizi</span>
           </button>
           <button
             onClick={() => setActiveTab('barbers')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'barbers'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Barbieri
+            <Users className="w-4 h-4 mr-2" />
+            <span>Barbieri</span>
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'users'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Utenti
+            <ClipboardList className="w-4 h-4 mr-2" />
+            <span>Utenti</span>
           </button>
           <button
             onClick={() => setActiveTab('waitinglist')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'waitinglist'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Lista d'attesa
+            <Clock className="w-4 h-4 mr-2" />
+            <span>Lista d'attesa</span>
           </button>
           <button
             onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`flex items-center px-4 py-2 rounded-lg transition-all ${
               activeTab === 'stats'
                 ? 'bg-[var(--accent)] text-white'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
             }`}
           >
-            Statistiche
+            <BarChart2 className="w-4 h-4 mr-2" />
+            <span>Statistiche</span>
           </button>
         </div>
 

@@ -1,6 +1,6 @@
 import { Scissors } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -13,11 +13,10 @@ import { TimezoneProvider } from './context/TimezoneContext';
 import UserProfile from './pages/UserProfile';
 import WaitingList from './pages/WaitingList';
 
-// Immagini decorative (sostituire con i vostri asset)
-
 function App() {
   const [theme, setTheme] = useState('dark');
   const { user } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -29,54 +28,157 @@ function App() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // Componente Homepage migliorato
-  const HomePage = () => (
-    <div className="animate-fade-in">
-      {/* Hero section con effetto parallasse */}
-      <div className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-        {/* Overlay semitrasparente */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[var(--bg-primary)] z-0"></div>
+  // Componente HomePage migliorato
+  const HomePage = () => {
+    // Verifica se l'utente è loggato e ha un ruolo specifico per reindirizzare
+    if (user) {
+      // Non renderizzare nulla qui, lascia che sia il router a gestire i redirect
+      return (
+        <div className="animate-fade-in">
+          {/* Hero section con effetto parallasse */}
+          <div className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+            {/* Overlay semitrasparente */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[var(--bg-primary)] z-0"></div>
 
-        {/* Contenuto hero */}
-        <div className="z-10 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[var(--accent)] hover-scale">
-            Your Style <span className="text-white">Barber Studio</span>
-          </h1>
+            {/* Contenuto hero */}
+            <div className="z-10 max-w-4xl mx-auto">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[var(--accent)] hover-scale">
+                Your Style <span className="text-white">Barber Studio</span>
+              </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Il tuo stile, la nostra passione. Esperienza di barberia premium per l'uomo moderno.
-          </p>
-
-          {/* CTA principale */}
-          {user ? (
-            <div className="space-y-4">
-              <p className="text-lg text-[var(--accent)] mb-6 animate-slide-in">
-                Benvenuto, {user.firstName}!
+              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Il tuo stile, la nostra passione. Esperienza di barberia premium per l'uomo moderno.
               </p>
-              {user.role === 'admin' ? (
-                <Link
-                  to="/admin"
-                  className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
-                >
-                  Dashboard Admin
-                </Link>
-              ) : user.role === 'barber' ? (
-                <Link
-                  to="/barber"
-                  className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
-                >
-                  Pannello Barbiere
-                </Link>
-              ) : (
-                <Link
-                  to="/booking"
-                  className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
-                >
-                  Prenota Subito
-                </Link>
-              )}
+
+              {/* CTA principale */}
+              <div className="space-y-4">
+                <p className="text-lg text-[var(--accent)] mb-6 animate-slide-in">
+                  Benvenuto, {user.firstName}!
+                </p>
+                {user.role === 'admin' ? (
+                  <Link
+                    to="/admin"
+                    className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
+                  >
+                    Dashboard Admin
+                  </Link>
+                ) : user.role === 'barber' ? (
+                  <Link
+                    to="/barber"
+                    className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
+                  >
+                    Pannello Barbiere
+                  </Link>
+                ) : (
+                  <Link
+                    to="/booking"
+                    className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover-glow"
+                  >
+                    Prenota Subito
+                  </Link>
+                )}
+              </div>
             </div>
-          ) : (
+          </div>
+
+          {/* Sezione servizi */}
+          <div className="py-20 bg-[var(--bg-secondary)]">
+            <div className="max-w-6xl mx-auto px-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-[var(--accent)]">
+                I Nostri Servizi Premium
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Servizio 1 */}
+                <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <Scissors className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Taglio Classico</h3>
+                  <p className="text-center text-[var(--text-primary)] opacity-90">
+                    Esperienza di taglio tradizionale con prodotti di alta qualità e attenzione ai dettagli.
+                  </p>
+                </div>
+
+                {/* Servizio 2 */}
+                <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <Scissors className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Barba e Baffi</h3>
+                  <p className="text-center text-[var(--text-primary)] opacity-90">
+                    Rifinitura e modellatura professionale con trattamenti specifici per la cura della barba.
+                  </p>
+                </div>
+
+                {/* Servizio 3 */}
+                <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                  <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <Scissors className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Trattamenti Speciali</h3>
+                  <p className="text-center text-[var(--text-primary)] opacity-90">
+                    Massaggi, trattamenti con asciugamani caldi e prodotti esclusivi per un'esperienza premium.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to action */}
+          <div className="py-16 bg-[var(--bg-primary)]">
+            <div className="max-w-4xl mx-auto px-4 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[var(--accent)]">
+                Pronto a rinnovare il tuo look?
+              </h2>
+              <p className="text-xl text-[var(--text-primary)] opacity-90 mb-8">
+                Prenota subito un appuntamento e affidati ai nostri esperti barbieri
+              </p>
+              <Link
+                to={user ? "/booking" : "/guest-booking"}
+                className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition-all duration-300 hover-glow"
+              >
+                Prenota Ora
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="py-8 bg-[var(--bg-secondary)] border-t border-gray-700">
+            <div className="max-w-6xl mx-auto px-4 text-center">
+              <p className="text-[var(--text-primary)] opacity-70">
+                © {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.
+              </p>
+              <div className="mt-4 flex justify-center space-x-4">
+                <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Privacy</a>
+                <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Termini</a>
+                <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Contatti</a>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    // Per utenti non loggati, mostra la homepage standard
+    return (
+      <div className="animate-fade-in">
+        {/* Hero section con effetto parallasse */}
+        <div className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+          {/* Overlay semitrasparente */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[var(--bg-primary)] z-0"></div>
+
+          {/* Contenuto hero */}
+          <div className="z-10 max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[var(--accent)] hover-scale">
+              Your Style <span className="text-white">Barber Studio</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Il tuo stile, la nostra passione. Esperienza di barberia premium per l'uomo moderno.
+            </p>
+
+            {/* CTA principale */}
             <div className="space-y-8 animate-slide-in">
               <p className="text-xl mb-4 text-gray-300">
                 Esperienza di taglio superiore per ogni cliente
@@ -102,87 +204,87 @@ function App() {
                 </Link>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Sezione servizi */}
-      <div className="py-20 bg-[var(--bg-secondary)]">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-[var(--accent)]">
-            I Nostri Servizi Premium
-          </h2>
+        {/* Sezione servizi */}
+        <div className="py-20 bg-[var(--bg-secondary)]">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-[var(--accent)]">
+              I Nostri Servizi Premium
+            </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Servizio 1 */}
-            <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Scissors className="w-8 h-8" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Servizio 1 */}
+              <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Scissors className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Taglio Classico</h3>
+                <p className="text-center text-[var(--text-primary)] opacity-90">
+                  Esperienza di taglio tradizionale con prodotti di alta qualità e attenzione ai dettagli.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Taglio Classico</h3>
-              <p className="text-center text-[var(--text-primary)] opacity-90">
-                Esperienza di taglio tradizionale con prodotti di alta qualità e attenzione ai dettagli.
-              </p>
-            </div>
 
-            {/* Servizio 2 */}
-            <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Scissors className="w-8 h-8" />
+              {/* Servizio 2 */}
+              <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Scissors className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Barba e Baffi</h3>
+                <p className="text-center text-[var(--text-primary)] opacity-90">
+                  Rifinitura e modellatura professionale con trattamenti specifici per la cura della barba.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Barba e Baffi</h3>
-              <p className="text-center text-[var(--text-primary)] opacity-90">
-                Rifinitura e modellatura professionale con trattamenti specifici per la cura della barba.
-              </p>
-            </div>
 
-            {/* Servizio 3 */}
-            <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Scissors className="w-8 h-8" />
+              {/* Servizio 3 */}
+              <div className="bg-[var(--bg-primary)] rounded-lg p-6 shadow-lg hover-scale transform hover:-translate-y-1 transition-all duration-300">
+                <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Scissors className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Trattamenti Speciali</h3>
+                <p className="text-center text-[var(--text-primary)] opacity-90">
+                  Massaggi, trattamenti con asciugamani caldi e prodotti esclusivi per un'esperienza premium.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-center mb-3 text-[var(--accent)]">Trattamenti Speciali</h3>
-              <p className="text-center text-[var(--text-primary)] opacity-90">
-                Massaggi, trattamenti con asciugamani caldi e prodotti esclusivi per un'esperienza premium.
-              </p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Call to action */}
-      <div className="py-16 bg-[var(--bg-primary)]">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[var(--accent)]">
-            Pronto a rinnovare il tuo look?
-          </h2>
-          <p className="text-xl text-[var(--text-primary)] opacity-90 mb-8">
-            Prenota subito un appuntamento e affidati ai nostri esperti barbieri
-          </p>
-          <Link
-            to={user ? "/booking" : "/guest-booking"}
-            className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition-all duration-300 hover-glow"
-          >
-            Prenota Ora
-          </Link>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="py-8 bg-[var(--bg-secondary)] border-t border-gray-700">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p className="text-[var(--text-primary)] opacity-70">
-            © {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.
-          </p>
-          <div className="mt-4 flex justify-center space-x-4">
-            <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Privacy</a>
-            <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Termini</a>
-            <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Contatti</a>
+        {/* Call to action */}
+        <div className="py-16 bg-[var(--bg-primary)]">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[var(--accent)]">
+              Pronto a rinnovare il tuo look?
+            </h2>
+            <p className="text-xl text-[var(--text-primary)] opacity-90 mb-8">
+              Prenota subito un appuntamento e affidati ai nostri esperti barbieri
+            </p>
+            <Link
+              to="/guest-booking"
+              className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-4 px-10 rounded-lg shadow-lg transition-all duration-300 hover-glow"
+            >
+              Prenota Ora
+            </Link>
           </div>
         </div>
-      </footer>
-    </div>
-  );
+
+        {/* Footer */}
+        <footer className="py-8 bg-[var(--bg-secondary)] border-t border-gray-700">
+          <div className="max-w-6xl mx-auto px-4 text-center">
+            <p className="text-[var(--text-primary)] opacity-70">
+              © {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.
+            </p>
+            <div className="mt-4 flex justify-center space-x-4">
+              <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Privacy</a>
+              <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Termini</a>
+              <a href="#" className="text-[var(--accent)] hover:opacity-80 transition-opacity">Contatti</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  };
 
   const renderRoutes = () => (
     <Routes>
