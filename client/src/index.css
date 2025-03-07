@@ -649,3 +649,49 @@
 .panel-container {
   min-height: calc(100vh - 10rem);
 }
+
+/* Stabilizzare l'output del rendering per prevenire flickering */
+.stabilize-render {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  will-change: auto;
+  contain: content;
+}
+
+/* Migliora le transizioni con opacity */
+.fade-transition {
+  transition: opacity 300ms ease-in-out;
+  opacity: 1;
+}
+
+.fade-transition-enter {
+  opacity: 0;
+}
+
+.fade-transition-enter-active {
+  opacity: 1;
+}
+
+/* Prevenzione di layout shifts */
+.content-stable {
+  min-height: 100vh;
+  isolation: isolate;
+  position: relative;
+}
+
+/* Fix per evitare sfarfallio nelle animazioni sui vari browser */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .stabilize-render {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+}
+
+@supports (-moz-appearance:none) {
+  .stabilize-render {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+}
