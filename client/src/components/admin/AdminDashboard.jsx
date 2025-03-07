@@ -1,5 +1,5 @@
 import { BarChart2, Calendar, Clipboard, Clock, Scissors, Users } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import AppointmentCalendar from './AppointmentCalendar';
 import BarberManager from './BarberManager';
@@ -13,50 +13,66 @@ function AdminDashboard() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [contentVisible, setContentVisible] = useState(false);
+  const [isInitialRender, setIsInitialRender] = useState(true);
 
-  // Previene il flickering al caricamento iniziale
+  // Miglioramento: useCallback per prevenire ricreazioni della funzione ad ogni render
+  const renderContent = useCallback(() => {
+    switch (activeTab) {
+      case 'appointments':
+        return <AppointmentCalendar key="appointments" />;
+      case 'services':
+        return <ServiceManager key="services" />;
+      case 'users':
+        return <UserManager key="users" />;
+      case 'barbers':
+        return <BarberManager key="barbers" />;
+      case 'waitinglist':
+        return <WaitingListManager key="waitinglist" />;
+      case 'stats':
+        return <Stats key="stats" />;
+      default:
+        return <AppointmentCalendar key="appointments" />;
+    }
+  }, [activeTab]);
+
+  // Miglioramento: useEffect con migliore gestione rendering iniziale
   useEffect(() => {
-    // Breve timeout per permettere al DOM di renderizzarsi correttamente
-    const timer = setTimeout(() => {
-      setIsLoading(false);
+    if (isInitialRender) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
 
-      // Aggiungi un piccolo ritardo per l'effetto di fade in
-      setTimeout(() => {
+        // Aggiungi un piccolo ritardo per l'effetto di fade in
+        setTimeout(() => {
+          setContentVisible(true);
+          setIsInitialRender(false);
+        }, 50);
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [isInitialRender]);
+
+  // Renderizza il contenuto una sola volta all'avvio
+  useEffect(() => {
+    if (!isInitialRender && !isLoading) {
+      // Evita di impostare contentVisible se è già true
+      if (!contentVisible) {
         setContentVisible(true);
-      }, 50);
-    }, 100);
+      }
+    }
+  }, [isInitialRender, isLoading, contentVisible]);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Verifica se l'utente è admin
+  // Previene il rendering se l'utente non è admin
   if (user?.role !== 'admin') {
     return (
-      <div className="text-center p-8 animate-fade-in">
+      <div className="text-center p-8">
         <h2 className="text-2xl text-red-500">Accesso non autorizzato</h2>
         <p className="text-gray-300">Devi essere un amministratore per accedere a questa pagina.</p>
       </div>
     );
   }
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'appointments':
-        return <AppointmentCalendar />;
-      case 'services':
-        return <ServiceManager />;
-      case 'users':
-        return <UserManager />;
-      case 'barbers':
-        return <BarberManager />;
-      case 'waitinglist':
-        return <WaitingListManager />;
-      case 'stats':
-        return <Stats />;
-      default:
-        return <AppointmentCalendar />;
-    }
-  };
 
   // Mostra uno spinner durante il caricamento
   if (isLoading) {
@@ -66,6 +82,18 @@ function AdminDashboard() {
       </div>
     );
   }
+
+  // Gestione tab migliorata
+  const handleTabChange = (tabName) => {
+    if (activeTab !== tabName) {
+      // Facoltativo: aggiungi una piccola transizione
+      setContentVisible(false);
+      setTimeout(() => {
+        setActiveTab(tabName);
+        setContentVisible(true);
+      }, 100);
+    }
+  };
 
   return (
     <div
@@ -82,7 +110,7 @@ function AdminDashboard() {
         {/* Tabs - versione migliorata con icone */}
         <div className="flex flex-wrap gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
           <button
-            onClick={() => setActiveTab('appointments')}
+            onClick={() => handleTabChange('appointments')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'appointments'
                 ? 'bg-[var(--accent)] text-white active'
@@ -93,7 +121,7 @@ function AdminDashboard() {
             <span>Appuntamenti</span>
           </button>
           <button
-            onClick={() => setActiveTab('services')}
+            onClick={() => handleTabChange('services')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'services'
                 ? 'bg-[var(--accent)] text-white active'
@@ -104,7 +132,7 @@ function AdminDashboard() {
             <span>Servizi</span>
           </button>
           <button
-            onClick={() => setActiveTab('barbers')}
+            onClick={() => handleTabChange('barbers')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'barbers'
                 ? 'bg-[var(--accent)] text-white active'
@@ -115,7 +143,7 @@ function AdminDashboard() {
             <span>Barbieri</span>
           </button>
           <button
-            onClick={() => setActiveTab('users')}
+            onClick={() => handleTabChange('users')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'users'
                 ? 'bg-[var(--accent)] text-white active'
@@ -126,7 +154,7 @@ function AdminDashboard() {
             <span>Utenti</span>
           </button>
           <button
-            onClick={() => setActiveTab('waitinglist')}
+            onClick={() => handleTabChange('waitinglist')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'waitinglist'
                 ? 'bg-[var(--accent)] text-white active'
@@ -137,7 +165,7 @@ function AdminDashboard() {
             <span>Lista d'attesa</span>
           </button>
           <button
-            onClick={() => setActiveTab('stats')}
+            onClick={() => handleTabChange('stats')}
             className={`flex items-center px-4 py-3 rounded-lg transition-all tab-button ${
               activeTab === 'stats'
                 ? 'bg-[var(--accent)] text-white active'
@@ -149,7 +177,7 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content container with improved stability */}
         <div className="bg-[var(--bg-secondary)] rounded-lg shadow-lg p-6 panel-container transition-all duration-200">
           {renderContent()}
         </div>
