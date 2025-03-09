@@ -205,7 +205,7 @@ const HomePage = React.memo(() => {
             <div className="lg:w-1/2 rounded-lg overflow-hidden shadow-xl">
               {/* Actual barber shop image */}
               <img
-                src="/barber-shop.png"
+                src={require('../assets/barber-shop.png')}
                 alt="Your Style Barber Studio"
                 className="w-full h-auto object-cover"
               />
