@@ -203,10 +203,11 @@ const HomePage = React.memo(() => {
             </div>
 
             <div className="lg:w-1/2 rounded-lg overflow-hidden shadow-xl">
+              {/* Actual barber shop image */}
               <img
-                src="client\src\assets\barber-shop.png"
-                alt="Immagine del Salone"
-                className="w-full h-80 object-cover"
+                src="/barber-shop.png"
+                alt="Your Style Barber Studio"
+                className="w-full h-auto object-cover"
               />
             </div>
           </div>
@@ -338,17 +339,19 @@ const HomePage = React.memo(() => {
             </div>
 
             <div className="lg:w-1/2">
-              <iframe
-                src="https://g.co/kgs/9brU4yo"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                aria-hidden="false"
-                tabIndex="0"
-                className="rounded-lg shadow-lg"
-              ></iframe>
+              {/* Google Maps iframe */}
+              <div className="w-full h-80 rounded-lg shadow-lg overflow-hidden">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2769.1762082072193!2d8.956452376757941!3d46.01143121224133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478433f211495255%3A0x2b7199e7a5d952f!2sYour%20Style%20Barber%20Shop!5e0!3m2!1sen!2sit!4v1709978855831!5m2!1sen!2sit"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Your Style Barber Shop Location"
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
