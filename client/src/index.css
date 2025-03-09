@@ -202,6 +202,72 @@
   @apply ring-2 ring-opacity-50 ring-cyan-400;
 }
 
+/* Hero Section Enhancement */
+.hero-image {
+  @apply absolute inset-0 bg-cover bg-center bg-no-repeat z-0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform: scale(1.05);
+  transition: all 0.5s ease;
+  filter: brightness(0.85) contrast(1.1);
+  will-change: transform, filter;
+}
+
+.hero-overlay-dark {
+  @apply absolute inset-0 bg-gradient-to-b z-0 transition-opacity duration-300 ease-in-out;
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.85));
+  opacity: 1;
+}
+
+.hero-overlay-light {
+  @apply absolute inset-0 bg-gradient-to-b z-0 transition-opacity duration-300 ease-in-out;
+  background-image: linear-gradient(to bottom, rgba(0,20,40,0.8), rgba(0,20,40,0.9));
+  opacity: 0;
+}
+
+.box-shadow-vignette {
+  box-shadow: inset 0 0 150px 60px rgba(0, 0, 0, 0.8);
+}
+
+/* Tema chiaro/scuro per hero section */
+[data-theme='light'] .hero-overlay-dark {
+  opacity: 0;
+}
+
+[data-theme='light'] .hero-overlay-light {
+  opacity: 1;
+}
+
+[data-theme='dark'] .hero-overlay-dark {
+  opacity: 1;
+}
+
+[data-theme='dark'] .hero-overlay-light {
+  opacity: 0;
+}
+
+/* Text enhancement */
+.text-enhanced {
+  @apply text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide;
+  text-rendering: optimizeLegibility;
+}
+
+.text-accent-glow {
+  @apply text-[var(--accent)] drop-shadow-[0_0_16px_rgba(29,203,235,0.3)] tracking-wide;
+  text-rendering: optimizeLegibility;
+}
+
+/* Button enhancement */
+.button-enhanced {
+  @apply inline-block bg-[var(--accent)] hover:bg-opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300;
+  box-shadow: 0 4px 14px rgba(29,203,235,0.4);
+}
+
+.button-enhanced:hover {
+  box-shadow: 0 6px 20px rgba(29,203,235,0.6);
+  transform: translateY(-2px);
+}
+
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -250,6 +316,14 @@
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
   }
+}
+
+/* Miglioramento immagini ad alta risoluzione */
+.high-quality-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Prevenire problemi di TILT (sfarfallio continuo) */
