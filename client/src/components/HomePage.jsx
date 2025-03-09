@@ -22,7 +22,7 @@ const HomePage = React.memo(() => {
   <div
     className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
     style={{
-      backgroundImage: 'url("/hero-image.png")',
+      backgroundImage: 'url("/shot-img2.png")',
     }}
   >
     {/* Overlay gradiente scuro sopra l'immagine */}
