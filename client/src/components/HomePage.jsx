@@ -16,91 +16,101 @@ const HomePage = React.memo(() => {
 
   return (
     <div className="home-page min-h-screen">
-      {/* Hero Section */}
-      <section className="hero-section min-h-screen flex items-center justify-center relative bg-[var(--bg-primary)] text-[var(--text-primary)] py-20 px-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.4)] to-[rgba(0,0,0,0.6)] z-0"></div>
-        <div className="container mx-auto text-center max-w-5xl relative z-10">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[var(--accent)] animate-fade-in hover-scale">
-            Your Style Barber Studio
-          </h1>
-          <p className="text-xl md:text-2xl mb-10 animate-fade-in">
-            Il tuo stile, la nostra passione
-          </p>
+     {/* Hero Section */}
+<section className="hero-section min-h-screen flex items-center justify-center relative bg-[var(--bg-primary)] text-[var(--text-primary)] py-20 px-4">
+  {/* Background Image con Overlay */}
+  <div
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+    style={{
+      backgroundImage: 'url("/hero-image.png")',
+    }}
+  >
+    {/* Overlay gradiente scuro sopra l'immagine */}
+    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[rgba(0,0,0,0.8)] z-0"></div>
+  </div>
 
-          <div className="mt-10 animate-slide-in">
-            {user ? (
-              <div className="space-y-6">
-                <p className="text-xl text-[var(--accent)]">
-                  Bentornato, {user.firstName}!
-                </p>
-                <div>
-                  {user.role === 'admin' ? (
-                    <Link
-                      to="/admin"
-                      className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                    >
-                      Dashboard Admin
-                    </Link>
-                  ) : user.role === 'barber' ? (
-                    <Link
-                      to="/barber"
-                      className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                    >
-                      Pannello Barbiere
-                    </Link>
-                  ) : (
-                    <Link
-                      to="/booking"
-                      className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                    >
-                      Prenota Ora
-                    </Link>
-                  )}
-                </div>
-              </div>
+  <div className="container mx-auto text-center max-w-5xl relative z-10">
+    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[var(--accent)] animate-fade-in hover-scale">
+      Your Style Barber Studio
+    </h1>
+    <p className="text-xl md:text-2xl mb-10 animate-fade-in">
+      Il tuo stile, la nostra passione
+    </p>
+
+    <div className="mt-10 animate-slide-in">
+      {user ? (
+        <div className="space-y-6">
+          <p className="text-xl text-[var(--accent)]">
+            Bentornato, {user.firstName}!
+          </p>
+          <div>
+            {user.role === 'admin' ? (
+              <Link
+                to="/admin"
+                className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+              >
+                Dashboard Admin
+              </Link>
+            ) : user.role === 'barber' ? (
+              <Link
+                to="/barber"
+                className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+              >
+                Pannello Barbiere
+              </Link>
             ) : (
-              <div className="space-y-6">
-                <p className="text-xl mb-6">
-                  Prenota il tuo appuntamento oggi stesso
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link
-                    to="/login"
-                    className="bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                  >
-                    Accedi
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                  >
-                    Registrati
-                  </Link>
-                  <Link
-                    to="/guest-booking"
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
-                  >
-                    Prenota come ospite
-                  </Link>
-                </div>
-              </div>
+              <Link
+                to="/booking"
+                className="inline-block bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+              >
+                Prenota Ora
+              </Link>
             )}
           </div>
-
-          <div className="mt-12">
-            <button
-              onClick={() => scrollToSection('services')}
-              className="text-[var(--accent)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 mx-auto"
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <p className="text-xl mb-6">
+            Prenota il tuo appuntamento oggi stesso
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/login"
+              className="bg-[var(--accent)] hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
             >
-              Scopri di più
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce-custom">
-                <path d="M7 13l5 5 5-5"></path>
-                <path d="M7 6l5 5 5-5"></path>
-              </svg>
-            </button>
+              Accedi
+            </Link>
+            <Link
+              to="/register"
+              className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+            >
+              Registrati
+            </Link>
+            <Link
+              to="/guest-booking"
+              className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover-glow"
+            >
+              Prenota come ospite
+            </Link>
           </div>
         </div>
-      </section>
+      )}
+    </div>
+
+    <div className="mt-12">
+      <button
+        onClick={() => scrollToSection('services')}
+        className="text-[var(--accent)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 mx-auto"
+      >
+        Scopri di più
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce-custom">
+          <path d="M7 13l5 5 5-5"></path>
+          <path d="M7 6l5 5 5-5"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
 
       {/* Services Section */}
       <section id="services" className="py-16 px-4 bg-[var(--bg-secondary)]">
