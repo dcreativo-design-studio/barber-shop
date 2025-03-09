@@ -25,7 +25,7 @@ const HomePage = React.memo(() => {
       className="hero-image high-quality-image"
       style={{
         backgroundImage: 'url("/shot-img2.png")',
-        backgroundPosition: 'center',
+        backgroundPosition: 'left center',
       }}
     ></div>
 
