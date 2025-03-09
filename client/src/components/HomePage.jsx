@@ -203,10 +203,11 @@ const HomePage = React.memo(() => {
             </div>
 
             <div className="lg:w-1/2 rounded-lg overflow-hidden shadow-xl">
-              {/* Placeholder for barber shop image */}
-              <div className="bg-gray-700 w-full h-80 flex items-center justify-center">
-                <p className="text-white text-lg">Immagine del Salone</p>
-              </div>
+              <img
+                src="client\src\assets\barber-shop.png"
+                alt="Immagine del Salone"
+                className="w-full h-80 object-cover"
+              />
             </div>
           </div>
         </div>
@@ -337,10 +338,17 @@ const HomePage = React.memo(() => {
             </div>
 
             <div className="lg:w-1/2">
-              {/* Placeholder for map */}
-              <div className="bg-gray-700 w-full h-80 rounded-lg shadow-lg flex items-center justify-center">
-                <p className="text-white text-lg">Mappa del Salone</p>
-              </div>
+              <iframe
+                src="https://g.co/kgs/9brU4yo"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                aria-hidden="false"
+                tabIndex="0"
+                className="rounded-lg shadow-lg"
+              ></iframe>
             </div>
           </div>
         </div>
