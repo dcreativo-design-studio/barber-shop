@@ -18,29 +18,35 @@ const HomePage = React.memo(() => {
     <div className="home-page min-h-screen">
      {/* Hero Section */}
 <section className="hero-section min-h-screen flex items-center justify-center relative bg-[var(--bg-primary)] text-[var(--text-primary)] py-20 px-4">
-  {/* Background Image con Overlay */}
+  {/* Background Image con Overlay - Ottimizzata per mobile e desktop */}
   <div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 md:bg-center"
     style={{
       backgroundImage: 'url("/shot-img2.png")',
+      backgroundPosition: 'left center', // Allinea l'immagine a sinistra per mobile
     }}
   >
-    {/* Overlay gradiente scuro sopra l'immagine */}
-    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[rgba(0,0,0,0.8)] z-0"></div>
+    {/* Overlay gradiente scuro per tema scuro */}
+    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[rgba(0,0,0,0.8)] z-0 dark:opacity-100 light:opacity-50"></div>
+
+    {/* Overlay gradiente chiaro per tema chiaro - più scuro per garantire contrasto */}
+    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.6)] to-[rgba(0,0,0,0.7)] z-0 dark:opacity-0 light:opacity-80"></div>
   </div>
 
   <div className="container mx-auto text-center max-w-5xl relative z-10">
-    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[var(--accent)] animate-fade-in hover-scale">
+    {/* Titolo con contrasto migliorato per entrambi i temi */}
+    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-[var(--accent)] animate-fade-in hover-scale drop-shadow-lg">
       Your Style Barber Studio
     </h1>
-    <p className="text-xl md:text-2xl mb-10 animate-fade-in">
+    {/* Sottotitolo con ombra per migliorare leggibilità in tema chiaro */}
+    <p className="text-xl md:text-2xl mb-10 animate-fade-in text-white drop-shadow-lg dark:text-white light:text-white">
       Il tuo stile, la nostra passione
     </p>
 
     <div className="mt-10 animate-slide-in">
       {user ? (
         <div className="space-y-6">
-          <p className="text-xl text-[var(--accent)]">
+          <p className="text-xl text-[var(--accent)] drop-shadow-lg">
             Bentornato, {user.firstName}!
           </p>
           <div>
@@ -70,7 +76,7 @@ const HomePage = React.memo(() => {
         </div>
       ) : (
         <div className="space-y-6">
-          <p className="text-xl mb-6">
+          <p className="text-xl mb-6 text-white drop-shadow-lg dark:text-white light:text-white">
             Prenota il tuo appuntamento oggi stesso
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -100,7 +106,7 @@ const HomePage = React.memo(() => {
     <div className="mt-12">
       <button
         onClick={() => scrollToSection('services')}
-        className="text-[var(--accent)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 mx-auto"
+        className="text-[var(--accent)] hover:text-white transition-colors flex items-center gap-2 mx-auto drop-shadow-lg"
       >
         Scopri di più
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce-custom">
