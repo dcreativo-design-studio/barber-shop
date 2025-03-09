@@ -27,7 +27,7 @@ const HomePage = React.memo(() => {
     }}
   >
     {/* Overlay gradiente scuro per tema scuro */}
-    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[rgba(0,0,0,0.8)] z-0 dark:opacity-100 light:opacity-50"></div>
+    <div className="absolute inset-0 bg-gradient-to-b from-[rgba(89,86,86,0.7)] to-[rgba(85,81,81,0.8)] z-0 dark:opacity-100 light:opacity-50"></div>
 
     {/* Overlay gradiente chiaro per tema chiaro - più scuro per garantire contrasto */}
     <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.6)] to-[rgba(0,0,0,0.7)] z-0 dark:opacity-0 light:opacity-80"></div>
