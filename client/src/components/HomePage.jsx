@@ -222,8 +222,8 @@ const HomePage = React.memo(() => {
             {/* Service 1 */}
             <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
               <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all">
-                  <Scissors className="w-8 h-8 text-[var(--accent)]" />
+                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                  <Scissors className="w-8 h-8 text-[var(--accent)]" aria-hidden="true" />
                 </div>
                 <h3 className="text-xl font-bold">Taglio di Capelli</h3>
               </div>
@@ -239,8 +239,13 @@ const HomePage = React.memo(() => {
             {/* Service 2 */}
             <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
               <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all">
-                  <Scissors className="w-8 h-8 text-[var(--accent)]" />
+                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)]" aria-hidden="true">
+                    <path d="M3 3v18h18" />
+                    <path d="M16 3c0 6-4 10-10 10" />
+                    <path d="M8 15a2 2 0 0 0 4 0" />
+                    <path d="M18 3c0 9-4 14-10 14" />
+                  </svg>
                 </div>
                 <h3 className="text-xl font-bold">Barba</h3>
               </div>
@@ -256,8 +261,17 @@ const HomePage = React.memo(() => {
             {/* Service 3 */}
             <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
               <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all">
-                  <Scissors className="w-8 h-8 text-[var(--accent)]" />
+                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)]" aria-hidden="true">
+                    <path d="M16 2s-2 2-4 2-4-2-4-2"></path>
+                    <path d="M12 14c-3 0-4-3-4-3"></path>
+                    <path d="M16 14c-1 0-2-1-3-2"></path>
+                    <path d="M3 6v14"></path>
+                    <path d="M21 6v14"></path>
+                    <path d="M3 10h18"></path>
+                    <path d="M3 14h18"></path>
+                    <path d="M10 6a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1z"></path>
+                  </svg>
                 </div>
                 <h3 className="text-xl font-bold">Taglio + Barba</h3>
               </div>
@@ -273,8 +287,13 @@ const HomePage = React.memo(() => {
             {/* Service 4 */}
             <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
               <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all">
-                  <Scissors className="w-8 h-8 text-[var(--accent)]" />
+                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)]" aria-hidden="true">
+                    <circle cx="12" cy="9" r="5"></circle>
+                    <path d="M8 9h8"></path>
+                    <path d="M12 4v10"></path>
+                    <path d="M9 17l3 4 3-4"></path>
+                  </svg>
                 </div>
                 <h3 className="text-xl font-bold">Taglio Bambino</h3>
               </div>
@@ -290,8 +309,17 @@ const HomePage = React.memo(() => {
             {/* Service 5 */}
             <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
               <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all">
-                  <Scissors className="w-8 h-8 text-[var(--accent)]" />
+                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)]" aria-hidden="true">
+                    <path d="M7 7h10v10H7z"></path>
+                    <path d="M3 10h4"></path>
+                    <path d="M17 10h4"></path>
+                    <path d="M10 3v4"></path>
+                    <path d="M10 17v4"></path>
+                    <path d="m16 16-2.5-2.5"></path>
+                    <path d="M16 8 8 16"></path>
+                    <path d="m14 14 6 6"></path>
+                  </svg>
                 </div>
                 <h3 className="text-xl font-bold">Trattamenti Speciali</h3>
               </div>
@@ -312,7 +340,8 @@ const HomePage = React.memo(() => {
                 <p className="mb-6">Scegli il servizio e prenota il tuo appuntamento in pochi click.</p>
                 <Link
                   to={user ? "/booking" : "/guest-booking"}
-                  className="inline-block bg-white text-[var(--accent)] font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md"
+                  className="inline-block bg-white dark:text-[var(--accent)] text-[var(--accent)] font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md"
+                  style={{ color: 'var(--accent)' }}
                 >
                   Prenota
                 </Link>
@@ -595,8 +624,8 @@ const HomePage = React.memo(() => {
 
                 <div className="space-y-6">
                   <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4">
-                      <MapPin className="w-6 h-6 text-[var(--accent)]" />
+                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-[var(--accent)]" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-bold text-lg mb-1">Indirizzo</p>
@@ -605,8 +634,8 @@ const HomePage = React.memo(() => {
                   </div>
 
                   <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4">
-                      <Clock className="w-6 h-6 text-[var(--accent)]" />
+                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-[var(--accent)]" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-bold text-lg mb-1">Orari</p>
@@ -617,8 +646,8 @@ const HomePage = React.memo(() => {
                   </div>
 
                   <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4">
-                      <Phone className="w-6 h-6 text-[var(--accent)]" />
+                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center">
+                      <Phone className="w-6 h-6 text-[var(--accent)]" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-bold text-lg mb-1">Telefono</p>
@@ -627,8 +656,8 @@ const HomePage = React.memo(() => {
                   </div>
 
                   <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4">
-                      <Mail className="w-6 h-6 text-[var(--accent)]" />
+                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-[var(--accent)]" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-bold text-lg mb-1">Email</p>
