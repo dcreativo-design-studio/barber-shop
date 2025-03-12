@@ -386,21 +386,12 @@
   transform: translateY(2px);
   box-shadow: 0 2px 4px rgba(50, 50, 93, 0.11), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
-:root {
-  /* Aggiungi variabili per l'accent color in formato RGB per poter usare opacity */
-  --accent-rgb: 29, 203, 235;
-  --accent-dark: color-mix(in srgb, var(--accent) 80%, black);
-}
-
-[data-theme='light'] {
-  --accent-rgb: 29, 165, 192;
-}
-
-/* Classi specifiche per le icone nei servizi */
+/* Fix per le icone nei cerchi dei servizi */
 .service-icon-container {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  background-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .service-icon {
@@ -409,20 +400,7 @@
   stroke: var(--accent) !important;
 }
 
-/* Classi specifiche per le icone nei contatti */
-.contact-icon-container {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.contact-icon {
-  color: var(--accent) !important;
-  fill: var(--accent) !important;
-  stroke: var(--accent) !important;
-}
-
-/* Classi specifiche per il testo nella card CTA */
+/* Fix per il testo nella card CTA */
 .cta-text {
   color: white !important;
 }
@@ -431,26 +409,37 @@
   color: var(--accent) !important;
 }
 
-/* Assicura la corretta visualizzazione delle icone SVG */
-svg {
-  display: inline-block !important;
-  vertical-align: middle !important;
+[data-theme='light'] .cta-button {
+  color: var(--accent) !important;
 }
 
-/* Aggiunge enfasi alle icone con un leggero pulsare al passaggio del mouse */
-.service-icon-container:hover .service-icon,
-.contact-icon-container:hover .contact-icon {
-  animation: pulse 2s infinite;
+[data-theme='dark'] .cta-button {
+  color: var(--accent) !important;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+/* Fix per le icone nei contatti */
+.contact-icon-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.contact-icon {
+  color: var(--accent) !important;
+}
+
+/* Assicura la visibilità delle icone SVG in entrambi i temi */
+svg.icon {
+  fill: currentColor;
+  stroke: currentColor;
+  color: inherit;
+}
+
+/* Aggiungi variabili RGB per l'accent color */
+:root {
+  --accent-rgb: 29, 203, 235;
+}
+
+[data-theme='light'] {
+  --accent-rgb: 29, 165, 192;
 }
