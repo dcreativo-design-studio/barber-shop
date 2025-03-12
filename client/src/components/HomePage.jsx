@@ -3,6 +3,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Componente per visualizzare una singola card di servizio
+const ServiceCard = ({ icon, title, description, price, user }) => {
+  return (
+    <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+      <div className="flex items-center mb-4">
+        <div className="service-icon-wrapper">
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold">{title}</h3>
+      </div>
+      <p className="mb-4 text-[var(--text-primary)] text-opacity-80">{description}</p>
+      <div className="flex justify-between items-center">
+        <p className="text-[var(--accent)] font-bold">{price}</p>
+        <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
+          Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const HomePage = React.memo(() => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState({});
@@ -219,135 +240,102 @@ const HomePage = React.memo(() => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Service 1 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all service-icon-container">
-                  <Scissors className="w-8 h-8 text-[var(--accent)] service-icon" style={{ color: 'var(--accent)' }} aria-hidden="true" />
-                </div>
-                <h3 className="text-xl font-bold">Taglio di Capelli</h3>
-              </div>
-              <p className="mb-4 text-[var(--text-primary)] text-opacity-80">Taglio professionale personalizzato in base alla forma del viso e alle preferenze personali.</p>
-              <div className="flex justify-between items-center">
-                <p className="text-[var(--accent)] font-bold">Da CHF 30</p>
-                <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
-                  Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-                </Link>
-              </div>
-            </div>
+  {/* Taglio di Capelli */}
+  <ServiceCard
+    icon={<Scissors className="icon-white" />}
+    title="Taglio di Capelli"
+    description="Taglio professionale personalizzato in base alla forma del viso e alle preferenze personali."
+    price="Da CHF 30"
+    user={user}
+  />
 
-            {/* Service 2 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all service-icon-container">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)] service-icon" style={{ color: 'var(--accent)' }} aria-hidden="true">
-                    <path d="M3 3v18h18" />
-                    <path d="M16 3c0 6-4 10-10 10" />
-                    <path d="M8 15a2 2 0 0 0 4 0" />
-                    <path d="M18 3c0 9-4 14-10 14" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Barba</h3>
-              </div>
-              <p className="mb-4 text-[var(--text-primary)] text-opacity-80">Rifinitura e modellamento della barba, con trattamento rilassante e prodotti di qualità.</p>
-              <div className="flex justify-between items-center">
-                <p className="text-[var(--accent)] font-bold">Da CHF 25</p>
-                <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
-                  Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-                </Link>
-              </div>
-            </div>
+  {/* Barba */}
+  <ServiceCard
+    icon={
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+        <path d="M3 3v18h18" />
+        <path d="M16 3c0 6-4 10-10 10" />
+        <path d="M8 15a2 2 0 0 0 4 0" />
+        <path d="M18 3c0 9-4 14-10 14" />
+      </svg>
+    }
+    title="Barba"
+    description="Rifinitura e modellamento della barba, con trattamento rilassante e prodotti di qualità."
+    price="Da CHF 25"
+    user={user}
+  />
 
-            {/* Service 3 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all service-icon-container">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)] service-icon" style={{ color: 'var(--accent)' }} aria-hidden="true">
-                    <path d="M16 2s-2 2-4 2-4-2-4-2"></path>
-                    <path d="M12 14c-3 0-4-3-4-3"></path>
-                    <path d="M16 14c-1 0-2-1-3-2"></path>
-                    <path d="M3 6v14"></path>
-                    <path d="M21 6v14"></path>
-                    <path d="M3 10h18"></path>
-                    <path d="M3 14h18"></path>
-                    <path d="M10 6a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1z"></path>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Taglio + Barba</h3>
-              </div>
-              <p className="mb-4 text-[var(--text-primary)] text-opacity-80">Combinazione di taglio di capelli e rifinitura della barba per un look completo.</p>
-              <div className="flex justify-between items-center">
-                <p className="text-[var(--accent)] font-bold">Da CHF 45</p>
-                <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
-                  Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-                </Link>
-              </div>
-            </div>
+  {/* Taglio + Barba */}
+  <ServiceCard
+    icon={
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+        <path d="M16 2s-2 2-4 2-4-2-4-2"></path>
+        <path d="M12 14c-3 0-4-3-4-3"></path>
+        <path d="M16 14c-1 0-2-1-3-2"></path>
+        <path d="M3 6v14"></path>
+        <path d="M21 6v14"></path>
+        <path d="M3 10h18"></path>
+        <path d="M3 14h18"></path>
+        <path d="M10 6a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1z"></path>
+      </svg>
+    }
+    title="Taglio + Barba"
+    description="Combinazione di taglio di capelli e rifinitura della barba per un look completo."
+    price="Da CHF 45"
+    user={user}
+  />
 
-            {/* Service 4 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all service-icon-container">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)] service-icon" style={{ color: 'var(--accent)' }} aria-hidden="true">
-                    <circle cx="12" cy="9" r="5"></circle>
-                    <path d="M8 9h8"></path>
-                    <path d="M12 4v10"></path>
-                    <path d="M9 17l3 4 3-4"></path>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Taglio Bambino</h3>
-              </div>
-              <p className="mb-4 text-[var(--text-primary)] text-opacity-80">Taglio speciale per i più piccoli in un ambiente confortevole e divertente.</p>
-              <div className="flex justify-between items-center">
-                <p className="text-[var(--accent)] font-bold">Da CHF 20</p>
-                <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
-                  Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-                </Link>
-              </div>
-            </div>
+  {/* Taglio Bambino */}
+  <ServiceCard
+    icon={
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+        <circle cx="12" cy="9" r="5"></circle>
+        <path d="M8 9h8"></path>
+        <path d="M12 4v10"></path>
+        <path d="M9 17l3 4 3-4"></path>
+      </svg>
+    }
+    title="Taglio Bambino"
+    description="Taglio speciale per i più piccoli in un ambiente confortevole e divertente."
+    price="Da CHF 20"
+    user={user}
+  />
 
-            {/* Service 5 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-              <div className="flex items-center mb-4">
-                <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-3 group-hover:bg-opacity-20 transition-all service-icon-container">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent)] service-icon" style={{ color: 'var(--accent)' }} aria-hidden="true">
-                    <path d="M7 7h10v10H7z"></path>
-                    <path d="M3 10h4"></path>
-                    <path d="M17 10h4"></path>
-                    <path d="M10 3v4"></path>
-                    <path d="M10 17v4"></path>
-                    <path d="m16 16-2.5-2.5"></path>
-                    <path d="M16 8 8 16"></path>
-                    <path d="m14 14 6 6"></path>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Trattamenti Speciali</h3>
-              </div>
-              <p className="mb-4 text-[var(--text-primary)] text-opacity-80">Trattamenti personalizzati per capelli e cuoio capelluto con prodotti professionali.</p>
-              <div className="flex justify-between items-center">
-                <p className="text-[var(--accent)] font-bold">Da CHF 35</p>
-                <Link to={user ? "/booking" : "/guest-booking"} className="text-sm text-[var(--accent)] hover:underline font-medium flex items-center">
-                  Prenota <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-                </Link>
-              </div>
-            </div>
+  {/* Trattamenti Speciali */}
+  <ServiceCard
+    icon={
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+        <path d="M7 7h10v10H7z"></path>
+        <path d="M3 10h4"></path>
+        <path d="M17 10h4"></path>
+        <path d="M10 3v4"></path>
+        <path d="M10 17v4"></path>
+        <path d="m16 16-2.5-2.5"></path>
+        <path d="M16 8 8 16"></path>
+        <path d="m14 14 6 6"></path>
+      </svg>
+    }
+    title="Trattamenti Speciali"
+    description="Trattamenti personalizzati per capelli e cuoio capelluto con prodotti professionali."
+    price="Da CHF 35"
+    user={user}
+  />
 
-            {/* CTA Card with Pulsing Animation */}
-            <div className="bg-gradient-to-br from-[var(--accent)] to-[var(--accent-dark)] p-6 rounded-lg shadow-lg text-white transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl relative overflow-hidden">
-              <div className="absolute inset-0 bg-white opacity-0 animate-pulse-slow"></div>
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-4 cta-text">Prenota Ora</h3>
-                <p className="mb-6 cta-text">Scegli il servizio e prenota il tuo appuntamento in pochi click.</p>
-                <Link
-                  to={user ? "/booking" : "/guest-booking"}
-                  className="inline-block bg-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md cta-button"
-                  style={{ color: 'var(--accent)' }}
-                >
-                  Prenota
-                </Link>
-              </div>
-            </div>
-          </div>
+  {/* CTA Card */}
+  <div className="bg-[var(--accent)] p-6 rounded-lg shadow-lg text-white transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl relative overflow-hidden cta-card">
+    <div className="absolute inset-0 bg-white opacity-0 animate-pulse-slow"></div>
+    <div className="relative z-10">
+      <h3 className="text-xl font-bold mb-4 text-white">Prenota Ora</h3>
+      <p className="mb-6 text-white">Scegli il servizio e prenota il tuo appuntamento in pochi click.</p>
+      <Link
+        to={user ? "/booking" : "/guest-booking"}
+        className="inline-block bg-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md cta-button"
+      >
+        Prenota
+      </Link>
+    </div>
+  </div>
+</div>
         </div>
       </section>
 
@@ -609,94 +597,134 @@ const HomePage = React.memo(() => {
         ref={sectionRefs.contact}
         className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('contact')}`}
       >
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
-            Dove Trovarci
-          </h2>
-          <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
-            Siamo facilmente raggiungibili nel centro di Lugano
-          </p>
+       <div className="container mx-auto max-w-6xl">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
+          Dove Trovarci
+        </h2>
+        <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
+          Siamo facilmente raggiungibili nel centro di Lugano
+        </p>
 
-          <div className="flex flex-col lg:flex-row gap-12">
-            <div className="lg:w-1/2">
-              <div className="bg-[var(--bg-secondary)] p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                <h3 className="text-2xl font-bold mb-6 text-[var(--accent)]">Contatti</h3>
+        <div className="flex flex-col lg:flex-row gap-12">
+          <div className="lg:w-1/2">
+            <div className="bg-[var(--bg-secondary)] p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <h3 className="text-2xl font-bold mb-6 text-[var(--accent)]">Contatti</h3>
 
-                <div className="space-y-6">
-                  <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center contact-icon-container">
-                      <MapPin className="w-6 h-6 text-[var(--accent)] contact-icon" style={{ color: 'var(--accent)' }} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg mb-1">Indirizzo</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">Via Zurigo 2, 6900 Lugano</p>
-                    </div>
+              <div className="space-y-6">
+                {/* Indirizzo */}
+                <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
+                  <div className="service-icon-wrapper">
+                    <MapPin
+                      className="icon-white"
+                      style={{
+                        color: 'white',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: 2.5
+                      }}
+                      aria-hidden="true"
+                    />
                   </div>
-
-                  <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center contact-icon-container">
-                      <Clock className="w-6 h-6 text-[var(--accent)] contact-icon" style={{ color: 'var(--accent)' }} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg mb-1">Orari</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">Lunedì: 14:00 - 19:00</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">Martedì - Sabato: 9:00 - 19:00</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">Domenica: Chiuso</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center contact-icon-container">
-                      <Phone className="w-6 h-6 text-[var(--accent)] contact-icon" style={{ color: 'var(--accent)' }} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg mb-1">Telefono</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">+41 78 930 15 99</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
-                    <div className="p-3 rounded-full bg-[var(--accent)] bg-opacity-10 mr-4 flex items-center justify-center contact-icon-container">
-                      <Mail className="w-6 h-6 text-[var(--accent)] contact-icon" style={{ color: 'var(--accent)' }} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg mb-1">Email</p>
-                      <p className="text-[var(--text-primary)] text-opacity-80">barbershopyourstyle@gmail.com</p>
-                    </div>
+                  <div>
+                    <p className="font-bold text-lg mb-1">Indirizzo</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">Via Zurigo 2, 6900 Lugano</p>
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <Link
-                    to={user ? "/booking" : "/guest-booking"}
-                    className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all hover:shadow-lg transform hover:translate-y-1"
-                  >
-                    Prenota Ora
-                  </Link>
+                {/* Orari */}
+                <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
+                  <div className="service-icon-wrapper">
+                    <Clock
+                      className="icon-white"
+                      style={{
+                        color: 'white',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: 2.5
+                      }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg mb-1">Orari</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">Lunedì: 14:00 - 19:00</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">Martedì - Sabato: 9:00 - 19:00</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">Domenica: Chiuso</p>
+                  </div>
+                </div>
+
+                {/* Telefono */}
+                <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
+                  <div className="service-icon-wrapper">
+                    <Phone
+                      className="icon-white"
+                      style={{
+                        color: 'white',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: 2.5
+                      }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg mb-1">Telefono</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">+41 78 930 15 99</p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-start transform hover:translate-x-1 transition-transform duration-300">
+                  <div className="service-icon-wrapper">
+                    <Mail
+                      className="icon-white"
+                      style={{
+                        color: 'white',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: 2.5
+                      }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg mb-1">Email</p>
+                    <p className="text-[var(--text-primary)] text-opacity-80">barbershopyourstyle@gmail.com</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="lg:w-1/2">
-              {/* Google Maps iframe with hover effect */}
-              <div className="w-full h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                <div className="absolute inset-0 border-2 border-[var(--accent)] border-opacity-0 group-hover:border-opacity-50 rounded-lg transition-all duration-500 z-10"></div>
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2769.1762082072193!2d8.956452376757941!3d46.01143121224133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478433f211495255%3A0x2b7199e7a5d952f!2sYour%20Style%20Barber%20Shop!5e0!3m2!1sen!2sit!4v1709978855831!5m2!1sen!2sit"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Your Style Barber Shop Location"
-                  className="group-hover:opacity-90 transition-opacity"
-                ></iframe>
+              <div className="mt-8">
+                <Link
+                  to={user ? "/booking" : "/guest-booking"}
+                  className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all hover:shadow-lg transform hover:-translate-y-1"
+                >
+                  Prenota Ora
+                </Link>
               </div>
             </div>
           </div>
+
+          <div className="lg:w-1/2">
+            {/* Google Maps iframe with hover effect */}
+            <div className="w-full h-96 rounded-lg shadow-lg overflow-hidden relative group">
+              <div className="absolute inset-0 border-2 border-[var(--accent)] border-opacity-0 group-hover:border-opacity-50 rounded-lg transition-all duration-500 z-10"></div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2769.1762082072193!2d8.956452376757941!3d46.01143121224133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478433f211495255%3A0x2b7199e7a5d952f!2sYour%20Style%20Barber%20Shop!5e0!3m2!1sen!2sit!4v1709978855831!5m2!1sen!2sit"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Your Style Barber Shop Location"
+                className="group-hover:opacity-90 transition-opacity"
+              ></iframe>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Modern Footer with Animation */}
       <footer className="bg-[var(--bg-secondary)] py-12 px-4 border-t border-[var(--accent)] border-opacity-20">
