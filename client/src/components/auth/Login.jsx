@@ -156,45 +156,53 @@ function Login() {
           <form className={`mt-6 space-y-5 transition-all duration-500 ${formFocused ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
-                  placeholder="Email"
-                />
+                <div className="flex items-center relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
+                    placeholder="Email"
+                  />
+                </div>
               </div>
               <div className="relative group password-field-focus">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
-                  placeholder="Password"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center password-toggle-icon"
-                  aria-label={showPassword ? "Nascondi password" : "Mostra password"}
-                >
-                  {showPassword ? (
-                    <Eye className="h-5 w-5 hover:text-[var(--accent)] transition-colors duration-200" />
-                  ) : (
-                    <EyeOff className="h-5 w-5 hover:text-[var(--accent)] transition-colors duration-200" />
-                  )}
-                </button>
+                <div className="flex items-center relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
+                    <Lock className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
+                    placeholder="Password"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center password-toggle-icon"
+                    aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+                  >
+                    {showPassword ? (
+                      <Eye className="h-5 w-5 hover:text-[var(--accent)] transition-colors duration-200" />
+                    ) : (
+                      <EyeOff className="h-5 w-5 hover:text-[var(--accent)] transition-colors duration-200" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex flex-col space-y-4">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[var(--accent)] hover-glow text-white font-bold py-3 px-4 rounded-md transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 login-button hover:shadow-lg transform hover:-translate-y-1 active:translate-y-0"
+                className="w-full bg-[var(--accent)] hover-glow text-white font-bold py-3 px-4 rounded-md transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 login-button hover:shadow-lg transform hover:-translate-y-1 active:translate-y-0 group"
               >
                 {isLoading ? (
                   <>
@@ -229,15 +237,19 @@ function Login() {
         ) : (
           <form className={`mt-6 space-y-5 transition-all duration-500 ${formFocused ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} onSubmit={handleResetPassword}>
             <div className="relative group">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
-              <input
-                type="email"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                required
-                className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
-                placeholder="Inserisci la tua email"
-              />
+              <div className="flex items-center relative">
+                <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
+                  <Mail className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                </div>
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
+                  placeholder="Inserisci la tua email"
+                />
+              </div>
             </div>
             <div className="flex flex-col space-y-4">
               <button
