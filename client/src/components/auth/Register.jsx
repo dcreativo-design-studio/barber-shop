@@ -72,14 +72,14 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] theme-transition">
-      <div className="max-w-md w-full space-y-6 p-8 bg-[var(--bg-secondary)] rounded-lg shadow-lg theme-transition">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] theme-transition pt-16 md:pt-24">
+      <div className="max-w-md w-full space-y-6 p-8 bg-[var(--bg-secondary)] rounded-lg shadow-lg theme-transition my-8">
         <h2 className="text-3xl font-bold text-center text-[var(--accent)]">
           Crea il tuo account
         </h2>
 
         {error && (
-          <div className="error-message text-center">
+          <div className="error-message p-3 bg-red-100 border border-red-400 text-red-700 rounded text-center">
             {error}
           </div>
         )}
@@ -96,7 +96,7 @@ function Register() {
                 onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                 placeholder="Nome"
                 required
-                className="login-input text-[var(--text-primary)]"
+                className="login-input text-[var(--text-primary)] w-full"
               />
             </div>
             <div>
@@ -109,7 +109,7 @@ function Register() {
                 onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                 placeholder="Cognome"
                 required
-                className="login-input text-[var(--text-primary)]"
+                className="login-input text-[var(--text-primary)] w-full"
               />
             </div>
           </div>
@@ -124,7 +124,7 @@ function Register() {
               onChange={(e) => setFormData({...formData, email: e.target.value})}
               placeholder="Email"
               required
-              className="login-input text-[var(--text-primary)]"
+              className="login-input text-[var(--text-primary)] w-full"
             />
           </div>
 
@@ -138,7 +138,7 @@ function Register() {
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
               placeholder="Telefono"
               required
-              className="login-input text-[var(--text-primary)]"
+              className="login-input text-[var(--text-primary)] w-full"
             />
           </div>
 
@@ -153,17 +153,18 @@ function Register() {
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 placeholder="Password"
                 required
-                className="login-input text-[var(--text-primary)]"
+                className="login-input text-[var(--text-primary)] w-full"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('password')}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center password-toggle-icon"
+                aria-label={showPassword ? "Nascondi password" : "Mostra password"}
               >
                 {showPassword ? (
-                  <Eye className="h-5 w-5" aria-label="Nascondi password" />
+                  <Eye className="h-5 w-5" />
                 ) : (
-                  <EyeOff className="h-5 w-5" aria-label="Mostra password" />
+                  <EyeOff className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -180,17 +181,18 @@ function Register() {
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 placeholder="Conferma Password"
                 required
-                className="login-input text-[var(--text-primary)]"
+                className="login-input text-[var(--text-primary)] w-full"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('confirm')}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center password-toggle-icon"
+                aria-label={showConfirmPassword ? "Nascondi password di conferma" : "Mostra password di conferma"}
               >
                 {showConfirmPassword ? (
-                  <Eye className="h-5 w-5" aria-label="Nascondi password di conferma" />
+                  <Eye className="h-5 w-5" />
                 ) : (
-                  <EyeOff className="h-5 w-5" aria-label="Mostra password di conferma" />
+                  <EyeOff className="h-5 w-5" />
                 )}
               </button>
             </div>
