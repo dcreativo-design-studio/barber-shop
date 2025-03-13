@@ -1,7 +1,79 @@
 import { Award, Calendar, ChevronDown, Clock, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Scissors, Star, User } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import DCreativoFooterPromo from '../components/DCreativoFooterPromo';
 import { useAuth } from '../context/AuthContext';
+
+// CSS Aggiuntivo per il componente DCreativo
+const dCreativoStyles = `
+  .service-icon-wrapper {
+    background: var(--accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .service-icon-wrapper .icon-white {
+    color: white;
+  }
+
+  .service-card:hover .service-icon-wrapper {
+    transform: scale(1.1);
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0; }
+    50% { opacity: 0.1; }
+    100% { opacity: 0; }
+  }
+
+  /* Stili per la sezione DCreativo */
+  .dcreativo-footer-promo {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dcreativo-footer-promo .bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .dcreativo-footer-promo .service-card {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dcreativo-footer-promo .service-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background: var(--accent);
+    opacity: 0.1;
+    transition: height 0.3s ease;
+    z-index: -1;
+  }
+
+  .dcreativo-footer-promo .service-card:hover::after {
+    height: 100%;
+  }
+`;
 
 // Componente per visualizzare una singola card di servizio
 const ServiceCard = ({ icon, title, description, price, user }) => {
@@ -28,6 +100,7 @@ const HomePage = React.memo(() => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState({});
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [showDCreativoPromo, setShowDCreativoPromo] = useState(false);
   const sectionRefs = {
     hero: useRef(null),
     services: useRef(null),
@@ -69,13 +142,31 @@ const HomePage = React.memo(() => {
       }
     });
 
+    // Osserva anche la sezione DCreativo se esiste
+    if (handleDCreativoSectionRef.current) {
+      observer.observe(handleDCreativoSectionRef.current);
+    }
+
     return () => {
       Object.values(sectionRefs).forEach(ref => {
         if (ref.current) {
           observer.unobserve(ref.current);
         }
       });
+
+      if (handleDCreativoSectionRef.current) {
+        observer.unobserve(handleDCreativoSectionRef.current);
+      }
     };
+  }, []);
+
+  // Mostra la promozione DCreativo dopo 3 secondi dalla visualizzazione della pagina
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowDCreativoPromo(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Auto-rotate testimonials
@@ -90,6 +181,16 @@ const HomePage = React.memo(() => {
   // Animation classes based on visibility
   const getAnimationClass = (sectionId) => {
     return isVisible[sectionId] ? 'animate-fade-in opacity-100 translate-y-0' : 'opacity-0 translate-y-10';
+  };
+
+  // Aggiungi riferimento al componente da promuovere
+  const handleDCreativoSectionRef = useRef(null);
+
+  // Funzione per scrollare alla sezione DCreativo
+  const scrollToDCreativoSection = () => {
+    if (handleDCreativoSectionRef.current) {
+      handleDCreativoSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -802,9 +903,27 @@ const HomePage = React.memo(() => {
 
           <div className="border-t border-[var(--text-primary)] border-opacity-10 pt-6 text-center">
             <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+
+            {/* Link per mostrare la promozione DCreativo */}
+            <button
+              onClick={() => {
+                setShowDCreativoPromo(true);
+                scrollToDCreativoSection();
+              }}
+              className="mt-4 text-[var(--accent)] hover:underline text-sm inline-flex items-center"
+            >
+              Sistema di prenotazioni sviluppato da DCreativo
+              <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* DCreativo Footer Promo Section */}
+      <style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
+      <div className={`transition-all duration-500 ${showDCreativoPromo ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+        <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
+      </div>
     </div>
   );
 });
