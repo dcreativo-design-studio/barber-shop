@@ -1,5 +1,6 @@
 import { ArrowRight, Award, CheckCircle, Code, ExternalLink, Rocket, Zap } from 'lucide-react';
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // DCreativo Footer Promo Component
 const DCreativoFooterPromo = () => {
@@ -43,19 +44,20 @@ const DCreativoFooterPromo = () => {
             </button>
           </div>
         </div>
+
         {/* call-to-action */}
-            <div className="mt-4">
-            <Link
-                to="/marketing-barber-system"
-                className="group relative overflow-hidden bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center"
-            >
-                <span className="relative z-10 flex items-center">
-                <Zap className="w-5 h-5 mr-2" />
-                Scopri il sistema di prenotazioni
-                </span>
-                <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
-            </Link>
-            </div>
+        <div className="mt-4">
+          <Link
+            to="/marketing-barber-system"
+            className="group relative overflow-hidden bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center"
+          >
+            <span className="relative z-10 flex items-center">
+              <Zap className="w-5 h-5 mr-2" />
+              Scopri il sistema di prenotazioni
+            </span>
+            <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
+          </Link>
+        </div>
 
         {/* Services Highlights */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
@@ -122,116 +124,115 @@ const DCreativoFooterPromo = () => {
               <span>+41 76 781 01 94</span>
             </a>
             <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
-            <a
-              href="https://www.dcreativo.ch"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center hover:text-[var(--accent)] transition-colors"
-            >
+<a
+  href="https://www.dcreativo.ch"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center hover:text-[var(--accent)] transition-colors"
+>
               <span>www.dcreativo.ch</span>
               <ExternalLink className="w-3 h-3 ml-1" />
             </a>
           </div>
-
-          <a
-            href="https://barbershop.dcreativo.ch/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-6 text-[var(--accent)] hover:underline text-sm flex items-center justify-center"
-          >
-            <span>Vedi la demo del sistema di prenotazioni</span>
-            <ArrowRight className="w-3 h-3 ml-1" />
-          </a>
-          <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
-
-            {/* NUOVO LINK ALLA LANDING PAGE */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+  <a  // Manca questo tag di apertura
+    href="https://barbershop.dcreativo.ch/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+  >
+              <span>Vedi la demo del sistema di prenotazioni</span>
+              <ArrowRight className="w-3 h-3 ml-1" />
+            </a>
+            <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
             <Link
-            to="/marketing-barber-system"
-            className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+              to="/marketing-barber-system"
+              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
             >
-            <span>Scopri tutti i vantaggi del sistema</span>
-            <ArrowRight className="w-3 h-3 ml-1" />
+              <span>Scopri tutti i vantaggi del sistema</span>
+              <ArrowRight className="w-3 h-3 ml-1" />
             </Link>
-            </div>
-            </div>
-
-      {/* Info Request Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-[var(--bg-primary)] rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-[var(--accent)]">Richiedi Informazioni</h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Nome e Cognome</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
-                    placeholder="Inserisci il tuo nome"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
-                    placeholder="La tua email"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Telefono</label>
-                  <input
-                    type="tel"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
-                    placeholder="Il tuo numero di telefono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Sono interessato a</label>
-                  <select className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]">
-                    <option value="booking">Sistema di Prenotazioni</option>
-                    <option value="website">Sito Web</option>
-                    <option value="webapp">Applicazione Web</option>
-                    <option value="ecommerce">E-commerce</option>
-                    <option value="other">Altro</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Messaggio</label>
-                  <textarea
-                    className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)] min-h-20"
-                    placeholder="Descrivi brevemente le tue esigenze"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[var(--accent)] text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition-all"
-                >
-                  Invia Richiesta
-                </button>
-              </form>
-
-              <p className="mt-4 text-xs text-[var(--text-primary)] opacity-60 text-center">
-                I tuoi dati saranno trattati nel rispetto della privacy e utilizzati solo per rispondere alla tua richiesta.
-              </p>
-            </div>
           </div>
         </div>
-      )}
+
+        {/* Info Request Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-[var(--bg-primary)] rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-[var(--accent)]">Richiedi Informazioni</h3>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nome e Cognome</label>
+                    <input
+                      type="text"
+                      className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
+                      placeholder="Inserisci il tuo nome"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input
+                      type="email"
+                      className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
+                      placeholder="La tua email"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Telefono</label>
+                    <input
+                      type="tel"
+                      className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
+                      placeholder="Il tuo numero di telefono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Sono interessato a</label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]">
+                      <option value="booking">Sistema di Prenotazioni</option>
+                      <option value="website">Sito Web</option>
+                      <option value="webapp">Applicazione Web</option>
+                      <option value="ecommerce">E-commerce</option>
+                      <option value="other">Altro</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Messaggio</label>
+                    <textarea
+                      className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)] min-h-20"
+                      placeholder="Descrivi brevemente le tue esigenze"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-[var(--accent)] text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition-all"
+                  >
+                    Invia Richiesta
+                  </button>
+                </form>
+
+                <p className="mt-4 text-xs text-[var(--text-primary)] opacity-60 text-center">
+                  I tuoi dati saranno trattati nel rispetto della privacy e utilizzati solo per rispondere alla tua richiesta.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

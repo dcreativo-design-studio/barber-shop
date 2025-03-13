@@ -6,8 +6,8 @@ import Register from './components/auth/Register';
 import BarberDashboard from './components/barber/BarberDashboard';
 import BookingCalendar from './components/BookingCalendar';
 import GuestBooking from './components/GuestBooking';
-import HomePage from './components/HomePage'; // Importazione del nuovo componente HomePage
-import MarketingBarbershopSystem from './components/MarketingBarbershopSystem'; // Importazione del componente MarketingBarbershopSystem
+import HomePage from './components/HomePage';
+import MarketingBarbershopSystem from './components/MarketingBarbershopSystem';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
 import { TimezoneProvider } from './context/TimezoneContext';
