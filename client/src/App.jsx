@@ -35,7 +35,7 @@ function App() {
       <Route path="/guest-booking" element={<GuestBooking />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/marketing-barber-system" element={<MarketingBarbershopSystem />} /> {/* Nuova rotta per la landing page marketing */}
+      <Route path="/marketing-barber-system" element={<MarketingBarbershopSystem />} /> {/* Rotta pubblica - nessuna autenticazione richiesta */}
 
       {/* Route protette - richiedono autenticazione */}
       <Route
