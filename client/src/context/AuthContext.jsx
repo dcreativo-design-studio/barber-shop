@@ -6,7 +6,7 @@ const TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minuti
 const TOKEN_REFRESH_INTERVAL = 14 * 60 * 1000; // 14 minuti
 
 // Lista delle route pubbliche che non richiedono autenticazione
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/guest-booking'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/guest-booking', '/marketing-barber-system'];
 
 const AuthContext = createContext(null);
 
