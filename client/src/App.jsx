@@ -7,6 +7,7 @@ import BarberDashboard from './components/barber/BarberDashboard';
 import BookingCalendar from './components/BookingCalendar';
 import GuestBooking from './components/GuestBooking';
 import HomePage from './components/HomePage'; // Importazione del nuovo componente HomePage
+import MarketingBarbershopSystem from './components/MarketingBarbershopSystem'; // Importazione del componente MarketingBarbershopSystem
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
 import { TimezoneProvider } from './context/TimezoneContext';
@@ -34,6 +35,7 @@ function App() {
       <Route path="/guest-booking" element={<GuestBooking />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/marketing-barber-system" element={<MarketingBarbershopSystem />} /> {/* Nuova rotta per la landing page marketing */}
 
       {/* Route protette - richiedono autenticazione */}
       <Route

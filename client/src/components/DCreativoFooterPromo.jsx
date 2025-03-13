@@ -43,6 +43,19 @@ const DCreativoFooterPromo = () => {
             </button>
           </div>
         </div>
+        {/* call-to-action */}
+            <div className="mt-4">
+            <Link
+                to="/marketing-barber-system"
+                className="group relative overflow-hidden bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center"
+            >
+                <span className="relative z-10 flex items-center">
+                <Zap className="w-5 h-5 mr-2" />
+                Scopri il sistema di prenotazioni
+                </span>
+                <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
+            </Link>
+            </div>
 
         {/* Services Highlights */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
@@ -129,8 +142,18 @@ const DCreativoFooterPromo = () => {
             <span>Vedi la demo del sistema di prenotazioni</span>
             <ArrowRight className="w-3 h-3 ml-1" />
           </a>
-        </div>
-      </div>
+          <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
+
+            {/* NUOVO LINK ALLA LANDING PAGE */}
+            <Link
+            to="/marketing-barber-system"
+            className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+            >
+            <span>Scopri tutti i vantaggi del sistema</span>
+            <ArrowRight className="w-3 h-3 ml-1" />
+            </Link>
+            </div>
+            </div>
 
       {/* Info Request Modal */}
       {isModalOpen && (
