@@ -52,23 +52,12 @@ const MarketingBarbershopSystem = () => {
   // Array di testimonial
   const testimonials = [
     {
-      name: 'Santiago Rodriguez',
+      name: 'Santiago',
       role: 'Proprietario - Your Style Barber Studio',
-      quote: 'Questo sistema ha rivoluzionato la gestione del mio salone. Le prenotazioni sono aumentate del 20% e ho ridotto drasticamente i no-show.',
+      quote: '(Aggiungere recensione di Santiago',
       image: '/barber-testimonial-1.jpg'
     },
-    {
-      name: 'Marco Bianchi',
-      role: 'Titolare - Elegance Barber Shop',
-      quote: 'Risparmio almeno 10 ore settimanali che prima dedicavo a rispondere al telefono e gestire l\'agenda. Un investimento che si è ripagato in pochissimo tempo.',
-      image: '/barber-testimonial-2.jpg'
-    },
-    {
-      name: 'Luigi Verdi',
-      role: 'Barbiere - Modern Cuts',
-      quote: 'L\'interfaccia è intuitiva e i clienti adorano poter prenotare 24/7. Il supporto tecnico è sempre disponibile e reattivo.',
-      image: '/barber-testimonial-3.jpg'
-    }
+
   ];
 
   // Calcolo ROI
@@ -116,7 +105,7 @@ const MarketingBarbershopSystem = () => {
               <div className="relative">
                 <div className="rounded-lg shadow-2xl overflow-hidden border-4 border-white border-opacity-20">
                   <img
-                    src="/admin-panel-preview.jpg"
+                    src="/shot-14.png"
                     alt="Sistema di Prenotazioni per Barber Shop"
                     className="w-full h-auto"
                     onError={(e) => {
