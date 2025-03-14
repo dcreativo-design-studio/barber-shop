@@ -350,12 +350,71 @@ a:focus-visible {
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
     0 0 0 2px rgba(59, 130, 246, 0.3);
 }
+    /* Animazione di pulsazione con contrasto molto più evidente */
+@keyframes high-contrast-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1) rotate(12deg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) rotate(12deg);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1) rotate(12deg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Classe per applicare l'animazione migliorata */
+.high-contrast-sticker {
+  animation: high-contrast-pulse 2s infinite;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  /* Ombra interna per maggiore definizione */
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Ottimizzazione per mobile */
+@media (max-width: 768px) {
+  .high-contrast-sticker {
+    /* Aumento dimensioni per mobile */
+    padding: 6px 12px;
+    /* Ombra più pronunciata per migliore visibilità */
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+      0 6px 12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.3);
+    /* Bordo più spesso e visibile */
+    border-width: 2px;
+  }
+
+  /* Testo con maggiore visibilità su mobile */
+  .high-contrast-sticker span {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Effetti di hover per desktop */
+@media (min-width: 769px) {
+  .high-contrast-sticker:hover {
+    transform: scale(1.1) rotate(12deg) !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.5) !important;
+    transition: all 0.3s ease;
+  }
+}
 `;
 // Componente DCreativoPromoLink aggiornato con sticker promozionale
 const DCreativoPromoLink = ({ onClick }) => {
   return (
     <div className="relative mt-8 flex justify-center">
-      {/* Pulsante principale */}
+      {/* Pulsante principale - invariato */}
       <button
         onClick={onClick}
         className="relative py-3 px-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 mx-auto group z-10"
@@ -371,16 +430,18 @@ const DCreativoPromoLink = ({ onClick }) => {
         </span>
       </button>
 
-      {/* Sticker pubblicitario che invoglia a cliccare */}
-      <div className="absolute -top-12 -right-4 md:-right-10 transform rotate-12 bg-red-500 text-white px-3 py-1 rounded-lg shadow-lg animate-pulse">
+      {/* Sticker pubblicitario migliorato con contrasto maggiore */}
+      <div className="absolute -top-14 -right-5 md:-right-12 transform rotate-12 bg-gradient-to-br from-red-600 to-red-700 text-white px-4 py-2 rounded-lg shadow-lg high-contrast-sticker">
         <div className="relative flex items-center">
-          <span className="font-bold text-sm whitespace-nowrap">Scopri di più!</span>
-          <svg className="w-4 h-4 ml-1 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          <span className="font-bold text-sm md:text-base whitespace-nowrap drop-shadow-md">Scopri di più!</span>
+          <svg className="w-4 h-4 ml-1 animate-bounce drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
-          {/* Freccia curva che punta al pulsante */}
-          <svg className="absolute -bottom-6 -right-6 w-8 h-8 text-red-500 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+          {/* Bordo bianco per aumentare il contrasto */}
+          <div className="absolute inset-0 border-2 border-white rounded-lg opacity-40"></div>
+          {/* Freccia curva che punta al pulsante - più grande e visibile */}
+          <svg className="absolute -bottom-6 -right-6 w-10 h-10 text-red-600 filter drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
           </svg>
         </div>
       </div>
