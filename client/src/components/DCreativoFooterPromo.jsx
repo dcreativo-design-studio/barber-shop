@@ -1,13 +1,36 @@
 import { ArrowRight, Award, CheckCircle, Code, ExternalLink, Rocket, Zap } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { forwardRef, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-// DCreativo Footer Promo Component
-const DCreativoFooterPromo = () => {
+// Enhanced DCreativo Footer Promo Component
+const DCreativoFooterPromo = forwardRef((props, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Handle navigation to marketing page with proper scroll
+  const handleNavigateToMarketing = () => {
+    // If we're already on the marketing page, just scroll to top
+    if (location.pathname === '/marketing-barber-system') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // Otherwise navigate and set a flag to scroll to top after navigation
+      navigate('/marketing-barber-system');
+    }
+  };
+
+  // Effect to scroll to top when landing on the marketing page
+  useEffect(() => {
+    if (location.pathname === '/marketing-barber-system') {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   return (
-    <div className="dcreativo-footer-promo border-t border-[var(--accent)] border-opacity-20 py-8 px-4 bg-[var(--bg-secondary)]">
+    <div ref={ref} className="dcreativo-footer-promo border-t border-[var(--accent)] border-opacity-20 py-8 px-4 bg-[var(--bg-secondary)]">
       <div className="container mx-auto max-w-6xl">
         {/* DCreativo Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-[var(--text-primary)] border-opacity-10">
@@ -45,18 +68,31 @@ const DCreativoFooterPromo = () => {
           </div>
         </div>
 
-        {/* call-to-action */}
-        <div className="mt-4">
-          <Link
-            to="/marketing-barber-system"
-            className="group relative overflow-hidden bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center"
+        {/* Enhanced call-to-action */}
+        <div className="mt-8 mb-12">
+          <button
+            onClick={handleNavigateToMarketing}
+            className="group relative overflow-hidden bg-blue-600 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl flex items-center mx-auto animate-pulse hover:animate-none"
+            style={{
+              boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)',
+              transform: 'perspective(1000px) rotateX(0deg)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'perspective(1000px) rotateX(5deg)';
+              e.currentTarget.style.boxShadow = '0 20px 30px -10px rgba(59, 130, 246, 0.6)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg)';
+              e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(59, 130, 246, 0.5)';
+            }}
           >
             <span className="relative z-10 flex items-center">
-              <Zap className="w-5 h-5 mr-2" />
-              Scopri il sistema di prenotazioni
+              <Zap className="w-6 h-6 mr-3" />
+              <span className="text-xl">Scopri il sistema di prenotazioni</span>
+              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
             </span>
-            <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
-          </Link>
+            <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+          </button>
         </div>
 
         {/* Services Highlights */}
@@ -135,23 +171,23 @@ const DCreativoFooterPromo = () => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-  <a  // Manca questo tag di apertura
-    href="https://barbershop.dcreativo.ch/"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
-  >
+            <a
+              href="https://barbershop.dcreativo.ch/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+            >
               <span>Vedi la demo del sistema di prenotazioni</span>
               <ArrowRight className="w-3 h-3 ml-1" />
             </a>
             <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
-            <Link
-              to="/marketing-barber-system"
+            <button
+              onClick={handleNavigateToMarketing}
               className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
             >
               <span>Scopri tutti i vantaggi del sistema</span>
               <ArrowRight className="w-3 h-3 ml-1" />
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -235,6 +271,6 @@ const DCreativoFooterPromo = () => {
       </div>
     </div>
   );
-};
+});
 
 export default DCreativoFooterPromo;

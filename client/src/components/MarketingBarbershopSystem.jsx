@@ -1,11 +1,34 @@
 import { ArrowRight, BarChart2, Calendar, Check, Clock, DollarSign, Globe, Mail, Phone, ShieldCheck, Star, User, Users } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const MarketingBarbershopSystem = () => {
   const [activeTab, setActiveTab] = useState('features');
   const [activeFeature, setActiveFeature] = useState('booking');
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const location = useLocation();
+
+  // Scroll to top on component mount to ensure we start at the top
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Automatically update the activeTab based on URL hash if present
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash && ['features', 'benefits', 'roi', 'testimonials', 'pricing'].includes(hash)) {
+      setActiveTab(hash);
+
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location]);
 
   // Funzione per gestire l'invio del form
   const handleSubmit = (e) => {
@@ -71,7 +94,7 @@ const MarketingBarbershopSystem = () => {
   return (
     <div className="marketing-barbershop-system bg-gray-50 text-gray-800">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-r from-blue-600 to-indigo-800 text-white overflow-hidden">
+      <section id="hero" className="relative py-20 px-4 bg-gradient-to-r from-blue-600 to-indigo-800 text-white overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         <div className="container mx-auto max-w-5xl relative z-10">
           <div className="flex flex-col md:flex-row items-center">
@@ -124,34 +147,40 @@ const MarketingBarbershopSystem = () => {
       </section>
 
       {/* Nav Tabs */}
-      <section className="bg-white shadow">
+      {/* Nav Tabs - Updated to include IDs for each tab */}
+      <section id="nav-tabs" className="bg-white shadow">
         <div className="container mx-auto max-w-5xl">
           <div className="flex overflow-x-auto py-4 px-4">
             <button
+              id="features"
               onClick={() => setActiveTab('features')}
               className={`py-2 px-4 font-medium rounded-lg mr-2 whitespace-nowrap ${activeTab === 'features' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
               Funzionalità
             </button>
             <button
+              id="benefits"
               onClick={() => setActiveTab('benefits')}
               className={`py-2 px-4 font-medium rounded-lg mr-2 whitespace-nowrap ${activeTab === 'benefits' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
               Vantaggi
             </button>
             <button
+              id="roi"
               onClick={() => setActiveTab('roi')}
               className={`py-2 px-4 font-medium rounded-lg mr-2 whitespace-nowrap ${activeTab === 'roi' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
               ROI
             </button>
             <button
+              id="testimonials"
               onClick={() => setActiveTab('testimonials')}
               className={`py-2 px-4 font-medium rounded-lg mr-2 whitespace-nowrap ${activeTab === 'testimonials' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
               Testimonial
             </button>
             <button
+              id="pricing"
               onClick={() => setActiveTab('pricing')}
               className={`py-2 px-4 font-medium rounded-lg whitespace-nowrap ${activeTab === 'pricing' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
             >
@@ -164,10 +193,10 @@ const MarketingBarbershopSystem = () => {
       {/* Content Sections */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-5xl">
-
-          {/* Features Tab */}
+          {/* Each tab section remains the same but with proper ID attributes */}
           {activeTab === 'features' && (
-            <div className="features-section animate-fade-in">
+            <div id="features-content" className="features-section animate-fade-in">
+
               <h2 className="text-3xl font-bold text-center mb-6">Funzionalità Principali</h2>
               <p className="text-center text-gray-600 max-w-3xl mx-auto mb-10">
                 Il nostro sistema di prenotazioni è stato progettato specificamente per barber shop e saloni, con funzionalità avanzate che ottimizzano la gestione degli appuntamenti.

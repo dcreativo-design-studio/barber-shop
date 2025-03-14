@@ -74,7 +74,33 @@ const dCreativoStyles = `
     height: 100%;
   }
 `;
+const DCreativoPromoLink = ({ onClick }) => {
+  return (
+    <div className="mt-6 group cursor-pointer">
+      <button
+        onClick={onClick}
+        className="relative py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 group"
+        aria-label="Scopri il sistema di prenotazioni sviluppato da DCreativo"
+      >
+        <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+        <span className="text-lg font-medium">✨ Sistema di prenotazioni sviluppato da DCreativo</span>
+        <div className="flex items-center ml-2 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </button>
 
+      {/* Floating badges to attract attention */}
+      <div className="absolute -mt-10 -mr-2 right-0 transform rotate-12 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse shadow-lg">
+        Novità!
+      </div>
+      <div className="absolute -mt-10 ml-2 left-0 transform -rotate-12 bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">
+        Scopri di più
+      </div>
+    </div>
+  );
+};
 // Componente per visualizzare una singola card di servizio
 const ServiceCard = ({ icon, title, description, price, user }) => {
   return (
@@ -108,6 +134,8 @@ const HomePage = React.memo(() => {
     testimonials: useRef(null),
     contact: useRef(null)
   };
+
+
 
   // Scroll to section with smooth animation
   const scrollToSection = (id) => {
@@ -186,11 +214,14 @@ const HomePage = React.memo(() => {
   // Aggiungi riferimento al componente da promuovere
   const handleDCreativoSectionRef = useRef(null);
 
-  // Funzione per scrollare alla sezione DCreativo
+  // Scroll to DCreativo section with proper positioning at the top
   const scrollToDCreativoSection = () => {
-    if (handleDCreativoSectionRef.current) {
-      handleDCreativoSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setShowDCreativoPromo(true);
+    setTimeout(() => {
+      if (handleDCreativoSectionRef.current) {
+        handleDCreativoSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   return (
@@ -902,30 +933,26 @@ const HomePage = React.memo(() => {
           </div>
 
           <div className="border-t border-[var(--text-primary)] border-opacity-10 pt-6 text-center">
-            <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+  <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
 
-            {/* Link per mostrare la promozione DCreativo */}
-            <button
-              onClick={() => {
-                setShowDCreativoPromo(true);
-                scrollToDCreativoSection();
-              }}
-              className="mt-4 text-[var(--accent)] hover:underline text-sm inline-flex items-center"
-            >
-              Sistema di prenotazioni sviluppato da DCreativo
-              <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
-            </button>
-          </div>
-        </div>
-      </footer>
+  {/* Replace the old button with our new enhanced component */}
+  <DCreativoPromoLink
+    onClick={() => {
+      setShowDCreativoPromo(true);
+      scrollToDCreativoSection();
+    }}
+  />
+</div>
+</div>
+</footer>
 
-      {/* DCreativo Footer Promo Section */}
-      <style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
-      <div className={`transition-all duration-500 ${showDCreativoPromo ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-        <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
-      </div>
-    </div>
-  );
+{/* DCreativo Footer Promo Section */}
+<style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
+<div className={`transition-all duration-500 ${showDCreativoPromo ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+  <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
+</div>
+</div>
+);
 });
 
 export default HomePage;
