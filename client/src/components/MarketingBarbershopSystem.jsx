@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart2, Calendar, Check, Clock, DollarSign, Globe, Mail, Phone, ShieldCheck, Star, User, Users } from 'lucide-react';
+import { ArrowRight, BarChart2, Calendar, Check, Clock, DollarSign, Globe, Mail, Phone, ShieldCheck, User, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -562,112 +562,8 @@ const MarketingBarbershopSystem = () => {
             </div>
           )}
 
-          {/* Testimonials Tab */}
-          {activeTab === 'testimonials' && (
-            <div className="testimonials-section animate-fade-in">
-              <h2 className="text-3xl font-bold text-center mb-6">Cosa Dicono i Clienti</h2>
-              <p className="text-center text-gray-600 max-w-3xl mx-auto mb-10">
-                Scopri le esperienze di chi ha già implementato il nostro sistema di prenotazioni nel proprio salone.
-              </p>
+          {/* Testimonials Tab Non ho ancora recensioni sull'utilizzo dell'pp e quindi questa sezione per il momento non deve comparire (codice salvato in un file separato testimonials.txt)*/}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
-                {/* Testimonial Slider */}
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="relative h-full">
-                    {testimonials.map((testimonial, index) => (
-                      <div
-                        key={index}
-                        className={`absolute inset-0 transition-opacity duration-500 flex flex-col ${
-                          activeTestimonial === index ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                        }`}
-                      >
-                        <div className="bg-blue-600 p-6 text-white">
-                          <div className="flex items-center">
-                            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center overflow-hidden mr-4">
-                              <img
-                                src={testimonial.image}
-                                alt={testimonial.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23718096'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='system-ui' font-size='30'%3E" + testimonial.name.charAt(0) + "%3C/text%3E%3C/svg%3E";
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-xl">{testimonial.name}</h3>
-                              <p className="text-blue-200 text-sm">{testimonial.role}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-6 flex-grow flex flex-col justify-center">
-                          <div className="text-6xl text-blue-200 mb-4">"</div>
-                          <p className="text-lg italic mb-6">{testimonial.quote}</p>
-                          <div className="flex text-yellow-500">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-5 h-5 fill-current" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Testimonial Navigation */}
-                <div className="flex flex-col">
-                  {testimonials.map((testimonial, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveTestimonial(index)}
-                      className={`text-left p-6 mb-4 rounded-lg transition-all duration-300 ${
-                        activeTestimonial === index
-                          ? 'bg-white shadow-lg border-l-4 border-blue-600'
-                          : 'bg-gray-100 hover:bg-gray-200'
-                      }`}
-                    >
-                      <h3 className="font-bold">{testimonial.name}</h3>
-                      <p className="text-sm text-gray-600">{testimonial.role}</p>
-                      <p className="mt-2 line-clamp-2">{testimonial.quote}</p>
-                    </button>
-                  ))}
-
-                  <div className="mt-4 p-6 bg-blue-50 rounded-lg border border-blue-100">
-                    <h3 className="font-bold text-blue-800 mb-2">Risultati Reali</h3>
-                    <p className="text-sm">
-                      Tutti i nostri clienti hanno riscontrato un aumento delle prenotazioni e una riduzione dei no-show dopo l'implementazione del sistema.
-                    </p>
-                    <ul className="mt-3">
-                      <li className="flex items-center text-sm">
-                        <Check className="text-green-500 w-4 h-4 mr-2" />
-                        <span>Incremento del volume d'affari</span>
-                      </li>
-                      <li className="flex items-center text-sm mt-1">
-                        <Check className="text-green-500 w-4 h-4 mr-2" />
-                        <span>Maggiore efficienza operativa</span>
-                      </li>
-                      <li className="flex items-center text-sm mt-1">
-                        <Check className="text-green-500 w-4 h-4 mr-2" />
-                        <span>Miglioramento dell'esperienza cliente</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <a
-                  href="https://barbershop.dcreativo.ch/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-3 px-8 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center"
-                >
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                  Prova la Demo Live
-                </a>
-              </div>
-            </div>
-          )}
 
           {/* Pricing Tab */}
           {activeTab === 'pricing' && (
