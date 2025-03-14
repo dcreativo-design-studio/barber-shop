@@ -431,7 +431,7 @@ const DCreativoPromoLink = ({ onClick }) => {
       </button>
 
       {/* Sticker pubblicitario migliorato con contrasto maggiore */}
-      <div className="absolute -top-14 -right-5 md:-right-12 transform rotate-12 bg-gradient-to-br from-red-600 to-red-700 text-white px-4 py-2 rounded-lg shadow-lg high-contrast-sticker">
+      <div className="absolute -top-14 -right-5 md:-right-12 transform rotate-12 bg-gradient-to-br from-red-400 to-red-700 text-white px-4 py-2 rounded-lg shadow-lg high-contrast-sticker">
         <div className="relative flex items-center">
           <span className="font-bold text-sm md:text-base whitespace-nowrap drop-shadow-md">Scopri di più!</span>
           <svg className="w-4 h-4 ml-1 animate-bounce drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
