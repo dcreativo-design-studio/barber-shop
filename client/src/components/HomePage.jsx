@@ -73,14 +73,292 @@ const dCreativoStyles = `
   .dcreativo-footer-promo .service-card:hover::after {
     height: 100%;
   }
+   /* Enhanced animations for DCreativo promo elements */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes glowing {
+  0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Add these classes to your global CSS */
+.promo-button-3d {
+  transform: perspective(1000px) rotateX(0deg);
+  transition: all 0.3s ease;
+}
+
+.promo-button-3d:hover {
+  transform: perspective(1000px) rotateX(5deg);
+}
+
+.promo-badge {
+  position: absolute;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  animation: float 3s ease-in-out infinite;
+}
+
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Enhance the CTA button */
+.enhanced-cta-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: glowing 2s infinite;
+}
+
+.enhanced-cta-button:hover {
+  transform: translateY(-3px);
+}
+
+.enhanced-cta-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.enhanced-cta-button:hover::after {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Improved scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent, #4F46E5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+/* Accessibility improvements */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--accent, #4F46E5);
+  outline-offset: 2px;
+}
+
+/* Add smooth transitions for theme changes */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Enhanced tab focus styles for keyboard navigation */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent, #4F46E5);
+  outline-offset: 2px;
+}
+  /* Effetto pulsante principale */
+.dcreativo-cta-main {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+}
+
+.dcreativo-cta-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.6);
+}
+
+.dcreativo-cta-main::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.dcreativo-cta-main:hover::after {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Pulsante "Scopri di più" */
+.dcreativo-cta-secondary {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.dcreativo-cta-secondary:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Animazione pulsante scopri */
+@keyframes bounce-horizontal {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+.dcreativo-cta-secondary:hover svg {
+  animation: bounce-horizontal 1s ease infinite;
+}
+
+/* Stile per il contenitore del footer promo */
+.dcreativo-footer-promo-container {
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.dcreativo-footer-promo-container.visible {
+  max-height: 2000px; /* Un valore grande per contenere il contenuto */
+  opacity: 1;
+}
+
+/* Pulsatione leggera per attirare l'attenzione */
+@keyframes soft-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.pulse-attention {
+  animation: soft-pulse 2s infinite;
+}
+  /* Pulsazione più sottile per il bordo luminoso */
+@keyframes pulse-subtle {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite;
+}
+
+/* Pulsazione per lo sticker "Scopri di più" */
+@keyframes pulse-stronger {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.animate-pulse-stronger {
+  animation: pulse-stronger 2s infinite;
+}
+
+/* Rimbalzo verticale per la freccia */
+@keyframes bounce-vertical {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+.animate-bounce-vertical {
+  animation: bounce-vertical 1s infinite;
+}
+
+/* Effetto di brillantezza per il pulsante CTA */
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: shine 3s infinite;
+}
+
+/* Stili mobile-friendly */
+@media (max-width: 768px) {
+  .mobile-extra-visible {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+  }
+
+  /* Dimensioni aumentate per tocco su mobile */
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Aggiunta ombre migliorate per contrasto anche su sfondi scuri */
+.enhanced-visibility {
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 2px rgba(59, 130, 246, 0.3);
+}
 `;
+// Componente DCreativoPromoLink aggiornato con sticker promozionale
 const DCreativoPromoLink = ({ onClick }) => {
   return (
-    <div className="relative flex flex-col items-center justify-center mt-8">
+    <div className="relative mt-8 flex justify-center">
       {/* Pulsante principale */}
       <button
         onClick={onClick}
-        className="relative py-3 px-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 mx-auto group"
+        className="relative py-3 px-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 mx-auto group z-10"
         aria-label="Sistema di prenotazioni sviluppato da DCreativo"
       >
         <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -93,18 +371,18 @@ const DCreativoPromoLink = ({ onClick }) => {
         </span>
       </button>
 
-      {/* Pulsante 'Scopri di più' posizionato sotto il pulsante principale */}
-      <div className="mt-4 flex justify-center">
-        <button
-          onClick={onClick}
-          className="bg-blue-100 text-blue-600 hover:bg-blue-200 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 flex items-center shadow-md hover:shadow-lg"
-        >
-          Scopri di più
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
+      {/* Sticker pubblicitario che invoglia a cliccare */}
+      <div className="absolute -top-12 -right-4 md:-right-10 transform rotate-12 bg-red-500 text-white px-3 py-1 rounded-lg shadow-lg animate-pulse">
+        <div className="relative flex items-center">
+          <span className="font-bold text-sm whitespace-nowrap">Scopri di più!</span>
+          <svg className="w-4 h-4 ml-1 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
           </svg>
-        </button>
+          {/* Freccia curva che punta al pulsante */}
+          <svg className="absolute -bottom-6 -right-6 w-8 h-8 text-red-500 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+          </svg>
+        </div>
       </div>
     </div>
   );
@@ -219,14 +497,25 @@ const HomePage = React.memo(() => {
   const handleDCreativoSectionRef = useRef(null);
 
   // Scroll to DCreativo section with proper positioning at the top
-  const scrollToDCreativoSection = () => {
+ // Funzione migliorata per lo scrolling, specifica per dispositivi mobili
+const scrollToDCreativoSection = () => {
+  // Breve timeout per assicurarci che il componente sia renderizzato
+  setTimeout(() => {
     if (handleDCreativoSectionRef.current) {
-      handleDCreativoSectionRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+      // Calcola la posizione corretta con offset per mobile e desktop
+      const isMobile = window.innerWidth < 768;
+      const yOffset = isMobile ? -100 : -50; // Offset maggiore per mobile
+
+      const element = handleDCreativoSectionRef.current;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
       });
     }
-  };
+  }, 300); // Attendi un po' più a lungo per dispositivi mobili
+};
 
   return (
     <div className="home-page min-h-screen overflow-x-hidden">

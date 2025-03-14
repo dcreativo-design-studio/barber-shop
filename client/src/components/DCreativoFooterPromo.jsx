@@ -17,7 +17,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
         behavior: 'smooth'
       });
     } else {
-      // Otherwise navigate and set a flag to scroll to top after navigation
+      // Otherwise navigate and set a flag for scrolling
       navigate('/marketing-barber-system');
     }
   };
@@ -68,22 +68,13 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
           </div>
         </div>
 
-        {/* Enhanced call-to-action */}
+        {/* Enhanced call-to-action - Migliorato contrasto e visibilità */}
         <div className="mt-8 mb-12">
           <button
             onClick={handleNavigateToMarketing}
-            className="group relative overflow-hidden bg-blue-600 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl flex items-center mx-auto animate-pulse hover:animate-none"
+            className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center mx-auto"
             style={{
-              boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)',
-              transform: 'perspective(1000px) rotateX(0deg)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'perspective(1000px) rotateX(5deg)';
-              e.currentTarget.style.boxShadow = '0 20px 30px -10px rgba(59, 130, 246, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg)';
-              e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(59, 130, 246, 0.5)';
+              boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.7)',
             }}
           >
             <span className="relative z-10 flex items-center">
@@ -91,7 +82,10 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
               <span className="text-xl">Scopri il sistema di prenotazioni</span>
               <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
             </span>
-            <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></span>
+
+            {/* Aggiungiamo bordo luminoso e pulsazione per maggiore visibilità */}
+            <span className="absolute inset-0 border-2 border-blue-300 rounded-lg animate-pulse-subtle"></span>
           </button>
         </div>
 
@@ -147,7 +141,8 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
         </div>
 
         {/* Contact Info */}
-        <div className="text-center">
+       {/* Contact Info - Modificato il link alla landing page */}
+       <div className="text-center">
           <p className="text-[var(--text-primary)] opacity-80 mb-4">
             Vuoi saperne di più sui nostri servizi di sviluppo web?
           </p>
@@ -175,7 +170,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
               href="https://barbershop.dcreativo.ch/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center font-medium"
             >
               <span>Vedi la demo del sistema di prenotazioni</span>
               <ArrowRight className="w-3 h-3 ml-1" />
@@ -183,7 +178,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
             <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
             <button
               onClick={handleNavigateToMarketing}
-              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center"
+              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center font-medium"
             >
               <span>Scopri tutti i vantaggi del sistema</span>
               <ArrowRight className="w-3 h-3 ml-1" />
