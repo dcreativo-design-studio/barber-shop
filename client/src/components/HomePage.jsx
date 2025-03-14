@@ -76,27 +76,35 @@ const dCreativoStyles = `
 `;
 const DCreativoPromoLink = ({ onClick }) => {
   return (
-    <div className="mt-6 group cursor-pointer">
+    <div className="relative flex flex-col items-center justify-center mt-8">
+      {/* Pulsante principale */}
       <button
         onClick={onClick}
-        className="relative py-3 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 group"
-        aria-label="Scopri il sistema di prenotazioni sviluppato da DCreativo"
+        className="relative py-3 px-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 mx-auto group"
+        aria-label="Sistema di prenotazioni sviluppato da DCreativo"
       >
         <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-        <span className="text-lg font-medium">✨ Sistema di prenotazioni sviluppato da DCreativo</span>
-        <div className="flex items-center ml-2 animate-bounce">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <span className="flex items-center">
+          <span className="text-lg font-medium mr-2">✨</span>
+          <span>Sistema di prenotazioni sviluppato da DCreativo</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 group-hover:translate-y-1 transition-transform">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
-        </div>
+        </span>
       </button>
 
-      {/* Floating badges to attract attention */}
-      <div className="absolute -mt-10 -mr-2 right-0 transform rotate-12 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse shadow-lg">
-        Novità!
-      </div>
-      <div className="absolute -mt-10 ml-2 left-0 transform -rotate-12 bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-        Scopri di più
+      {/* Pulsante 'Scopri di più' posizionato sotto il pulsante principale */}
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={onClick}
+          className="bg-blue-100 text-blue-600 hover:bg-blue-200 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 flex items-center shadow-md hover:shadow-lg"
+        >
+          Scopri di più
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -190,11 +198,7 @@ const HomePage = React.memo(() => {
 
   // Mostra la promozione DCreativo dopo 3 secondi dalla visualizzazione della pagina
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowDCreativoPromo(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    setShowDCreativoPromo(false); // Assicura che sia chiuso all'avvio
   }, []);
 
   // Auto-rotate testimonials
@@ -216,12 +220,12 @@ const HomePage = React.memo(() => {
 
   // Scroll to DCreativo section with proper positioning at the top
   const scrollToDCreativoSection = () => {
-    setShowDCreativoPromo(true);
-    setTimeout(() => {
-      if (handleDCreativoSectionRef.current) {
-        handleDCreativoSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    if (handleDCreativoSectionRef.current) {
+      handleDCreativoSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   return (
@@ -933,13 +937,17 @@ const HomePage = React.memo(() => {
           </div>
 
           <div className="border-t border-[var(--text-primary)] border-opacity-10 pt-6 text-center">
-  <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+          <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
 
-  {/* Replace the old button with our new enhanced component */}
+  {/* Nuovo componente con pulsante principale e secondario */}
   <DCreativoPromoLink
     onClick={() => {
-      setShowDCreativoPromo(true);
-      scrollToDCreativoSection();
+      setShowDCreativoPromo(!showDCreativoPromo); // Toggle per aprire/chiudere
+      if (!showDCreativoPromo) { // Solo se stiamo aprendo
+        setTimeout(() => {
+          scrollToDCreativoSection();
+        }, 100);
+      }
     }}
   />
 </div>
@@ -948,7 +956,11 @@ const HomePage = React.memo(() => {
 
 {/* DCreativo Footer Promo Section */}
 <style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
-<div className={`transition-all duration-500 ${showDCreativoPromo ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+<div className={`transition-all duration-500 ${
+  showDCreativoPromo
+    ? 'opacity-100 max-h-[2000px]' // Usa max-height invece di height per supportare contenuti di dimensioni variabili
+    : 'opacity-0 max-h-0 overflow-hidden'
+  }`}>
   <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
 </div>
 </div>
