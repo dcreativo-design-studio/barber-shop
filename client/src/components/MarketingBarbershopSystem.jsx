@@ -172,13 +172,7 @@ const MarketingBarbershopSystem = () => {
             >
               ROI
             </button>
-            <button
-              id="testimonials"
-              onClick={() => setActiveTab('testimonials')}
-              className={`py-2 px-4 font-medium rounded-lg mr-2 whitespace-nowrap ${activeTab === 'testimonials' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            >
-              Testimonial
-            </button>
+
             <button
               id="pricing"
               onClick={() => setActiveTab('pricing')}
