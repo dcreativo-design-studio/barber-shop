@@ -35,16 +35,17 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
         {/* DCreativo Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-[var(--text-primary)] border-opacity-10">
           <div className="mb-6 md:mb-0 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start mb-4">
-              <img
-                src="/dcreativo-logo.png"
-                alt="DCreativo Logo"
-                className="w-12 h-12 mr-3"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='%23222'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' text-anchor='middle' fill='%2300CCFF'%3ED%3C/text%3E%3C/svg%3E";
-                }}
-              />
+          <div className="w-12 h-12 mr-3 rounded-full overflow-hidden flex items-center justify-center bg-gray-900 border border-blue-400/20">
+  <img
+    src="/dcreativo-logo.png"
+    alt="DCreativo Logo"
+    className="w-full h-full object-contain p-0.5"
+    onError={(e) => {
+      e.target.onerror = null;
+      e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='%23222'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' text-anchor='middle' fill='%2300CCFF'%3ED%3C/text%3E%3C/svg%3E";
+    }}
+  />
+</div>
               <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-[var(--accent)] to-purple-400">
                 DCreativo Solutions
               </h3>
@@ -264,7 +265,8 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
           </div>
         )}
       </div>
-    </div>
+
+
   );
 });
 
