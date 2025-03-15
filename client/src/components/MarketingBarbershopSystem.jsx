@@ -22,6 +22,21 @@ const MarketingBarbershopSystem = () => {
   const location = useLocation();
   const { completeTransition } = useTransition();
 
+  // Aggiungi una classe di preload all'elemento root
+  useEffect(() => {
+    // Aggiungi una classe al body per indicare che siamo in fase di caricamento
+    document.body.classList.add('preloading-marketing');
+
+    // Rimuovi questa classe dopo un breve ritardo
+    setTimeout(() => {
+      document.body.classList.remove('preloading-marketing');
+    }, 300);
+
+    return () => {
+      document.body.classList.remove('preloading-marketing');
+    };
+  }, []);
+
   // Refs for sections to enable smooth scrolling
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
@@ -32,71 +47,70 @@ const MarketingBarbershopSystem = () => {
   // Refs for entrance animations
   const staggeredRefs = useRef([]);
   const observerRef = useRef(null);
-
   // Animation state
-  const [animationsLoaded, setAnimationsLoaded] = useState(false);
-
   // Scroll to top and setup animations on component mount
-  useEffect(() => {
-    window.scrollTo(0, 0);
+useEffect(() => {
+  // Aggiungi una classe al body per indicare che siamo in fase di caricamento
+  document.body.classList.add('preloading-marketing');
 
-    // Complete any transitions in progress
-    if (completeTransition) {
-      // Forzare la chiamata con un leggero ritardo per assicurarsi che venga eseguita dopo il render
-      setTimeout(() => {
-        completeTransition();
-      }, 200);
-    }
+  window.scrollTo(0, 0);
 
-    // Setup entrance animations with a slight delay
+  // Complete any transitions in progress
+  if (completeTransition) {
+    // Forzare la chiamata con un leggero ritardo per assicurarsi che venga eseguita dopo il render
     setTimeout(() => {
-      setAnimationsLoaded(true);
+      completeTransition();
+    }, 200);
+  }
 
-      // Setup hero animations
-      const heroElements = document.querySelectorAll('.hero-element');
-      heroElements.forEach((el, index) => {
-        el.style.opacity = 0;
-        el.style.transform = 'translateY(30px)';
+  // Setup entrance animations con un ritardo leggermente maggiore (dopo che la transizione è completata)
+setTimeout(() => {
+  // Attiva direttamente le animazioni degli elementi hero
+  const heroElements = document.querySelectorAll('.hero-element');
+  heroElements.forEach((el, index) => {
+    // Rimuovi qualsiasi stile inline che potrebbe interferire
+    el.style.opacity = '';
+    el.style.transform = '';
 
-        setTimeout(() => {
-          el.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
-          el.style.opacity = 1;
-          el.style.transform = 'translateY(0)';
-        }, 300 + (index * 200));
-      });
+    // Imposta direttamente la classe per attivare l'animazione
+    el.classList.add('animate-hero');
+    // Aggiungi un delay basato sull'indice dell'elemento
+    el.style.animationDelay = `${0.3 + (index * 0.15)}s`;
+  });
 
-      // Setup intersection observer for staggered entrances
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry, idx) => {
-            if (entry.isIntersecting) {
-              // Add a staggered delay based on the element's position
-              setTimeout(() => {
-                entry.target.classList.add('staggered-entrance-visible');
-              }, idx * 100);
+  // Setup intersection observer for staggered entrances
+  observerRef.current = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, idx) => {
+        if (entry.isIntersecting) {
+          // Add a staggered delay based on the element's position
+          setTimeout(() => {
+            entry.target.classList.add('staggered-entrance-visible');
+          }, idx * 100);
 
-              // Unobserve after animation is triggered
-              observerRef.current.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-
-      // Observe all staggered elements
-      document.querySelectorAll('.staggered-entrance').forEach((el) => {
-        if (observerRef.current) {
-          observerRef.current.observe(el);
+          // Unobserve after animation is triggered
+          observerRef.current.unobserve(entry.target);
         }
       });
-    }, 100);
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -50px 0px' } // Aggiungi rootMargin per iniziare l'animazione un po' prima
+  );
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [completeTransition]);
+  // Observe all staggered elements
+  document.querySelectorAll('.staggered-entrance').forEach((el) => {
+    if (observerRef.current) {
+      observerRef.current.observe(el);
+    }
+  });
+}, 600); // Aumentato a 600ms per dare più tempo alla transizione di completarsi e al contenuto di renderizzarsi completamente
+
+return () => {
+  // Cleanup quando il componente viene smontato
+  if (observerRef.current) {
+    observerRef.current.disconnect();
+  }
+};
+}, [completeTransition]);
 
   // Handle URL hash navigation
   useEffect(() => {

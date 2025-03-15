@@ -24,8 +24,8 @@ const PageTransition = ({ children }) => {
           setTransitionStage('page-transition-enter-active');
           completeTransition();
           clearTimeout(enterTimeout);
-        }, 50);
-      }, 400);
+        }, 100); // Ridotto da 50ms a 100ms
+      }, 300); // Ridotto da 400ms a 300ms
 
       return () => clearTimeout(timeout);
     }
