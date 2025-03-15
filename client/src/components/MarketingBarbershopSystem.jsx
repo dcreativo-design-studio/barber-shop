@@ -41,7 +41,12 @@ const MarketingBarbershopSystem = () => {
     window.scrollTo(0, 0);
 
     // Complete any transitions in progress
-    completeTransition && completeTransition();
+    if (completeTransition) {
+      // Forzare la chiamata con un leggero ritardo per assicurarsi che venga eseguita dopo il render
+      setTimeout(() => {
+        completeTransition();
+      }, 200);
+    }
 
     // Setup entrance animations with a slight delay
     setTimeout(() => {

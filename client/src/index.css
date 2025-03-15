@@ -798,12 +798,17 @@ button,
   right: 0;
   bottom: 0;
   background-color: rgba(59, 130, 246, 0.2);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px); /* Riduci l'intensità del blur da 10px a 5px */
   z-index: 9999;
   pointer-events: none;
   opacity: 0;
   transition: opacity 600ms ease-in-out;
 }
+
 .page-transition-overlay.active {
   opacity: 1;
 }
+.page-transition-enter { opacity: 0; transform: translate3d(0, 20px, 0); }
+.page-transition-enter-active { opacity: 1; transform: translate3d(0, 0, 0); transition: opacity 800ms ease-in-out, transform 800ms ease-out; }
+.page-transition-exit { opacity: 1; transform: translate3d(0, 0, 0); }
+.page-transition-exit-active { opacity: 0; transform: translate3d(0, -20px, 0); transition: opacity 400ms ease-in-out, transform 400ms ease-in; }
