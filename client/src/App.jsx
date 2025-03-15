@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -9,14 +9,17 @@ import GuestBooking from './components/GuestBooking';
 import HomePage from './components/HomePage';
 import MarketingBarbershopSystem from './components/MarketingBarbershopSystem';
 import Navbar from './components/Navbar';
+import PageTransition from './components/PageTransition';
 import { useAuth } from './context/AuthContext';
 import { TimezoneProvider } from './context/TimezoneContext';
+import { TransitionProvider } from './context/TransitionContext';
 import UserProfile from './pages/UserProfile';
 import WaitingList from './pages/WaitingList';
 
 function App() {
   const [theme, setTheme] = useState('dark');
   const { user } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -29,7 +32,7 @@ function App() {
   };
 
   const renderRoutes = () => (
-    <Routes>
+    <Routes location={location}>
       {/* Route pubbliche - accessibili a tutti */}
       <Route path="/" element={<HomePage />} />
       <Route path="/guest-booking" element={<GuestBooking />} />
@@ -68,12 +71,16 @@ function App() {
 
   return (
     <TimezoneProvider>
-      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] theme-transition">
-        <Navbar onThemeToggle={toggleTheme} isDark={theme === 'dark'} />
-        <main className="navbar-offset">
-          {renderRoutes()}
-        </main>
-      </div>
+      <TransitionProvider>
+        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] theme-transition">
+          <Navbar onThemeToggle={toggleTheme} isDark={theme === 'dark'} />
+          <main className="navbar-offset">
+            <PageTransition>
+              {renderRoutes()}
+            </PageTransition>
+          </main>
+        </div>
+      </TransitionProvider>
     </TimezoneProvider>
   );
 }
