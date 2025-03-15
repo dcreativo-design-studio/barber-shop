@@ -9,7 +9,6 @@ import GuestBooking from './components/GuestBooking';
 import HomePage from './components/HomePage';
 import MarketingBarbershopSystem from './components/MarketingBarbershopSystem';
 import Navbar from './components/Navbar';
-import PageTransition from './components/PageTransition';
 import { useAuth } from './context/AuthContext';
 import { TimezoneProvider } from './context/TimezoneContext';
 import { TransitionProvider } from './context/TransitionContext';
