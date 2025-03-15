@@ -616,171 +616,80 @@ svg {
 
 .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
 .animate-scaleIn { animation: scaleIn 0.3s ease-in-out; }
+.animate-heroEntrance { opacity: 0; transform: translateY(30px); animation: heroEntrance 1s ease-out both; }
+.animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+.animate-float-slow { animation: float 8s ease-in-out infinite; }
+.animate-float-medium { animation: float 6s ease-in-out infinite; }
+.animate-float-fast { animation: float 4s ease-in-out infinite; }
+.animate-grow-width { animation: growWidth 1.5s ease-out forwards; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes pulse-subtle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.2; } }
-
-/* Animazioni di base per i form modali */
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.3s ease-in-out;
-}
-
-.animate-pulse {
-  animation: pulse-subtle 2s infinite;
-}
-
-.animate-pulse.delay-300 {
-  animation-delay: 300ms;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Keyframes per le animazioni */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 0.1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animazioni per le sezioni della pagina */
-.features-section,
-.benefits-section,
-.roi-section,
-.testimonials-section,
-.pricing-section {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Transizioni sui bottoni e card */
-button,
-.service-card,
-.bg-white {
-  transition: all 0.3s ease;
-}
-
-/* Animazione per il messaggio di successo */
-.success-checkmark {
-  animation: checkmark 0.5s ease-in-out 0.7s both;
-}
-
-@keyframes checkmark {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Animazione per il reindirizzamento dal footer alla landing-page */
-
-/* Animazioni di transizione tra pagine */
-/* Animazioni di transizione tra pagine */
-.page-transition-enter {
-  opacity: 0;
-  transform: translate3d(0, 20px, 0);
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-  transition: opacity 800ms ease-in-out, transform 800ms ease-out;
-}
-
-.page-transition-exit {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transform: translate3d(0, -20px, 0);
-  transition: opacity 400ms ease-in-out, transform 400ms ease-in;
-}
+@keyframes heroEntrance { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes growWidth { from { width: 0; } to { width: var(--target-width, 100%); } }
+@keyframes pulse-subtle { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+.page-transition-enter { opacity: 0; transform: translate3d(0, 20px, 0); }
+.page-transition-enter-active { opacity: 1; transform: translate3d(0, 0, 0); transition: opacity 800ms ease-in-out, transform 800ms ease-out; }
+.page-transition-exit { opacity: 1; transform: translate3d(0, 0, 0); }
+.page-transition-exit-active { opacity: 0; transform: translate3d(0, -20px, 0); transition: opacity 400ms ease-in-out, transform 400ms ease-in; }
 
 /* Hero section entrance animation */
 @keyframes heroEntrance {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.hero-title {
-  animation: heroEntrance 1s ease-out 0.3s both;
+/* Animazioni staggered */
+.staggered-entrance {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.staggered-entrance-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-.hero-subtitle {
-  animation: heroEntrance 1s ease-out 0.5s both;
+/* Animazione per il cambio di tab */
+.tab-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.tab-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
+.tab-transition-exit {
+  opacity: 1;
+}
+.tab-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
 }
 
-.hero-buttons {
-  animation: heroEntrance 1s ease-out 0.7s both;
-}
+/* Animazioni generali */
+.animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+.animate-scaleIn { animation: scaleIn 0.3s ease-in-out; }
+.animate-heroEntrance { opacity: 0; transform: translateY(30px); animation: heroEntrance 1s ease-out both; }
+.animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+.animate-float-slow { animation: float 8s ease-in-out infinite; }
+.animate-float-medium { animation: float 6s ease-in-out infinite; }
+.animate-float-fast { animation: float 4s ease-in-out infinite; }
+.animate-grow-width { animation: growWidth 1.5s ease-out forwards; }
+.pulse-on-hover { transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
+.pulse-on-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
 
-.hero-image {
-  animation: heroEntrance 1s ease-out 0.9s both;
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes heroEntrance { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes growWidth { from { width: 0; } to { width: var(--target-width, 100%); } }
+@keyframes pulse-subtle { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
-/* Animazione overlay di transizione */
+/* Animazioni per gli overlay */
 .page-transition-overlay {
   position: fixed;
   top: 0;
@@ -794,50 +703,52 @@ button,
   opacity: 0;
   transition: opacity 600ms ease-in-out;
 }
-
 .page-transition-overlay.active {
   opacity: 1;
 }
-
-/* Effetto pulse per gli elementi interattivi */
-.pulse-on-hover {
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.pulse-on-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
-}
-
-/* Animazione progressiva per gli elementi della sezione */
-.staggered-entrance {
+.footer-elem {
   opacity: 0;
   transform: translateY(20px);
 }
 
-.staggered-entrance-visible {
+.footer-elem-visible {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-/* Animazione per il cambio di tab */
-.tab-transition-enter {
-  opacity: 0;
-  transform: translateY(20px);
+.service-icon-wrapper {
+  transition: all 0.3s ease;
 }
 
-.tab-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 400ms ease-out, transform 400ms ease-out;
+.service-card:hover .service-icon-wrapper {
+  transform: scale(1.2) rotate(10deg);
+  background-color: rgba(59, 130, 246, 0.3);
 }
 
-.tab-transition-exit {
-  opacity: 1;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
 }
 
-.tab-transition-exit-active {
-  opacity: 0;
-  transition: opacity 300ms ease-in;
+.animate-float-slow { animation: float 8s ease-in-out infinite; }
+.animate-float-medium { animation: float 6s ease-in-out infinite; }
+.animate-float-fast { animation: float 4s ease-in-out infinite; }
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }
