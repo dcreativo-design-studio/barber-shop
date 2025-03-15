@@ -613,3 +613,115 @@ svg {
 .service-icon-wrapper:hover {
   animation: pulse-light 1.5s infinite;
 }
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+.animate-scaleIn { animation: scaleIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse-subtle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.2; } }
+
+/* Animazioni di base per i form modali */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-in-out;
+}
+
+.animate-pulse {
+  animation: pulse-subtle 2s infinite;
+}
+
+.animate-pulse.delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Keyframes per le animazioni */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animazioni per le sezioni della pagina */
+.features-section,
+.benefits-section,
+.roi-section,
+.testimonials-section,
+.pricing-section {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Transizioni sui bottoni e card */
+button,
+.service-card,
+.bg-white {
+  transition: all 0.3s ease;
+}
+
+/* Animazione per il messaggio di successo */
+.success-checkmark {
+  animation: checkmark 0.5s ease-in-out 0.7s both;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

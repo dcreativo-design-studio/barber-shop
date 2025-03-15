@@ -5,8 +5,85 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // Enhanced DCreativo Footer Promo Component
 const DCreativoFooterPromo = forwardRef((props, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    interest: 'booking',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Reset form and status when modal opens/closes
+  useEffect(() => {
+    if (!isModalOpen) {
+      // Reset after modal closes
+      setTimeout(() => {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          interest: 'booking',
+          message: ''
+        });
+        setSubmitStatus(null);
+      }, 300);
+    }
+  }, [isModalOpen]);
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // API endpoint per l'invio dell'email
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          interest: formData.interest,
+          message: formData.message
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        // Chiudi il modal dopo 3 secondi in caso di successo
+        setTimeout(() => {
+          setIsModalOpen(false);
+        }, 3000);
+      } else {
+        setSubmitStatus('error');
+        console.error('Errore invio email:', data.message);
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      console.error('Errore durante l\'invio:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Handle navigation to marketing page with proper scroll
   const handleNavigateToMarketing = () => {
@@ -77,7 +154,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
           </div>
         </div>
 
-        {/* Enhanced call-to-action - Migliorato contrasto e visibilità */}
+        {/* Enhanced call-to-action */}
         <div className="mt-8 mb-12">
           <button
             onClick={handleNavigateToMarketing}
@@ -92,8 +169,6 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
               <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
             </span>
             <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></span>
-
-            {/* Aggiungiamo bordo luminoso e pulsazione per maggiore visibilità */}
             <span className="absolute inset-0 border-2 border-blue-300 rounded-lg animate-pulse-subtle"></span>
           </button>
         </div>
@@ -150,8 +225,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
         </div>
 
         {/* Contact Info */}
-       {/* Contact Info - Modificato il link alla landing page */}
-       <div className="text-center">
+        <div className="text-center">
           <p className="text-[var(--text-primary)] opacity-80 mb-4">
             Vuoi saperne di più sui nostri servizi di sviluppo web?
           </p>
@@ -164,12 +238,12 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
               <span>+41 76 781 01 94</span>
             </a>
             <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
-<a
-  href="https://www.dcreativo.ch"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex items-center hover:text-[var(--accent)] transition-colors"
->
+            <a
+              href="https://www.dcreativo.ch"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center hover:text-[var(--accent)] transition-colors"
+            >
               <span>www.dcreativo.ch</span>
               <ExternalLink className="w-3 h-3 ml-1" />
             </a>
@@ -210,13 +284,17 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
                   </button>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <div>
                     <label className="block text-sm font-medium mb-1">Nome e Cognome</label>
                     <input
                       type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
                       placeholder="Inserisci il tuo nome"
+                      required
                     />
                   </div>
 
@@ -224,8 +302,12 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
                     <label className="block text-sm font-medium mb-1">Email</label>
                     <input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
                       placeholder="La tua email"
+                      required
                     />
                   </div>
 
@@ -233,14 +315,23 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
                     <label className="block text-sm font-medium mb-1">Telefono</label>
                     <input
                       type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
                       placeholder="Il tuo numero di telefono"
+                      required
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-1">Sono interessato a</label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]">
+                    <select
+                      name="interest"
+                      value={formData.interest}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)]"
+                    >
                       <option value="booking">Sistema di Prenotazioni</option>
                       <option value="website">Sito Web</option>
                       <option value="webapp">Applicazione Web</option>
@@ -252,16 +343,39 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
                   <div>
                     <label className="block text-sm font-medium mb-1">Messaggio</label>
                     <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md bg-[var(--bg-secondary)] min-h-20"
                       placeholder="Descrivi brevemente le tue esigenze"
+                      required
                     ></textarea>
                   </div>
 
+                  {/* Status messages */}
+                  {submitStatus === 'success' && (
+                    <div className="p-3 bg-green-100 text-green-800 rounded-md">
+                      <p className="flex items-center">
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        Richiesta inviata con successo! Ti contatteremo al più presto.
+                      </p>
+                    </div>
+                  )}
+
+                  {submitStatus === 'error' && (
+                    <div className="p-3 bg-red-100 text-red-800 rounded-md">
+                      <p>Si è verificato un errore. Riprova o contattaci direttamente via email.</p>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full bg-[var(--accent)] text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition-all"
+                    disabled={isSubmitting}
+                    className={`w-full bg-[var(--accent)] text-white font-bold py-2 px-4 rounded-md transition-all ${
+                      isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'
+                    }`}
                   >
-                    Invia Richiesta
+                    {isSubmitting ? 'Invio in corso...' : 'Invia Richiesta'}
                   </button>
                 </form>
 

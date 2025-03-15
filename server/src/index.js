@@ -12,6 +12,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import barberRoutes from './routes/barberRoutes.js';
+import contactRoutes from './routes/contactRoutes.js'; // Nuova importazione
 import serviceRoutes from './routes/serviceRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import waitingListRoutes from './routes/waitingListRoutes.js';
@@ -88,7 +89,8 @@ app.get('/', (req, res) => {
       users: '/api/users',
       barbers: '/api/barbers',
       waitingList: '/api/waiting-list',
-      services: '/api/services'
+      services: '/api/services',
+      contact: '/api/contact'  // Aggiunto nuovo endpoint
     },
     docs: 'https://docs.barbershop.dcreativo.ch'
   });
@@ -102,6 +104,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/barbers', barberRoutes);
 app.use('/api/waiting-list', waitingListRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/contact', contactRoutes);  // Nuova route per il form di contatto
 
 // Test route solo in development
 if (process.env.NODE_ENV !== 'production') {
@@ -195,7 +198,6 @@ const connectDB = async (retries = 5) => {
   }
 };
 
-// Server startup con gestione errori migliorata
 // Server startup con gestione errori migliorata
 const startServer = async () => {
   try {

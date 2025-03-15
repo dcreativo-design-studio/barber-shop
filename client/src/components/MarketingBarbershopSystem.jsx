@@ -7,6 +7,16 @@ const MarketingBarbershopSystem = () => {
   const [activeFeature, setActiveFeature] = useState('booking');
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    salonName: '',
+    message: '',
+    privacyAccepted: false
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
   const location = useLocation();
 
   // Scroll to top on component mount to ensure we start at the top
@@ -30,12 +40,72 @@ const MarketingBarbershopSystem = () => {
     }
   }, [location]);
 
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isContactFormOpen) {
+      setTimeout(() => {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          salonName: '',
+          message: '',
+          privacyAccepted: false
+        });
+        setSubmitStatus(null);
+      }, 300);
+    }
+  }, [isContactFormOpen]);
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
   // Funzione per gestire l'invio del form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Qui inserire la logica per inviare il form
-    alert('Il tuo messaggio è stato inviato! Ti contatteremo presto.');
-    setIsContactFormOpen(false);
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // Invio dati al backend
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          interest: 'booking-demo', // Specifico per le richieste di demo
+          message: `Nome salone: ${formData.salonName || 'Non specificato'}\n\n${formData.message}`
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        // Chiudi form dopo un breve timeout in caso di successo
+        setTimeout(() => {
+          setIsContactFormOpen(false);
+        }, 3000);
+      } else {
+        setSubmitStatus('error');
+        console.error('Errore invio email:', data.message);
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      console.error('Errore durante l\'invio:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Array di funzionalità
@@ -172,7 +242,6 @@ const MarketingBarbershopSystem = () => {
             >
               ROI
             </button>
-
             <button
               id="pricing"
               onClick={() => setActiveTab('pricing')}
@@ -504,7 +573,7 @@ const MarketingBarbershopSystem = () => {
                 {/* ROI Benefits */}
                 <div className="space-y-6">
                   <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h3 className="text-xl font-bold mb-4 text-blue-600">Aumento delle Prenotazioni</h3>
+                  <h3 className="text-xl font-bold mb-4 text-blue-600">Aumento delle Prenotazioni</h3>
                     <p className="mb-4">La possibilità per i clienti di prenotare 24/7 porta a un incremento del 15-20% delle prenotazioni, in particolare fuori orario di lavoro.</p>
                     <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 rounded-full" style={{ width: '20%' }}></div>
@@ -519,9 +588,6 @@ const MarketingBarbershopSystem = () => {
                     <h3 className="text-xl font-bold mb-4 text-blue-600">Riduzione No-Show</h3>
                     <p className="mb-4">I promemoria automatici riducono i mancati appuntamenti dell'80%, ottimizzando il calendario e massimizzando i profitti.</p>
                     <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-600 rounded-full" style={{ width: '80%' }}></div>
-                      </div>
-                      <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 rounded-full" style={{ width: '80%' }}></div>
                     </div>
                     <div className="flex justify-between mt-1 text-sm">
@@ -555,9 +621,6 @@ const MarketingBarbershopSystem = () => {
               </div>
             </div>
           )}
-
-          {/* Testimonials Tab Non ho ancora recensioni sull'utilizzo dell'pp e quindi questa sezione per il momento non deve comparire (codice salvato in un file separato testimonials.txt)*/}
-
 
           {/* Pricing Tab */}
           {activeTab === 'pricing' && (
@@ -710,88 +773,169 @@ const MarketingBarbershopSystem = () => {
         </div>
       </section>
 
-      {/* Contact Form Modal */}
+      {/* Enhanced Contact Form Modal with animations and feedback */}
       {isContactFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-blue-600">Richiedi Informazioni</h3>
-                <button
-                  onClick={() => setIsContactFormOpen(false)}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  ✕
-                </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+            <div className="relative p-6">
+              {/* Animated background decoration - pulse effect */}
+              <div className="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-blue-600 rounded-full opacity-10 animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-16 h-16 bg-blue-400 rounded-full opacity-10 animate-pulse delay-300"></div>
+
+              <div className="relative">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-blue-600">Richiedi una Demo</h3>
+                  <button
+                    onClick={() => setIsContactFormOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Chiudi"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Form content - conditional rendering based on submit status */}
+                {submitStatus === 'success' ? (
+                  <div className="py-10 px-6 text-center animate-fadeIn">
+                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <Check className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-800 mb-2">Richiesta inviata con successo!</h4>
+                    <p className="text-gray-600 mb-6">
+                      Grazie per il tuo interesse! Ti contatteremo al più presto per organizzare una demo personalizzata.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Controlla la tua email per una copia della richiesta.
+                    </p>
+                    <button
+                      onClick={() => setIsContactFormOpen(false)}
+                      className="mt-6 py-2 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Chiudi
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">Nome e Cognome</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Inserisci il tuo nome"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="La tua email"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">Telefono</label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Il tuo numero di telefono"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">Nome del tuo salone</label>
+                        <input
+                          type="text"
+                          name="salonName"
+                          value={formData.salonName}
+                          onChange={handleInputChange}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Nome del tuo Barber Shop"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">Messaggio</label>
+                        <textarea
+                          name="message"
+                          value={formData.message}
+                          onChange={handleInputChange}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[100px]"
+                          placeholder="Descrivi brevemente le tue esigenze o domande"
+                          rows={4}
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    {/* Status messages */}
+                    {submitStatus === 'error' && (
+                      <div className="p-3 bg-red-100 text-red-800 rounded-md animate-fadeIn flex items-start">
+                        <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p>Si è verificato un errore durante l'invio. Riprova o contattaci direttamente via email o telefono.</p>
+                      </div>
+                    )}
+
+                    <div className="flex items-start mt-4">
+                      <input
+                        type="checkbox"
+                        id="privacy"
+                        name="privacyAccepted"
+                        checked={formData.privacyAccepted}
+                        onChange={handleInputChange}
+                        className="mt-1 mr-2"
+                        required
+                      />
+                      <label htmlFor="privacy" className="text-sm text-gray-600">
+                        Ho letto e accetto la <a href="#" className="text-blue-600 hover:underline">privacy policy</a>. I miei dati saranno trattati solo per rispondere alla mia richiesta.
+                      </label>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`w-full py-3 px-4 rounded-md font-bold transition-all duration-300 flex items-center justify-center ${
+                        isSubmitting
+                          ? 'bg-gray-400 text-white cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl'
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Invio in corso...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="w-5 h-5 mr-2" />
+                          Richiedi Demo Gratuita
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
               </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Nome e Cognome</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50"
-                    placeholder="Inserisci il tuo nome"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50"
-                    placeholder="La tua email"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Telefono</label>
-                  <input
-                    type="tel"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50"
-                    placeholder="Il tuo numero di telefono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Nome del tuo salone</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50"
-                    placeholder="Nome del tuo Barber Shop"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Messaggio</label>
-                  <textarea
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 min-h-20"
-                    placeholder="Descrivi brevemente le tue esigenze"
-                    rows={4}
-                  ></textarea>
-                </div>
-
-                <div className="flex items-start">
-                  <input
-                    type="checkbox"
-                    id="privacy"
-                    className="mt-1 mr-2"
-                    required
-                  />
-                  <label htmlFor="privacy" className="text-sm text-gray-600">
-                    Ho letto e accetto la <a href="#" className="text-blue-600 hover:underline">privacy policy</a>. I miei dati saranno trattati solo per rispondere alla mia richiesta.
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-all"
-                >
-                  Invia Richiesta
-                </button>
-              </form>
             </div>
           </div>
         </div>
@@ -834,5 +978,12 @@ const MarketingBarbershopSystem = () => {
     </div>
   );
 };
+
+// Aggiungi questi stili al tuo file CSS globale
+// .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+// .animate-scaleIn { animation: scaleIn 0.3s ease-in-out; }
+// @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+// @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+// @keyframes pulse-subtle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.2; } }
 
 export default MarketingBarbershopSystem;
