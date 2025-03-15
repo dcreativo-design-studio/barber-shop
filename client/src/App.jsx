@@ -10,6 +10,7 @@ import HomePage from './components/HomePage';
 import MarketingBarbershopSystem from './components/MarketingBarbershopSystem';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
+import PageTransition from './context/PageTransition';
 import { TimezoneProvider } from './context/TimezoneContext';
 import { TransitionProvider } from './context/TransitionContext';
 import UserProfile from './pages/UserProfile';
