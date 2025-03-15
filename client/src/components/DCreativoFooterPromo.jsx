@@ -1,7 +1,7 @@
 import { ArrowRight, Award, CheckCircle, Code, ExternalLink, Rocket, Zap } from 'lucide-react';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { apiRequest } from '../config/api';
 // Enhanced DCreativo Footer Promo Component
 const DCreativoFooterPromo = forwardRef((props, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,36 +50,23 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
     setSubmitStatus(null);
 
     try {
-      // API endpoint per l'invio dell'email
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          interest: formData.interest,
-          message: formData.message
-        })
+      // Usa l'istanza axios già configurata con i giusti headers e baseURL
+      const response = await apiRequest.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        interest: formData.interest,
+        message: formData.message
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        // Chiudi il modal dopo 3 secondi in caso di successo
-        setTimeout(() => {
-          setIsModalOpen(false);
-        }, 3000);
-      } else {
-        setSubmitStatus('error');
-        console.error('Errore invio email:', data.message);
-      }
+      setSubmitStatus('success');
+      // Chiudi il modal dopo 3 secondi in caso di successo
+      setTimeout(() => {
+        setIsModalOpen(false);
+      }, 3000);
     } catch (error) {
       setSubmitStatus('error');
-      console.error('Errore durante l\'invio:', error);
+      console.error('Errore invio email:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,7 +1,7 @@
 import { ArrowRight, BarChart2, Calendar, Check, Clock, DollarSign, Globe, Mail, Phone, ShieldCheck, User, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
+import { apiRequest } from '../config/api';
 const MarketingBarbershopSystem = () => {
   const [activeTab, setActiveTab] = useState('features');
   const [activeFeature, setActiveFeature] = useState('booking');
@@ -73,36 +73,23 @@ const MarketingBarbershopSystem = () => {
     setSubmitStatus(null);
 
     try {
-      // Invio dati al backend
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          interest: 'booking-demo',
-          message: `Nome salone: ${formData.salonName || 'Non specificato'}\n\n${formData.message}`
-        })
+      // Usa l'istanza axios già configurata
+      const response = await apiRequest.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        interest: 'booking-demo',
+        message: `Nome salone: ${formData.salonName || 'Non specificato'}\n\n${formData.message}`
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        // Chiudi form dopo un breve timeout in caso di successo
-        setTimeout(() => {
-          setIsContactFormOpen(false);
-        }, 3000);
-      } else {
-        setSubmitStatus('error');
-        console.error('Errore invio email:', data.message);
-      }
+      setSubmitStatus('success');
+      // Chiudi form dopo un breve timeout in caso di successo
+      setTimeout(() => {
+        setIsContactFormOpen(false);
+      }, 3000);
     } catch (error) {
       setSubmitStatus('error');
-      console.error('Errore durante l\'invio:', error);
+      console.error('Errore invio email:', error);
     } finally {
       setIsSubmitting(false);
     }
