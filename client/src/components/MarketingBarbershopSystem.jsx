@@ -73,17 +73,19 @@ const MarketingBarbershopSystem = () => {
     setSubmitStatus(null);
 
     try {
-      await apiRequest.post('/contact', {
+      // Usa l'istanza axios già configurata
+      const response = await apiRequest.post('/contact', {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        interest: formData.interest, // o 'booking-demo' per MarketingBarbershopSystem
-        message: formData.message // o formattato per MarketingBarbershopSystem
+        interest: 'booking-demo',
+        message: `Nome salone: ${formData.salonName || 'Non specificato'}\n\n${formData.message}`
       });
 
       setSubmitStatus('success');
+      // Chiudi form dopo un breve timeout in caso di successo
       setTimeout(() => {
-        setIsModalOpen(false); // o setIsContactFormOpen(false)
+        setIsContactFormOpen(false);
       }, 3000);
     } catch (error) {
       setSubmitStatus('error');
@@ -557,7 +559,8 @@ const MarketingBarbershopSystem = () => {
 
                 {/* ROI Benefits */}
                 <div className="space-y-6">
-                  <div className="bg-white rounded-lg shadow-lg p-6"><h3 className="text-xl font-bold mb-4 text-blue-600">Aumento delle Prenotazioni</h3>
+                  <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="text-xl font-bold mb-4 text-blue-600">Aumento delle Prenotazioni</h3>
                     <p className="mb-4">La possibilità per i clienti di prenotare 24/7 porta a un incremento del 15-20% delle prenotazioni, in particolare fuori orario di lavoro.</p>
                     <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-600 rounded-full" style={{ width: '20%' }}></div>

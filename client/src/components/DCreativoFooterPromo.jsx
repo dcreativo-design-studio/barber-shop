@@ -50,17 +50,19 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
     setSubmitStatus(null);
 
     try {
-      await apiRequest.post('/contact', {
+      // Usa l'istanza axios già configurata con i giusti headers e baseURL
+      const response = await apiRequest.post('/contact', {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        interest: formData.interest, // o 'booking-demo' per MarketingBarbershopSystem
-        message: formData.message // o formattato per MarketingBarbershopSystem
+        interest: formData.interest,
+        message: formData.message
       });
 
       setSubmitStatus('success');
+      // Chiudi il modal dopo 3 secondi in caso di successo
       setTimeout(() => {
-        setIsModalOpen(false); // o setIsContactFormOpen(false)
+        setIsModalOpen(false);
       }, 3000);
     } catch (error) {
       setSubmitStatus('error');
