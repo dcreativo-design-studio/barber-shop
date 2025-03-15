@@ -1,121 +1,106 @@
 import { sendEmail } from '../services/emailService.js';
 
-const contactController = {
-  /**
-   * Gestisce l'invio di email dal form di contatto
-   */
-  async sendContactEmail(req, res) {
-    try {
-      const { name, email, phone, interest, message } = req.body;
-
-      // Validazione dei dati
-      if (!name || !email || !phone || !interest || !message) {
-        return res.status(400).json({
-          success: false,
-          message: 'Tutti i campi sono obbligatori'
-        });
-      }
-      /**
+/**
  * Crea il contenuto HTML per l'email di richiesta demo
  */
 const createDemoRequestEmail = (data) => {
-    return `
-    <!DOCTYPE html>
-    <html lang="it">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Richiesta Demo - Sistema di Prenotazioni Barber Shop</title>
-      <style>
-        body {
-          font-family: 'Helvetica Neue', Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          margin: 0;
-          padding: 0;
-          background-color: #f9f9f9;
-        }
-        .container {
-          max-width: 600px;
-          margin: 0 auto;
-          background-color: #ffffff;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-          background: linear-gradient(135deg, #3b82f6, #4f46e5);
-          color: #fff;
-          padding: 30px 20px;
-          text-align: center;
-        }
-        .header h1 {
-          margin: 0;
-          font-size: 24px;
-          font-weight: bold;
-        }
-        .header p {
-          margin: 10px 0 0;
-          font-size: 16px;
-          opacity: 0.9;
-        }
-        .content {
-          padding: 30px 20px;
-        }
-        .section-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: #3b82f6;
-          margin-top: 0;
-          margin-bottom: 15px;
-          border-bottom: 1px solid #e5e7eb;
-          padding-bottom: 8px;
-        }
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 20px;
-        }
-        .data-table td {
-          padding: 10px;
-          vertical-align: top;
-        }
-        .data-table .label {
-          width: 35%;
-          font-weight: bold;
-          color: #4b5563;
-        }
-        .data-table .value {
-          width: 65%;
-        }
-        .message-box {
-          background-color: #f3f4f6;
-          border-radius: 6px;
-          padding: 15px;
-          margin-top: 10px;
-        }
-        .message-content {
-          white-space: pre-line;
-        }
-        .cta {
-          text-align: center;
-          margin: 30px 0 10px;
-        }
-        .cta-button {
-          display: inline-block;
-          background-color: #3b82f6;
-          color: #ffffff;
-          font-weight: bold;
-          text-decoration: none;
-          padding: 12px 25px;
-          border-radius: 6px;
-          text-align: center;
-        }
-        .footer {
-          background-color: #f3f4f6;
-          padding: 20px;
-          text-align: center;
-          fontt-size: 14px;
+  return `
+  <!DOCTYPE html>
+  <html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richiesta Demo - Sistema di Prenotazioni Barber Shop</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #3b82f6, #4f46e5);
+        color: #fff;
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .header p {
+        margin: 10px 0 0;
+        font-size: 16px;
+        opacity: 0.9;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #3b82f6;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      .data-table td {
+        padding: 10px;
+        vertical-align: top;
+      }
+      .data-table .label {
+        width: 35%;
+        font-weight: bold;
+        color: #4b5563;
+      }
+      .data-table .value {
+        width: 65%;
+      }
+      .message-box {
+        background-color: #f3f4f6;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 10px;
+      }
+      .message-content {
+        white-space: pre-line;
+      }
+      .cta {
+        text-align: center;
+        margin: 30px 0 10px;
+      }
+      .cta-button {
+        display: inline-block;
+        background-color: #3b82f6;
+        color: #ffffff;
+        font-weight: bold;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .footer {
+        background-color: #f3f4f6;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
         color: #6b7280;
       }
       .footer p {
@@ -419,10 +404,24 @@ const createConfirmationEmailToCustomer = (data) => {
   `;
 };
 
+const contactController = {
+  /**
+   * Gestisce l'invio di email dal form di contatto
+   */
+  async sendContactEmail(req, res) {
+    try {
+      const { name, email, phone, interest, message } = req.body;
+
+      // Validazione dei dati
+      if (!name || !email || !phone || !interest || !message) {
+        return res.status(400).json({
+          success: false,
+          message: 'Tutti i campi sono obbligatori'
+        });
+      }
 
       // Mappa dei testi per il tipo di interesse
-      // Mappa dei testi per il tipo di interesse
-    const interestText = {
+      const interestText = {
         'booking': 'Sistema di Prenotazioni',
         'booking-demo': 'Demo Sistema di Prenotazioni',
         'website': 'Sito Web',
@@ -436,17 +435,25 @@ const createConfirmationEmailToCustomer = (data) => {
 
       // Se è una richiesta di demo, usa il template specifico
       if (interest === 'booking-demo') {
-        const salonName = message.split('\n')[0].replace('Nome salone:', '').trim();
+        // Estrai il nome del salone dal messaggio
+        let salonName = 'Non specificato';
+        if (message.includes('Nome salone:')) {
+          const match = message.match(/Nome salone:\s*([^\n]*)/);
+          if (match && match[1]) {
+            salonName = match[1].trim();
+          }
+        }
+
         const demoRequestData = {
           name,
           email,
           phone,
-          salonName: salonName || 'Non specificato',
-          message: message.split('\n').slice(2).join('\n').trim()
+          salonName,
+          message: message.replace(/Nome salone:[^\n]*\n?/, '').trim()
         };
 
         htmlContent = createDemoRequestEmail(demoRequestData);
-        subject = `Nuova richiesta di demo: ${name} - ${salonName || 'Barber Shop'}`;
+        subject = `Nuova richiesta di demo: ${name} - ${salonName}`;
 
         textContent = `
           Nuova richiesta di demo
@@ -454,7 +461,7 @@ const createConfirmationEmailToCustomer = (data) => {
           Nome: ${name}
           Email: ${email}
           Telefono: ${phone}
-          Nome salone: ${salonName || 'Non specificato'}
+          Nome salone: ${salonName}
 
           Messaggio:
           ${message}
@@ -504,8 +511,7 @@ const createConfirmationEmailToCustomer = (data) => {
       }
 
       // Invia l'email usando il servizio emailService esistente
-      // Invia l'email usando il servizio emailService esistente
-    await sendEmail({
+      await sendEmail({
         to: 'info@dcreativo.ch',
         subject,
         text: textContent,

@@ -83,7 +83,7 @@ const MarketingBarbershopSystem = () => {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          interest: 'booking-demo', // Specifico per le richieste di demo
+          interest: 'booking-demo',
           message: `Nome salone: ${formData.salonName || 'Non specificato'}\n\n${formData.message}`
         })
       });
