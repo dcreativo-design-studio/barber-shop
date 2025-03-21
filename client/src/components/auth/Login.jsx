@@ -15,6 +15,9 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [formFocused, setFormFocused] = useState(false);
+  // Stati per gestire il focus sui campi
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -157,13 +160,15 @@ function Login() {
             <div className="space-y-4">
               <div className="relative group">
                 <div className="flex items-center relative">
-                  <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                  <div className={`absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center transition-all duration-300 ${emailFocused || email ? 'opacity-40' : 'opacity-70'}`}>
+                    <Mail className={`h-5 w-5 text-[var(--text-primary)] transition-colors duration-200 ${emailFocused ? 'text-[var(--accent)]' : ''}`} />
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
                     required
                     className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
                     placeholder="Email"
@@ -172,13 +177,15 @@ function Login() {
               </div>
               <div className="relative group password-field-focus">
                 <div className="flex items-center relative">
-                  <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
-                    <Lock className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                  <div className={`absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center transition-all duration-300 ${passwordFocused || password ? 'opacity-40' : 'opacity-70'}`}>
+                    <Lock className={`h-5 w-5 text-[var(--text-primary)] transition-colors duration-200 ${passwordFocused ? 'text-[var(--accent)]' : ''}`} />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
                     required
                     className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
                     placeholder="Password"
@@ -238,13 +245,15 @@ function Login() {
           <form className={`mt-6 space-y-5 transition-all duration-500 ${formFocused ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} onSubmit={handleResetPassword}>
             <div className="relative group">
               <div className="flex items-center relative">
-                <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center">
-                  <Mail className="h-5 w-5 text-[var(--text-primary)] text-opacity-50 group-focus-within:text-[var(--accent)] transition-colors duration-200" />
+                <div className={`absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center transition-all duration-300 ${emailFocused || resetEmail ? 'opacity-40' : 'opacity-70'}`}>
+                  <Mail className={`h-5 w-5 text-[var(--text-primary)] transition-colors duration-200 ${emailFocused ? 'text-[var(--accent)]' : ''}`} />
                 </div>
                 <input
                   type="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
                   required
                   className="login-input text-[var(--text-primary)] pl-10 w-full transition-all duration-300 focus:border-[var(--accent)] border-[var(--text-primary)] border-opacity-20 rounded-md"
                   placeholder="Inserisci la tua email"
