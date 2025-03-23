@@ -327,6 +327,152 @@ a:focus-visible {
   transform: skewX(-25deg);
   animation: shine 3s infinite;
 }
+   /* Video Gallery Section Styles */
+  .video-gallery-section {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+  }
+
+  .video-gallery-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, var(--bg-primary), transparent);
+    z-index: 1;
+  }
+
+  .video-gallery-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, var(--bg-primary), transparent);
+    z-index: 1;
+  }
+
+  .video-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .video-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+  }
+
+  .video-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .video-container:hover .video-border {
+    opacity: 0.6;
+  }
+
+  .video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    aspect-ratio: 16/9;
+  }
+
+  .gallery-title-accent {
+    position: relative;
+    display: inline-block;
+  }
+
+  .gallery-title-accent::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--accent);
+    border-radius: 3px;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 768px) {
+    .video-container {
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
+    border-radius: 12px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .video-container:hover .video-overlay {
+    opacity: 0.4;
+  }
+
+  .video-label {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+
+  .video-container:hover .video-label {
+    transform: translateY(-5px);
+  }
+
+  .video-icon-wrapper {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .video-container:hover .video-icon-wrapper {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
 
 /* Stili mobile-friendly */
 @media (max-width: 768px) {
@@ -469,17 +615,54 @@ const ServiceCard = ({ icon, title, description, price, user }) => {
   );
 };
 
+// Video component for a single video in the gallery
+const VideoItem = ({ src, title, index }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    // Preload the video
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
+  }, []);
+
+  return (
+    <div className="video-container h-full">
+      <div className="video-border"></div>
+      <div className="video-overlay"></div>
+      <video
+        ref={videoRef}
+        className="video-element"
+        autoPlay={index === 0} // Auto-play only the first video
+        muted
+        loop
+        playsInline
+        preload="auto"
+      >
+        <source src={src} type="video/mp4" />
+        Il tuo browser non supporta i video HTML5.
+      </video>
+      <div className="video-label">{title}</div>
+      <div className="video-icon-wrapper">
+        <Video className="icon-white w-5 h-5" />
+      </div>
+    </div>
+  );
+};
+
 const HomePage = React.memo(() => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState({});
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [showDCreativoPromo, setShowDCreativoPromo] = useState(false);
+
   const sectionRefs = {
     hero: useRef(null),
     services: useRef(null),
     about: useRef(null),
     testimonials: useRef(null),
-    contact: useRef(null)
+    contact: useRef(null),
+    videoGallery: useRef(null) // New reference for the video gallery section
   };
 
 
@@ -504,6 +687,16 @@ const HomePage = React.memo(() => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
+
+          // Auto-play video when it becomes visible
+          if (entry.target.id === 'video-gallery' && entry.isIntersecting) {
+            const videos = entry.target.querySelectorAll('video');
+            videos.forEach(video => {
+              if (video.paused) {
+                video.play().catch(err => console.log('Auto-play prevented:', err));
+              }
+            });
+          }
         }
       });
     };
@@ -541,14 +734,13 @@ const HomePage = React.memo(() => {
   }, []);
 
   // Auto-rotate testimonials
-  // Auto-rotate testimonials
-useEffect(() => {
-  const interval = setInterval(() => {
-    setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
-  }, 5000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
+    }, 5000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   // Animation classes based on visibility
   const getAnimationClass = (sectionId) => {
@@ -559,25 +751,44 @@ useEffect(() => {
   const handleDCreativoSectionRef = useRef(null);
 
   // Scroll to DCreativo section with proper positioning at the top
- // Funzione migliorata per lo scrolling, specifica per dispositivi mobili
-const scrollToDCreativoSection = () => {
-  // Breve timeout per assicurarci che il componente sia renderizzato
-  setTimeout(() => {
-    if (handleDCreativoSectionRef.current) {
-      // Calcola la posizione corretta con offset per mobile e desktop
-      const isMobile = window.innerWidth < 768;
-      const yOffset = isMobile ? -100 : -50; // Offset maggiore per mobile
+  const scrollToDCreativoSection = () => {
+    // Breve timeout per assicurarci che il componente sia renderizzato
+    setTimeout(() => {
+      if (handleDCreativoSectionRef.current) {
+        // Calcola la posizione corretta con offset per mobile e desktop
+        const isMobile = window.innerWidth < 768;
+        const yOffset = isMobile ? -100 : -50; // Offset maggiore per mobile
 
-      const element = handleDCreativoSectionRef.current;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        const element = handleDCreativoSectionRef.current;
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-      window.scrollTo({
-        top: y,
-        behavior: 'smooth'
-      });
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth'
+        });
+      }
+    }, 300); // Attendi un po' più a lungo per dispositivi mobili
+  };
+
+  // Videos data
+  const videos = [
+    {
+      src: "/videos/salon-main1.mp4",
+      title: "Area Principale"
+    },
+    {
+      src: "/videos/salon-main2.mp4",
+      title: "Postazioni di Lavoro"
+    },
+    {
+      src: "/videos/salon-main3.mp4",
+      title: "Servizi Speciali"
+    },
+    {
+      src: "/videos/salon-main4.mp4",
+      title: "L'Esperienza Completa"
     }
-  }, 300); // Attendi un po' più a lungo per dispositivi mobili
-};
+  ];
 
   return (
     <div className="home-page min-h-screen overflow-x-hidden">
@@ -712,12 +923,13 @@ const scrollToDCreativoSection = () => {
         </div>
       </section>
 
-     {/* Services Section with Card Animations */}
-     <section
+      {/* Services Section with Card Animations */}
+      <section
         id="services"
         ref={sectionRefs.services}
         className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('services')}`}
       >
+        {/* Existing services section code... */}
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
             I Nostri Servizi
@@ -932,12 +1144,53 @@ const scrollToDCreativoSection = () => {
           </div>
         </div>
       </section>
+
+      {/* VIDEO GALLERY SECTION - NEW SECTION */}
+      <section
+        id="video-gallery"
+        ref={sectionRefs.videoGallery}
+        className={`video-gallery-section py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('video-gallery')}`}
+      >
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gallery-title-accent text-[var(--accent)]">Visita Virtuale</span>
+            </h2>
+            <p className="text-xl max-w-2xl mx-auto text-[var(--text-primary)] opacity-80">
+              Esplora il nostro salone attraverso questi video e scopri l'ambiente in cui lavoriamo
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {videos.map((video, index) => (
+              <div key={index} className="h-full aspect-video">
+                <VideoItem
+                  src={video.src}
+                  title={video.title}
+                  index={index}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <Link
+              to={user ? "/booking" : "/guest-booking"}
+              className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-xl transform hover:-translate-y-1"
+            >
+              Prenota la tua esperienza
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* About Section with Parallax and Image Reveal */}
       <section
         id="about"
         ref={sectionRefs.about}
-        className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('about')}`}
+        className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('about')}`}
       >
+
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="lg:w-1/2">
@@ -955,7 +1208,7 @@ const scrollToDCreativoSection = () => {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-md hover:shadow-lg transition-all">
+                <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-md hover:shadow-lg transition-all">
                   <div className="flex items-center mb-2">
                     <Clock className="w-5 h-5 text-[var(--accent)] mr-2" />
                     <span className="font-medium">Orari</span>
@@ -963,7 +1216,7 @@ const scrollToDCreativoSection = () => {
                   <p className="text-sm">Lunedì: 14:00-19:00</p>
                   <p className="text-sm">Mar-Sab: 9:00-19:00</p>
                 </div>
-                <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-md hover:shadow-lg transition-all">
+                <div className="bg-[var(--bg-primary)] p-4 rounded-lg shadow-md hover:shadow-lg transition-all">
                   <div className="flex items-center mb-2">
                     <Award className="w-5 h-5 text-[var(--accent)] mr-2" />
                     <span className="font-medium">Qualità</span>
@@ -998,7 +1251,7 @@ const scrollToDCreativoSection = () => {
       <section
         id="testimonials"
         ref={sectionRefs.testimonials}
-        className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('testimonials')}`}
+        className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('testimonials')}`}
       >
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
@@ -1188,17 +1441,18 @@ const scrollToDCreativoSection = () => {
       <section
         id="contact"
         ref={sectionRefs.contact}
-        className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('contact')}`}
+        className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('contact')}`}
       >
-       <div className="container mx-auto max-w-6xl">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
-          Dove Trovarci
-        </h2>
-        <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
-          Siamo facilmente raggiungibili nel centro di Lugano
-        </p>
+        {/* Existing contact section code... */}
+        <div className="container mx-auto max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
+            Dove Trovarci
+          </h2>
+          <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
+            Siamo facilmente raggiungibili nel centro di Lugano
+          </p>
 
-        <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row gap-12">
           <div className="lg:w-1/2">
             <div className="bg-[var(--bg-secondary)] p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
               <h3 className="text-2xl font-bold mb-6 text-[var(--accent)]">Contatti</h3>
@@ -1320,7 +1574,7 @@ const scrollToDCreativoSection = () => {
     </section>
 
       {/* Modern Footer with Animation */}
-      <footer className="bg-[var(--bg-secondary)] py-12 px-4 border-t border-[var(--accent)] border-opacity-20">
+      <footer className="bg-[var(--bg-primary)] py-12 px-4 border-t border-[var(--accent)] border-opacity-20">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-8 md:mb-0 text-center md:text-left">
@@ -1335,7 +1589,7 @@ const scrollToDCreativoSection = () => {
                 href="https://www.instagram.com/yourstylelugano/?igsh=bzdocHJ5Y2dnbTJz#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[var(--bg-primary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
+                className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
                 aria-label="Instagram"
               >
                 <Instagram className="w-6 h-6" />
@@ -1344,7 +1598,7 @@ const scrollToDCreativoSection = () => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[var(--bg-primary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
+                className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
                 aria-label="Facebook"
               >
                 <Facebook className="w-6 h-6" />
@@ -1353,7 +1607,7 @@ const scrollToDCreativoSection = () => {
                 href="https://wa.me/41789301599?text=Ciao!%20Vorrei%20richiedere%20un%27informazioni"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[var(--bg-primary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
+                className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--accent)] hover:text-white transition-all duration-300"
                 aria-label="WhatsApp"
               >
                 <MessageCircle className="w-6 h-6" />
@@ -1365,8 +1619,9 @@ const scrollToDCreativoSection = () => {
             <div>
               <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
               <div className="space-y-2">
-                <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
+              <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
                 <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
+                <button onClick={() => scrollToSection('video-gallery')} className="block hover:text-[var(--accent)] transition-colors">Visita Virtuale</button>
                 <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
                 <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
               </div>
@@ -1396,32 +1651,33 @@ const scrollToDCreativoSection = () => {
           <div className="border-t border-[var(--text-primary)] border-opacity-10 pt-6 text-center">
           <p className="text-sm text-[var(--text-primary)] opacity-70">&copy; {new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
 
-  {/* Nuovo componente con pulsante principale e secondario */}
-  <DCreativoPromoLink
-    onClick={() => {
-      setShowDCreativoPromo(!showDCreativoPromo); // Toggle per aprire/chiudere
-      if (!showDCreativoPromo) { // Solo se stiamo aprendo
-        setTimeout(() => {
-          scrollToDCreativoSection();
-        }, 100);
-      }
-    }}
-  />
-</div>
-</div>
-</footer>
 
-{/* DCreativo Footer Promo Section */}
-<style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
-<div className={`transition-all duration-500 ${
-  showDCreativoPromo
-    ? 'opacity-100 max-h-[2000px]' // Usa max-height invece di height per supportare contenuti di dimensioni variabili
-    : 'opacity-0 max-h-0 overflow-hidden'
-  }`}>
-  <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
-</div>
-</div>
-);
+          {/* Nuovo componente con pulsante principale e secondario */}
+          <DCreativoPromoLink
+            onClick={() => {
+              setShowDCreativoPromo(!showDCreativoPromo); // Toggle per aprire/chiudere
+              if (!showDCreativoPromo) { // Solo se stiamo aprendo
+                setTimeout(() => {
+                  scrollToDCreativoSection();
+                }, 100);
+              }
+            }}
+          />
+        </div>
+      </div>
+    </footer>
+
+  {/* DCreativo Footer Promo Section */}
+  <style dangerouslySetInnerHTML={{ __html: dCreativoStyles }} />
+    <div className={`transition-all duration-500 ${
+      showDCreativoPromo
+        ? 'opacity-100 max-h-[2000px]' // Usa max-height invece di height per supportare contenuti di dimensioni variabili
+        : 'opacity-0 max-h-0 overflow-hidden'
+      }`}>
+      <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
+    </div>
+  </div>
+  );
 });
 
 export default HomePage;
