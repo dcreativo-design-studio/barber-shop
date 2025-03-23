@@ -574,6 +574,18 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+useEffect(() => {
+  const videoElements = document.querySelectorAll('video');
+  videoElements.forEach(video => {
+    video.addEventListener('loadeddata', () => {
+      console.log('Video caricato:', video.src);
+    });
+    video.addEventListener('error', (e) => {
+      console.error('Errore caricamento video:', e);
+    });
+  });
+}, []);
+
   // Animation classes based on visibility
   const getAnimationClass = (sectionId) => {
     return isVisible[sectionId] ? 'animate-fade-in opacity-100 translate-y-0' : 'opacity-0 translate-y-10';
@@ -1050,27 +1062,30 @@ const scrollToDCreativoSection = () => {
         <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 rounded-bl-xl border-white opacity-40 z-20 pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
 
-        <div className="aspect-video w-full">
-          <video
-            className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            controlsList="nodownload nofullscreen noremoteplayback"
-            disablePictureInPicture
-            style={{objectFit: 'cover'}}
-          >
-            <source src="videos/salon-main.mp4" type="video/mp4" />
-          </video>
-        </div>
+        <div className="relative aspect-video w-full z-0 overflow-hidden rounded-xl">
+  <video
+    className="absolute inset-0 w-full h-full object-cover rounded-xl"
+    autoPlay
+    muted
+    loop
+    playsInline
+    controls
+  >
+    <source src="videos/salon-main.mp4" type="video/mp4" />
+  </video>
 
-        {/* Overlay con testo */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-30 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
-          <h3 className="text-xl font-bold text-white mb-2">L'Arte del Taglio</h3>
-          <p className="text-white/90 text-sm">Precisione e stile in ogni dettaglio per un look perfetto</p>
-        </div>
+  {/* Overlay con z-index maggiore del video ma inferiore al testo */}
+  <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-blue-400 opacity-30 group-hover:opacity-40 transition-opacity z-30 pointer-events-none"></div>
+
+  {/* Bordo luminoso con z-index sopra l'overlay */}
+  <div className="absolute inset-0 border-2 border-[var(--accent)] rounded-xl opacity-0 group-hover:opacity-70 transition-opacity z-40 animate-pulse-subtle pointer-events-none"></div>
+
+  {/* Overlay testo con z-index superiore a tutto */}
+  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-50 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
+    <h3 className="text-xl font-bold text-white mb-2">L'Arte del Taglio</h3>
+    <p className="text-white/90 text-sm">Precisione e stile in ogni dettaglio per un look perfetto</p>
+  </div>
+</div>
       </div>
 
       {/* Grid di video secondari */}

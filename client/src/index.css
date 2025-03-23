@@ -863,3 +863,6 @@ button,
     max-width: 100%;
   }
 }
+.video-container {
+  background-color: black; /* Aggiunge uno sfondo nero dietro il video */
+}
