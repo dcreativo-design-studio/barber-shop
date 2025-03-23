@@ -472,6 +472,7 @@ const ServiceCard = ({ icon, title, description, price, user }) => {
 const HomePage = React.memo(() => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState({});
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [showDCreativoPromo, setShowDCreativoPromo] = useState(false);
   const sectionRefs = {
@@ -759,11 +760,14 @@ const scrollToDCreativoSection = () => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-                  <path d="M8 6c0-1.5 3.5-3 3.5-3s3.5 1.5 3.5 3c0 1.5-.5 2-2 3-1.5-1-5-1-5-3Z"></path>
-                  <path d="m9 11 1.5 1.5c1 1 2 1.5 3 1.5 1.5 0 2.5-1 2.5-1"></path>
-                  <path d="M5 10a4 4 0 0 0 8 0"></path>
-                  <path d="M11 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"></path>
-                </svg>
+  <circle cx="12" cy="6" r="3"></circle>
+  <path d="M12 9v2"></path>
+  <path d="M9 14l3 3 3-3"></path>
+  <path d="M9 18h6"></path>
+  <path d="M8 14h8"></path>
+  <path d="M10 20l-2 2"></path>
+  <path d="M14 20l2 2"></path>
+</svg>
               }
               title="Barba Modellata"
               description="Rifinitura e modellamento della barba con panno caldo, per un look impeccabile."
@@ -775,12 +779,14 @@ const scrollToDCreativoSection = () => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-                  <path d="M7 3a4 4 0 0 1 8 0v5a4 4 0 0 1-8 0Z"></path>
-                  <path d="M5 10a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"></path>
-                  <path d="M19 10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"></path>
-                  <path d="M12 20a5 5 0 0 1-5-5v-3a3 3 0 0 1 6 0v8"></path>
-                  <path d="M12 20a5 5 0 0 0 5-5v-3a3 3 0 0 0-6 0"></path>
-                </svg>
+  <circle cx="12" cy="8" r="4"></circle>
+  <path d="M12 12v4"></path>
+  <path d="M8 20c0-2 1-4 4-4s4 2 4 4"></path>
+  <path d="M10 16.5L8.5 20"></path>
+  <path d="M14 16.5l1.5 3.5"></path>
+  <path d="M9 17l-2 3"></path>
+  <path d="M15 17l2 3"></path>
+</svg>
               }
               title="Barba Lunga Hipster"
               description="Styling e cura della barba lunga per un look distintivo e alla moda."
@@ -829,11 +835,14 @@ const scrollToDCreativoSection = () => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-                  <path d="M18 21v-8a2 2 0 0 0-2-2h-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8"></path>
-                  <path d="M10 9H8"></path>
-                  <path d="M6 13v6"></path>
-                  <rect width="4" height="6" x="16" y="14" rx="2"></rect>
-                </svg>
+  <circle cx="12" cy="6" r="3"></circle>
+  <path d="M18 14l-6-2-6 2"></path>
+  <path d="M12 16v5"></path>
+  <path d="M9 12H4"></path>
+  <path d="M20 12h-5"></path>
+  <path d="M8 20l-1 2"></path>
+  <path d="M16 20l1 2"></path>
+</svg>
               }
               title="Taglio Bambino"
               description="Taglio speciale per bambini fino a 10 anni, in un ambiente accogliente e divertente."
@@ -1024,10 +1033,11 @@ const scrollToDCreativoSection = () => {
   muted
   loop
   playsInline
-  poster="/images/video-thumbnail.jpg"
+  poster="images/video-thumbnail.jpg"
   controls // Aggiungi i controlli per debug
+  crossOrigin="anonymous"
 >
-  <source src="/videos/salon-main.mp4" type="video/mp4" />
+  <source src="videos/salon-main.mp4" type="video/mp4" /> <!-- Nota: ho rimosso lo slash iniziale -->
   Il tuo browser non supporta i video HTML5.
 </video>
 
@@ -1051,8 +1061,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main1.mp4" type="video/mp4" />
-          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
+            <source src="videos/salon-main1.mp4" type="video/mp4" />
+          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1072,8 +1082,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main2.mp4" type="video/mp4" />
-          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
+            <source src="videos/salon-main2.mp4" type="video/mp4" />
+          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1093,8 +1103,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main3.mp4" type="video/mp4" />
-          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
+            <source src="videos/salon-main3.mp4" type="video/mp4" />
+          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1114,8 +1124,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main4.mp4" type="video/mp4" />
-          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
+            <source src="videos/salon-main4.mp4" type="video/mp4" />
+          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
