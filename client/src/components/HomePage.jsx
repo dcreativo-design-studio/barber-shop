@@ -1019,15 +1019,15 @@ const scrollToDCreativoSection = () => {
         <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
 
         <video
-  className="w-full h-auto"
-  width="640"
-  height="360"
-  autoPlay
-  muted
-  loop
-  playsInline
->
+          className="w-full h-auto object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/images/video-thumbnail.jpg"
+        >
           <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
           Il tuo browser non supporta i video HTML5.
         </video>
 
@@ -1051,7 +1051,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-detail-1.mp4" type="video/mp4" />
+            <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1071,7 +1072,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-detail-2.mp4" type="video/mp4" />
+            <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1091,7 +1093,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-detail-3.mp4" type="video/mp4" />
+            <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1111,7 +1114,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-detail-4.mp4" type="video/mp4" />
+            <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
@@ -1136,7 +1140,6 @@ const scrollToDCreativoSection = () => {
     </div>
   </div>
 </section>
-
       {/* Testimonials Section with Modern Card Design */}
       <section
         id="testimonials"
