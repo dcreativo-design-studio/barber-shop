@@ -1037,7 +1037,7 @@ const scrollToDCreativoSection = () => {
   controls // Aggiungi i controlli per debug
   crossOrigin="anonymous"
 >
-  <source src="videos/salon-main.mp4" type="video/mp4" /> <!-- Nota: ho rimosso lo slash iniziale -->
+  <source src="videos/salon-main.mp4" type="video/mp4" />
   Il tuo browser non supporta i video HTML5.
 </video>
 
