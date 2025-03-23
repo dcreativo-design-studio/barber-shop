@@ -778,11 +778,11 @@ const HomePage = React.memo(() => {
     },
     {
       src: "/videos/salon-main2.mp4",
-      title: "Postazioni di Lavoro"
+      title: "Vista Panoramica"
     },
     {
       src: "/videos/salon-main3.mp4",
-      title: "Servizi Speciali"
+      title: "Esperienza Cliente"
     },
     {
       src: "/videos/salon-main4.mp4",
