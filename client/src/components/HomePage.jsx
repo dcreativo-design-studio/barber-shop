@@ -1,4 +1,4 @@
-import { Award, Calendar, ChevronDown, Clock, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Scissors, Star, User } from 'lucide-react';
+import { Award, Calendar, ChevronDown, Clock, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Scissors, Star, User, Video } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DCreativoFooterPromo from '../components/DCreativoFooterPromo';
