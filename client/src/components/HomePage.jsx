@@ -1034,7 +1034,9 @@ const scrollToDCreativoSection = () => {
   loop
   playsInline
   poster="images/video-thumbnail.jpg"
-  controls // Aggiungi i controlli per debug
+  controls
+  width="640"
+  height="360"
   crossOrigin="anonymous"
 >
   <source src="videos/salon-main.mp4" type="video/mp4" />
