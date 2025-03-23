@@ -484,8 +484,31 @@ const HomePage = React.memo(() => {
     contact: useRef(null)
   };
 
+  const videoList = [
+    "videos/salon-main1.mp4",
+    "videos/salon-main2.mp4",
+    "videos/salon-main3.mp4",
+    "videos/salon-main4.mp4",
+  ];
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+const videoRef = useRef(null);
 
+useEffect(() => {
+  // Gestisce il passaggio al video successivo quando l'attuale termina
+  const handleVideoEnd = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videoList.length);
+  };
 
+  const videoElement = videoRef.current;
+  if (videoElement) {
+    videoElement.addEventListener('ended', handleVideoEnd);
+
+    // Pulisci l'event listener quando il componente si smonta
+    return () => {
+      videoElement.removeEventListener('ended', handleVideoEnd);
+    };
+  }
+}, [videoList.length]);
   // Scroll to section with smooth animation
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -1027,21 +1050,21 @@ const scrollToDCreativoSection = () => {
         <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 rounded-bl-xl border-white opacity-40 z-20 pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
 
-        <video
-  className="w-full h-auto object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-  autoPlay
-  muted
-  loop
-  playsInline
-  poster="images/video-thumbnail.jpg"
-  controls
-  width="640"
-  height="360"
-  crossOrigin="anonymous"
->
-  <source src="videos/salon-main.mp4" type="video/mp4" />
-  Il tuo browser non supporta i video HTML5.
-</video>
+        <div className="aspect-video w-full">
+          <video
+            className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
+            style={{objectFit: 'cover'}}
+          >
+            <source src="videos/salon-main.mp4" type="video/mp4" />
+          </video>
+        </div>
 
         {/* Overlay con testo */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-30 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
@@ -1056,17 +1079,21 @@ const scrollToDCreativoSection = () => {
         <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
 
-          <video
-            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="videos/salon-main1.mp4" type="video/mp4" />
-          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
-            Il tuo browser non supporta i video HTML5.
-          </video>
+          <div className="aspect-video w-full">
+            <video
+              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              style={{objectFit: 'cover'}}
+            >
+              <source src="videos/salon-main.mp4" type="video/mp4" />
+            </video>
+          </div>
 
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
             <h3 className="text-lg font-bold text-white">Cura della Barba</h3>
@@ -1077,17 +1104,21 @@ const scrollToDCreativoSection = () => {
         <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-indigo-500 opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
 
-          <video
-            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="videos/salon-main2.mp4" type="video/mp4" />
-          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
-            Il tuo browser non supporta i video HTML5.
-          </video>
+          <div className="aspect-video w-full">
+            <video
+              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              style={{objectFit: 'cover'}}
+            >
+              <source src="videos/salon-main.mp4" type="video/mp4" />
+            </video>
+          </div>
 
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
             <h3 className="text-lg font-bold text-white">Servizi Esclusivi</h3>
@@ -1098,17 +1129,21 @@ const scrollToDCreativoSection = () => {
         <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
 
-          <video
-            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="videos/salon-main3.mp4" type="video/mp4" />
-          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
-            Il tuo browser non supporta i video HTML5.
-          </video>
+          <div className="aspect-video w-full">
+            <video
+              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              style={{objectFit: 'cover'}}
+            >
+              <source src="videos/salon-main.mp4" type="video/mp4" />
+            </video>
+          </div>
 
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
             <h3 className="text-lg font-bold text-white">Ambiente Moderno</h3>
@@ -1119,17 +1154,21 @@ const scrollToDCreativoSection = () => {
         <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
 
-          <video
-            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="videos/salon-main4.mp4" type="video/mp4" />
-          <img src="images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
-            Il tuo browser non supporta i video HTML5.
-          </video>
+          <div className="aspect-video w-full">
+            <video
+              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              style={{objectFit: 'cover'}}
+            >
+              <source src="videos/salon-main.mp4" type="video/mp4" />
+            </video>
+          </div>
 
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
             <h3 className="text-lg font-bold text-white">Tocchi di Stile</h3>
