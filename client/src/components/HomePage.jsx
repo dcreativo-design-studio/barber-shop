@@ -472,43 +472,18 @@ const ServiceCard = ({ icon, title, description, price, user }) => {
 const HomePage = React.memo(() => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState({});
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [showDCreativoPromo, setShowDCreativoPromo] = useState(false);
   const sectionRefs = {
     hero: useRef(null),
     services: useRef(null),
     about: useRef(null),
-    videoShowcase: useRef(null), // Aggiungi questa riga
     testimonials: useRef(null),
     contact: useRef(null)
   };
 
-  const videoList = [
-    "videos/salon-main1.mp4",
-    "videos/salon-main2.mp4",
-    "videos/salon-main3.mp4",
-    "videos/salon-main4.mp4",
-  ];
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-const videoRef = useRef(null);
 
-useEffect(() => {
-  // Gestisce il passaggio al video successivo quando l'attuale termina
-  const handleVideoEnd = () => {
-    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videoList.length);
-  };
 
-  const videoElement = videoRef.current;
-  if (videoElement) {
-    videoElement.addEventListener('ended', handleVideoEnd);
-
-    // Pulisci l'event listener quando il componente si smonta
-    return () => {
-      videoElement.removeEventListener('ended', handleVideoEnd);
-    };
-  }
-}, [videoList.length]);
   // Scroll to section with smooth animation
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -566,24 +541,13 @@ useEffect(() => {
   }, []);
 
   // Auto-rotate testimonials
+  // Auto-rotate testimonials
 useEffect(() => {
   const interval = setInterval(() => {
     setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
   }, 5000);
 
   return () => clearInterval(interval);
-}, []);
-
-useEffect(() => {
-  const videoElements = document.querySelectorAll('video');
-  videoElements.forEach(video => {
-    video.addEventListener('loadeddata', () => {
-      console.log('Video caricato:', video.src);
-    });
-    video.addEventListener('error', (e) => {
-      console.error('Errore caricamento video:', e);
-    });
-  });
 }, []);
 
   // Animation classes based on visibility
@@ -748,8 +712,8 @@ const scrollToDCreativoSection = () => {
         </div>
       </section>
 
-      {/* Services Section with Card Animations */}
-      <section
+     {/* Services Section with Card Animations */}
+     <section
         id="services"
         ref={sectionRefs.services}
         className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('services')}`}
@@ -870,14 +834,14 @@ const scrollToDCreativoSection = () => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-  <circle cx="12" cy="6" r="3"></circle>
-  <path d="M18 14l-6-2-6 2"></path>
-  <path d="M12 16v5"></path>
-  <path d="M9 12H4"></path>
-  <path d="M20 12h-5"></path>
-  <path d="M8 20l-1 2"></path>
-  <path d="M16 20l1 2"></path>
-</svg>
+                <circle cx="12" cy="6" r="3"></circle>
+                <path d="M18 14l-6-2-6 2"></path>
+                <path d="M12 16v5"></path>
+                <path d="M9 12H4"></path>
+                <path d="M20 12h-5"></path>
+                <path d="M8 20l-1 2"></path>
+                <path d="M16 20l1 2"></path>
+              </svg>
               }
               title="Taglio Bambino"
               description="Taglio speciale per bambini fino a 10 anni, in un ambiente accogliente e divertente."
@@ -968,7 +932,6 @@ const scrollToDCreativoSection = () => {
           </div>
         </div>
       </section>
-
       {/* About Section with Parallax and Image Reveal */}
       <section
         id="about"
@@ -1031,181 +994,6 @@ const scrollToDCreativoSection = () => {
         </div>
       </section>
 
-              {/* Video Showcase Section */}
-<section
-  id="video-showcase"
-  ref={sectionRefs.videoShowcase}
-  className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('videoShowcase')}`}
->
-  <div className="container mx-auto max-w-6xl">
-    <div className="relative mb-4 flex justify-center">
-      <div className="w-16 h-1 bg-[var(--accent)]"></div>
-    </div>
-    <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
-      L'Esperienza Your Style
-    </h2>
-    <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
-      Vivi l'atmosfera del nostro salone attraverso questi brevi momenti catturati per te
-    </p>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-      {/* Video principale */}
-      <div className="relative group overflow-hidden rounded-xl shadow-2xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(var(--accent-rgb),0.3)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-blue-400 opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
-
-        {/* Bordo luminoso animato */}
-        <div className="absolute inset-0 border-2 border-[var(--accent)] rounded-xl opacity-0 group-hover:opacity-70 transition-opacity z-10 animate-pulse-subtle pointer-events-none"></div>
-
-        {/* Pattern decorativo agli angoli */}
-        <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 rounded-tl-xl border-white opacity-40 z-20 pointer-events-none"></div>
-        <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 rounded-tr-xl border-white opacity-40 z-20 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 rounded-bl-xl border-white opacity-40 z-20 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
-
-        <div className="relative aspect-video w-full z-0 overflow-hidden rounded-xl">
-  <video
-    className="absolute inset-0 w-full h-full object-cover rounded-xl"
-    autoPlay
-    muted
-    loop
-    playsInline
-    controls
-  >
-    <source src="videos/salon-main.mp4" type="video/mp4" />
-  </video>
-
-  {/* Overlay con z-index maggiore del video ma inferiore al testo */}
-  <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-blue-400 opacity-30 group-hover:opacity-40 transition-opacity z-30 pointer-events-none"></div>
-
-  {/* Bordo luminoso con z-index sopra l'overlay */}
-  <div className="absolute inset-0 border-2 border-[var(--accent)] rounded-xl opacity-0 group-hover:opacity-70 transition-opacity z-40 animate-pulse-subtle pointer-events-none"></div>
-
-  {/* Overlay testo con z-index superiore a tutto */}
-  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-50 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
-    <h3 className="text-xl font-bold text-white mb-2">L'Arte del Taglio</h3>
-    <p className="text-white/90 text-sm">Precisione e stile in ogni dettaglio per un look perfetto</p>
-  </div>
-</div>
-      </div>
-
-      {/* Grid di video secondari */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Video secondario 1 */}
-        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
-
-          <div className="aspect-video w-full">
-            <video
-              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              controlsList="nodownload nofullscreen noremoteplayback"
-              disablePictureInPicture
-              style={{objectFit: 'cover'}}
-            >
-              <source src="videos/salon-main.mp4" type="video/mp4" />
-            </video>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
-            <h3 className="text-lg font-bold text-white">Cura della Barba</h3>
-          </div>
-        </div>
-
-        {/* Video secondario 2 */}
-        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-indigo-500 opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
-
-          <div className="aspect-video w-full">
-            <video
-              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              controlsList="nodownload nofullscreen noremoteplayback"
-              disablePictureInPicture
-              style={{objectFit: 'cover'}}
-            >
-              <source src="videos/salon-main.mp4" type="video/mp4" />
-            </video>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
-            <h3 className="text-lg font-bold text-white">Servizi Esclusivi</h3>
-          </div>
-        </div>
-
-        {/* Video secondario 3 */}
-        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
-
-          <div className="aspect-video w-full">
-            <video
-              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              controlsList="nodownload nofullscreen noremoteplayback"
-              disablePictureInPicture
-              style={{objectFit: 'cover'}}
-            >
-              <source src="videos/salon-main.mp4" type="video/mp4" />
-            </video>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
-            <h3 className="text-lg font-bold text-white">Ambiente Moderno</h3>
-          </div>
-        </div>
-
-        {/* Video secondario 4 */}
-        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
-
-          <div className="aspect-video w-full">
-            <video
-              className="w-full h-full object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              controlsList="nodownload nofullscreen noremoteplayback"
-              disablePictureInPicture
-              style={{objectFit: 'cover'}}
-            >
-              <source src="videos/salon-main.mp4" type="video/mp4" />
-            </video>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
-            <h3 className="text-lg font-bold text-white">Tocchi di Stile</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* CTA Button */}
-    <div className="mt-12 text-center">
-      <Link
-        to={user ? "/booking" : "/guest-booking"}
-        className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-lg transform hover:-translate-y-1 relative overflow-hidden group"
-      >
-        <span className="relative z-10">Prenota la tua esperienza</span>
-        <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
-        {/* Effetto shine */}
-        <span className="absolute inset-0 opacity-0 group-hover:opacity-100 shine-effect"></span>
-      </Link>
-    </div>
-  </div>
-</section>
       {/* Testimonials Section with Modern Card Design */}
       <section
         id="testimonials"
@@ -1283,75 +1071,6 @@ const scrollToDCreativoSection = () => {
                 </div>
                 <div>
                   <h3 className="font-bold">Rossano Mantegazzi</h3>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 4 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                  "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
-                </p>
-              </div>
-              <div className="flex items-center">
-                <div className="mr-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
-                </div>
-                <div>
-                  <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 5 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                  "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
-                </p>
-              </div>
-              <div className="flex items-center">
-                <div className="mr-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
-                </div>
-                <div>
-                  <h3 className="font-bold">Patrick Cali</h3>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 6 */}
-            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                  "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
-                </p>
-              </div>
-              <div className="flex items-center">
-                <div className="mr-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
-                </div>
-                <div>
-                  <h3 className="font-bold">Fabio De Santis</h3>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
@@ -1443,87 +1162,12 @@ const scrollToDCreativoSection = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Testimonial 4 */}
-                <div className="w-full flex-shrink-0 p-2">
-                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
-                    <div className="relative">
-                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                        "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="mr-4">
-                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
-                      </div>
-                      <div>
-                        <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Testimonial 5 */}
-                <div className="w-full flex-shrink-0 p-2">
-                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
-                    <div className="relative">
-                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                        "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="mr-4">
-                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
-                      </div>
-                      <div>
-                        <h3 className="font-bold">Patrick Cali</h3>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Testimonial 6 */}
-                <div className="w-full flex-shrink-0 p-2">
-                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
-                    <div className="relative">
-                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
-                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
-                        "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="mr-4">
-                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
-                      </div>
-                      <div>
-                        <h3 className="font-bold">Fabio De Santis</h3>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
             {/* Dots navigation for testimonials */}
             <div className="flex justify-center mt-6 space-x-2">
-              {[0, 1, 2, 3, 4, 5].map((index) => (
+              {[0, 1, 2].map((index) => (
                 <button
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
@@ -1718,19 +1362,18 @@ const scrollToDCreativoSection = () => {
           </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-  <div>
-    <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
-    <div className="space-y-2">
-      <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
-      <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
-      <button onClick={() => scrollToSection('videoShowcase')} className="block hover:text-[var(--accent)] transition-colors">Video</button>
-      <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
-      <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
-    </div>
-  </div>
+            <div>
+              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
+              <div className="space-y-2">
+                <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
+                <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
+                <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
+                <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
+              </div>
+            </div>
 
-  <div>
-    <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Servizi</h3>
+            <div>
+              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Servizi</h3>
               <div className="space-y-2">
                 <Link to={user ? "/booking" : "/guest-booking"} className="block hover:text-[var(--accent)] transition-colors">Taglio di Capelli</Link>
                 <Link to={user ? "/booking" : "/guest-booking"} className="block hover:text-[var(--accent)] transition-colors">Barba</Link>
@@ -1740,7 +1383,7 @@ const scrollToDCreativoSection = () => {
             </div>
 
             <div>
-            <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Orari di apertura</h3>
+              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Orari di apertura</h3>
               <div className="space-y-2 text-[var(--text-primary)] opacity-80">
                 <p>Lunedì: 14:00 - 19:00</p>
                 <p>Martedì - Venerdì: 9:00 - 19:00</p>
