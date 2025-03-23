@@ -1114,8 +1114,8 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/public/videos/salon-main.mp4" type="video/mp4" />
-          <img src="/public/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
+            <source src="/videos/salon-main.mp4" type="video/mp4" />
+          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
 
