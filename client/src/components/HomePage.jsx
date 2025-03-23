@@ -542,13 +542,13 @@ const HomePage = React.memo(() => {
   }, []);
 
   // Auto-rotate testimonials
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % 3);
-    }, 5000);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
+  }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
 
   // Animation classes based on visibility
   const getAnimationClass = (sectionId) => {
@@ -1019,17 +1019,17 @@ const scrollToDCreativoSection = () => {
         <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
 
         <video
-          className="w-full h-auto object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/images/video-thumbnail.jpg"
-        >
-          <source src="/videos/salon-main.mp4" type="video/mp4" />
-          <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
-          Il tuo browser non supporta i video HTML5.
-        </video>
+  className="w-full h-auto object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+  autoPlay
+  muted
+  loop
+  playsInline
+  poster="/images/video-thumbnail.jpg"
+  controls // Aggiungi i controlli per debug
+>
+  <source src="/videos/salon-main.mp4" type="video/mp4" />
+  Il tuo browser non supporta i video HTML5.
+</video>
 
         {/* Overlay con testo */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-30 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
@@ -1051,7 +1051,7 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main.mp4" type="video/mp4" />
+            <source src="/videos/salon-main1.mp4" type="video/mp4" />
           <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
@@ -1072,7 +1072,7 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main.mp4" type="video/mp4" />
+            <source src="/videos/salon-main2.mp4" type="video/mp4" />
           <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
@@ -1093,7 +1093,7 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main.mp4" type="video/mp4" />
+            <source src="/videos/salon-main3.mp4" type="video/mp4" />
           <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
@@ -1114,7 +1114,7 @@ const scrollToDCreativoSection = () => {
             loop
             playsInline
           >
-            <source src="/videos/salon-main.mp4" type="video/mp4" />
+            <source src="/videos/salon-main4.mp4" type="video/mp4" />
           <img src="/images/video-thumbnail.jpg" alt="Video anteprima" className="w-full h-auto object-cover" />
             Il tuo browser non supporta i video HTML5.
           </video>
@@ -1651,19 +1651,20 @@ const scrollToDCreativoSection = () => {
             </div>
           </div>
 
-          <div>
-  <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
-  <div className="space-y-2">
-    <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
-    <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
-    <button onClick={() => scrollToSection('videoShowcase')} className="block hover:text-[var(--accent)] transition-colors">Video</button>
-    <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
-    <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+  <div>
+    <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
+    <div className="space-y-2">
+      <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
+      <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
+      <button onClick={() => scrollToSection('videoShowcase')} className="block hover:text-[var(--accent)] transition-colors">Video</button>
+      <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
+      <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
+    </div>
   </div>
 
-
-            <div>
-              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Servizi</h3>
+  <div>
+    <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Servizi</h3>
               <div className="space-y-2">
                 <Link to={user ? "/booking" : "/guest-booking"} className="block hover:text-[var(--accent)] transition-colors">Taglio di Capelli</Link>
                 <Link to={user ? "/booking" : "/guest-booking"} className="block hover:text-[var(--accent)] transition-colors">Barba</Link>
@@ -1673,7 +1674,7 @@ const scrollToDCreativoSection = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Orari di apertura</h3>
+            <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Orari di apertura</h3>
               <div className="space-y-2 text-[var(--text-primary)] opacity-80">
                 <p>Lunedì: 14:00 - 19:00</p>
                 <p>Martedì - Venerdì: 9:00 - 19:00</p>
