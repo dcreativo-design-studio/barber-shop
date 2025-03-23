@@ -156,10 +156,10 @@ const createEmailTemplate = (content) => {
       </div>
       <div class="footer">
         <p>Your Style Barber Studio</p>
-        <p class="address">Via Example 123, Lugano, Svizzera</p>
-        <p>Tel: +41 XX XXX XX XX</p>
+        <p class="address">Via Zurigo 2, Lugano, Svizzera</p>
+        <p>Tel: +41 78 930 15 99</p>
         <div class="social">
-          <a href="#">Instagram</a> | <a href="#">Facebook</a> | <a href="#">Website</a>
+          <a href="https://www.instagram.com/yourstylelugano/">Instagram</a> | <a href="#">Facebook</a> | <a href="https://yourstyle.dcreativo.ch/">Website</a>
         </div>
         <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
       </div>
@@ -249,7 +249,7 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
     </div>
-    <p class="address">Ti aspettiamo in Via Example 123, Lugano</p>
+    <p class="address">Ti aspettiamo in Via Zurigo 2, Lugano</p>
     <p>Per cancellare o modificare l'appuntamento, accedi al tuo account e visita la sezione "I miei appuntamenti" nel tuo profilo personale.</p>
   `;
 
@@ -273,14 +273,14 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
   const barberMail = {
     from: process.env.SMTP_USER,
     to: process.env.BARBER_EMAIL,
-    subject: 'Nuova Prenotazione - Your Style Barber',
+    subject: 'Nuova Prenotazione - Your Style Barber Studio',
     html: createEmailTemplate(adminContent)
   };
 
   const clientMail = {
     from: process.env.SMTP_USER,
     to: user.email,
-    subject: 'Conferma Prenotazione - Your Style Barber',
+    subject: 'Conferma Prenotazione - Your Style Barber Studio',
     html: createEmailTemplate(clientContent)
   };
 
@@ -288,7 +288,7 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
   const barberPersonalMail = {
     from: process.env.SMTP_USER,
     to: appointment.barber?.email,
-    subject: 'Nuovo Appuntamento - Your Style Barber',
+    subject: 'Nuovo Appuntamento - Your Style Barber Studio',
     html: createEmailTemplate(barberContent)
   };
 
@@ -340,7 +340,7 @@ export const sendCancellationEmailToClient = async (appointment, user) => {
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
-    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    subject: 'Cancellazione Appuntamento - Your Style Barbe Studio',
     html: createEmailTemplate(content)
   };
 
@@ -380,7 +380,7 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: process.env.BARBER_EMAIL,
-    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    subject: 'Cancellazione Appuntamento - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 
@@ -428,7 +428,7 @@ export const sendCancellationNotification = async ({ appointment, user }) => {
   const barberMail = {
     from: process.env.SMTP_USER,
     to: process.env.BARBER_EMAIL,
-    subject: 'Cancellazione Appuntamento - Your Style Barber',
+    subject: 'Cancellazione Appuntamento - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 
@@ -458,7 +458,7 @@ export const sendReminderEmail = async (appointment, user) => {
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
     </div>
-    <p><strong>Indirizzo:</strong> Via Example 123, Lugano</p>
+    <p><strong>Indirizzo:</strong> Via Zurigo 2, Lugano</p>
     <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
     <p>Ti aspettiamo!</p>
     <a href="${process.env.FRONTEND_URL}/appointments" class="button">Gestisci Appuntamenti</a>
@@ -467,7 +467,7 @@ export const sendReminderEmail = async (appointment, user) => {
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
-    subject: 'Promemoria Appuntamento - Your Style Barber',
+    subject: 'Promemoria Appuntamento - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 
@@ -498,7 +498,7 @@ export const sendPasswordChangeEmail = async (user) => {
     <p>Gentile ${user.firstName},</p>
     <p>La tua password è stata modificata con successo il ${new Date().toLocaleDateString('it-IT', dateOptions)}.</p>
     <p>Se non hai effettuato tu questa modifica, contatta immediatamente il nostro supporto.</p>
-    <p>Your Style Barber Team</p>
+    <p>Your Style Barber Studio Team</p>
   `;
 
   const htmlContent = createEmailTemplate(content);
@@ -626,7 +626,7 @@ export const sendBarberCancellationNotification = async (appointment, user) => {
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: appointment.barber.email,
-    subject: 'Appuntamento Cancellato - Your Style Barber',
+    subject: 'Appuntamento Cancellato - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 

@@ -152,13 +152,13 @@ export const notificationService = {
               <p><strong>Ora:</strong> ${appointment.time}</p>
               <p><strong>Barbiere:</strong> ${appointment.barber?.firstName || ''} ${appointment.barber?.lastName || ''}</p>
             </div>
-            <p style="font-style: italic;">Indirizzo: Via Example 123, Lugano</p>
+            <p style="font-style: italic;">Indirizzo: Via Zurigo 2, Lugano</p>
             <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo accedendo al tuo account.</p>
             <p>Ti aspettiamo!</p>
           </div>
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-            <p>Your Style Barber Studio</p>
-            <p>Via Example 123, Lugano</p>
+            <p>Your Style BarberShop</p>
+            <p>Via Zurigo 2, Lugano</p>
             <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
           </div>
         </div>
@@ -167,7 +167,7 @@ export const notificationService = {
       const mailOptions = {
         from: process.env.SMTP_USER,
         to: user.email,
-        subject: 'Promemoria Appuntamento - Your Style Barber',
+        subject: 'Promemoria Appuntamento - Your Style BarberShop',
         html: htmlContent
       };
 
@@ -403,9 +403,9 @@ export const notificationService = {
             <p>Ricorda che puoi modificare o cancellare l'appuntamento fino a 24 ore prima.</p>
           </div>
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-            <p>Your Style Barber Studio</p>
-            <p>Via Example 123, Lugano</p>
-            <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+            <p>Your Style Barber Shop</p>
+            <p>Via Zurigo 2, Lugano</p>
+            <p>&copy; ${new Date().getFullYear()} Your Style Barber Shop. Tutti i diritti riservati.</p>
           </div>
         </div>
       `;
@@ -440,9 +440,9 @@ export const notificationService = {
               </div>
             </div>
             <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-              <p>Your Style Barber Studio</p>
-              <p>Via Example 123, Lugano</p>
-              <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+              <p>Your Style Barber Shop</p>
+              <p>Via Zurigo 2, Lugano</p>
+              <p>&copy; ${new Date().getFullYear()} Your Style Barber Shop. Tutti i diritti riservati.</p>
             </div>
           </div>
         `;
@@ -576,10 +576,10 @@ export const notificationService = {
           <p>Se non hai richiesto questo ripristino o hai domande, ti preghiamo di contattarci immediatamente.</p>
         </div>
         <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-          <p>Your Style Barber Studio</p>
-          <p>Via Example 123, Lugano</p>
+          <p>Your Style Barber Shop</p>
+          <p>Via Zurigo 2, Lugano</p>
           <p>Questo è un messaggio automatico, si prega di non rispondere a questa email.</p>
-          <p>&copy; ${new Date().getFullYear()} Your Style Barber Studio. Tutti i diritti riservati.</p>
+          <p>&copy; ${new Date().getFullYear()} Your Style Barber Shop. Tutti i diritti riservati.</p>
         </div>
       </div>
     `;

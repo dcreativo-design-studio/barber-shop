@@ -478,6 +478,7 @@ const HomePage = React.memo(() => {
     hero: useRef(null),
     services: useRef(null),
     about: useRef(null),
+    videoShowcase: useRef(null), // Aggiungi questa riga
     testimonials: useRef(null),
     contact: useRef(null)
   };
@@ -726,102 +727,201 @@ const scrollToDCreativoSection = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {/* Taglio di Capelli */}
-  <ServiceCard
-    icon={<Scissors className="icon-white" />}
-    title="Taglio di Capelli"
-    description="Taglio professionale personalizzato in base alla forma del viso e alle preferenze personali."
-    price="Da CHF 30"
-    user={user}
-  />
+            {/* TAGLIO CAPELLI */}
+            <ServiceCard
+              icon={<Scissors className="icon-white" />}
+              title="Taglio Capelli"
+              description="Taglio professionale personalizzato in base alla forma del viso e alle preferenze personali."
+              price="CHF 30"
+              user={user}
+            />
 
-  {/* Barba */}
-  <ServiceCard
-    icon={
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-        <path d="M3 3v18h18" />
-        <path d="M16 3c0 6-4 10-10 10" />
-        <path d="M8 15a2 2 0 0 0 4 0" />
-        <path d="M18 3c0 9-4 14-10 14" />
-      </svg>
-    }
-    title="Barba"
-    description="Rifinitura e modellamento della barba, con trattamento rilassante e prodotti di qualità."
-    price="Da CHF 25"
-    user={user}
-  />
+            {/* High Definition */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M7 21L4 18"></path>
+                  <path d="M7 21L10 18"></path>
+                  <path d="M17 21l3-3"></path>
+                  <path d="M17 21l-3-3"></path>
+                  <rect width="16" height="13" x="4" y="3" rx="1"></rect>
+                  <path d="M8 12h8"></path>
+                  <path d="M12 8v8"></path>
+                </svg>
+              }
+              title="High Definition"
+              description="Taglio di precisione con finiture dettagliate per un look definito e impeccabile."
+              price="CHF 35"
+              user={user}
+            />
 
-  {/* Taglio + Barba */}
-  <ServiceCard
-    icon={
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-        <path d="M16 2s-2 2-4 2-4-2-4-2"></path>
-        <path d="M12 14c-3 0-4-3-4-3"></path>
-        <path d="M16 14c-1 0-2-1-3-2"></path>
-        <path d="M3 6v14"></path>
-        <path d="M21 6v14"></path>
-        <path d="M3 10h18"></path>
-        <path d="M3 14h18"></path>
-        <path d="M10 6a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1z"></path>
-      </svg>
-    }
-    title="Taglio + Barba"
-    description="Combinazione di taglio di capelli e rifinitura della barba per un look completo."
-    price="Da CHF 45"
-    user={user}
-  />
+            {/* BARBA */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M8 6c0-1.5 3.5-3 3.5-3s3.5 1.5 3.5 3c0 1.5-.5 2-2 3-1.5-1-5-1-5-3Z"></path>
+                  <path d="m9 11 1.5 1.5c1 1 2 1.5 3 1.5 1.5 0 2.5-1 2.5-1"></path>
+                  <path d="M5 10a4 4 0 0 0 8 0"></path>
+                  <path d="M11 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"></path>
+                </svg>
+              }
+              title="Barba Modellata"
+              description="Rifinitura e modellamento della barba con panno caldo, per un look impeccabile."
+              price="CHF 25"
+              user={user}
+            />
 
-  {/* Taglio Bambino */}
-  <ServiceCard
-    icon={
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-        <circle cx="12" cy="9" r="5"></circle>
-        <path d="M8 9h8"></path>
-        <path d="M12 4v10"></path>
-        <path d="M9 17l3 4 3-4"></path>
-      </svg>
-    }
-    title="Taglio Bambino"
-    description="Taglio speciale per i più piccoli in un ambiente confortevole e divertente."
-    price="Da CHF 20"
-    user={user}
-  />
+            {/* BARBA LUNGA HIPSTER */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M7 3a4 4 0 0 1 8 0v5a4 4 0 0 1-8 0Z"></path>
+                  <path d="M5 10a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"></path>
+                  <path d="M19 10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"></path>
+                  <path d="M12 20a5 5 0 0 1-5-5v-3a3 3 0 0 1 6 0v8"></path>
+                  <path d="M12 20a5 5 0 0 0 5-5v-3a3 3 0 0 0-6 0"></path>
+                </svg>
+              }
+              title="Barba Lunga Hipster"
+              description="Styling e cura della barba lunga per un look distintivo e alla moda."
+              price="CHF 30"
+              user={user}
+            />
 
-  {/* Trattamenti Speciali */}
-  <ServiceCard
-    icon={
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-        <path d="M7 7h10v10H7z"></path>
-        <path d="M3 10h4"></path>
-        <path d="M17 10h4"></path>
-        <path d="M10 3v4"></path>
-        <path d="M10 17v4"></path>
-        <path d="m16 16-2.5-2.5"></path>
-        <path d="M16 8 8 16"></path>
-        <path d="m14 14 6 6"></path>
-      </svg>
-    }
-    title="Trattamenti Speciali"
-    description="Trattamenti personalizzati per capelli e cuoio capelluto con prodotti professionali."
-    price="Da CHF 35"
-    user={user}
-  />
+            {/* BARBA EXPRESS */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M10 15c-1.5-1-5-1-5-3v8h5"></path>
+                  <path d="M14 15c1.5-1 5-1 5-3v8h-5"></path>
+                  <path d="M8.5 10A3.5 3.5 0 0 1 12 6.5a3.5 3.5 0 0 1 3.5 3.5"></path>
+                  <path d="M3 3v4"></path>
+                  <path d="m7 3-3 4"></path>
+                </svg>
+              }
+              title="Barba Express"
+              description="Servizio rapido di rifinitura barba per chi ha fretta ma non vuole rinunciare alla cura."
+              price="CHF 15"
+              user={user}
+            />
 
-  {/* CTA Card */}
-  <div className="bg-[var(--accent)] p-6 rounded-lg shadow-lg text-white transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl relative overflow-hidden cta-card">
-    <div className="absolute inset-0 bg-white opacity-0 animate-pulse-slow"></div>
-    <div className="relative z-10">
-      <h3 className="text-xl font-bold mb-4 text-white">Prenota Ora</h3>
-      <p className="mb-6 text-white">Scegli il servizio e prenota il tuo appuntamento in pochi click.</p>
-      <Link
-        to={user ? "/booking" : "/guest-booking"}
-        className="inline-block bg-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md cta-button"
-      >
-        Prenota
-      </Link>
-    </div>
-  </div>
-</div>
+            {/* TAGLIO + BARBA */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M7 8c0 1.5-.5 2-2 3 1.5 1 2 1.5 2 3"></path>
+                  <path d="M17 8c0 1.5.5 2 2 3-1.5 1-2 1.5-2 3"></path>
+                  <circle cx="12" cy="7" r="3"></circle>
+                  <path d="M9 22v-8a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8"></path>
+                  <path d="M18 22v-4"></path>
+                  <path d="M6 22v-4"></path>
+                  <circle cx="18" cy="17" r="1"></circle>
+                  <circle cx="6" cy="17" r="1"></circle>
+                </svg>
+              }
+              title="Taglio + Barba"
+              description="Combinazione di taglio di capelli e modellamento barba per un look completo e curato."
+              price="CHF 45"
+              user={user}
+            />
+
+            {/* TAGLIO BAMBINO UNDER 10 */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M18 21v-8a2 2 0 0 0-2-2h-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8"></path>
+                  <path d="M10 9H8"></path>
+                  <path d="M6 13v6"></path>
+                  <rect width="4" height="6" x="16" y="14" rx="2"></rect>
+                </svg>
+              }
+              title="Taglio Bambino"
+              description="Taglio speciale per bambini fino a 10 anni, in un ambiente accogliente e divertente."
+              price="CHF 20"
+              user={user}
+            />
+
+            {/* UNIVERSITARI */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+              }
+              title="Universitari"
+              description="Offerta speciale per studenti universitari con presentazione del tesserino."
+              price="CHF 25"
+              user={user}
+            />
+
+            {/* OVER 65 */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="m22 21-3.5-3.5"></path>
+                  <path d="M17 21h.01"></path>
+                  <path d="M19 17h.01"></path>
+                </svg>
+              }
+              title="Over 65"
+              description="Servizio dedicato per la cura dei capelli dei nostri clienti senior."
+              price="CHF 25"
+              user={user}
+            />
+
+            {/* HAIR TATTOO */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <circle cx="7" cy="7" r="3"></circle>
+                  <path d="m9 9 1.5 1.5"></path>
+                  <path d="M5 2h3.5M2 5v3.5"></path>
+                  <path d="M14 6h5M14 10h5"></path>
+                  <rect width="10" height="7" x="10" y="13" rx="1"></rect>
+                </svg>
+              }
+              title="Hair Tattoo"
+              description="Disegni personalizzati e creativi realizzati con tecniche professionali di precisione."
+              price="Da CHF 5"
+              user={user}
+            />
+
+            {/* SERVIZI TECNICI */}
+            <ServiceCard
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
+                  <path d="m14 5-3 3-2-2"></path>
+                  <path d="m14 11-3 3-2-2"></path>
+                  <path d="m14 17-3 3-2-2"></path>
+                  <path d="M6 9h10"></path>
+                  <path d="M6 15h10"></path>
+                  <path d="M6 21h10"></path>
+                </svg>
+              }
+              title="Servizi Tecnici"
+              description="Permanente, stiratura alla keratina, decolorazione e colorazione professionale."
+              price="Da CHF 30"
+              user={user}
+            />
+
+            {/* CTA Card */}
+            <div className="bg-[var(--accent)] p-6 rounded-lg shadow-lg text-white transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl relative overflow-hidden cta-card">
+              <div className="absolute inset-0 bg-white opacity-0 animate-pulse-slow"></div>
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold mb-4 text-white">Prenota Ora</h3>
+                <p className="mb-6 text-white">Scegli il servizio e prenota il tuo appuntamento in pochi click.</p>
+                <Link
+                  to={user ? "/booking" : "/guest-booking"}
+                  className="inline-block bg-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-md cta-button"
+                >
+                  Prenota
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -886,6 +986,154 @@ const scrollToDCreativoSection = () => {
           </div>
         </div>
       </section>
+
+              {/* Video Showcase Section */}
+<section
+  id="video-showcase"
+  ref={sectionRefs.videoShowcase}
+  className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('videoShowcase')}`}
+>
+  <div className="container mx-auto max-w-6xl">
+    <div className="relative mb-4 flex justify-center">
+      <div className="w-16 h-1 bg-[var(--accent)]"></div>
+    </div>
+    <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
+      L'Esperienza Your Style
+    </h2>
+    <p className="text-center max-w-2xl mx-auto mb-12 text-[var(--text-primary)] opacity-80">
+      Vivi l'atmosfera del nostro salone attraverso questi brevi momenti catturati per te
+    </p>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+      {/* Video principale */}
+      <div className="relative group overflow-hidden rounded-xl shadow-2xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(var(--accent-rgb),0.3)]">
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-blue-400 opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
+
+        {/* Bordo luminoso animato */}
+        <div className="absolute inset-0 border-2 border-[var(--accent)] rounded-xl opacity-0 group-hover:opacity-70 transition-opacity z-10 animate-pulse-subtle pointer-events-none"></div>
+
+        {/* Pattern decorativo agli angoli */}
+        <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 rounded-tl-xl border-white opacity-40 z-20 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 rounded-tr-xl border-white opacity-40 z-20 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 rounded-bl-xl border-white opacity-40 z-20 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 rounded-br-xl border-white opacity-40 z-20 pointer-events-none"></div>
+
+        <video
+          className="w-full h-auto object-cover rounded-xl transform transition-transform duration-700 group-hover:scale-105"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src="/videos/salon-main.mp4" type="video/mp4" />
+          Il tuo browser non supporta i video HTML5.
+        </video>
+
+        {/* Overlay con testo */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 z-30 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
+          <h3 className="text-xl font-bold text-white mb-2">L'Arte del Taglio</h3>
+          <p className="text-white/90 text-sm">Precisione e stile in ogni dettaglio per un look perfetto</p>
+        </div>
+      </div>
+
+      {/* Grid di video secondari */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Video secondario 1 */}
+        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
+
+          <video
+            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/videos/salon-detail-1.mp4" type="video/mp4" />
+            Il tuo browser non supporta i video HTML5.
+          </video>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
+            <h3 className="text-lg font-bold text-white">Cura della Barba</h3>
+          </div>
+        </div>
+
+        {/* Video secondario 2 */}
+        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-indigo-500 opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
+
+          <video
+            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/videos/salon-detail-2.mp4" type="video/mp4" />
+            Il tuo browser non supporta i video HTML5.
+          </video>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
+            <h3 className="text-lg font-bold text-white">Servizi Esclusivi</h3>
+          </div>
+        </div>
+
+        {/* Video secondario 3 */}
+        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
+
+          <video
+            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/videos/salon-detail-3.mp4" type="video/mp4" />
+            Il tuo browser non supporta i video HTML5.
+          </video>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
+            <h3 className="text-lg font-bold text-white">Ambiente Moderno</h3>
+          </div>
+        </div>
+
+        {/* Video secondario 4 */}
+        <div className="relative group overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(var(--accent-rgb),0.25)]">
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-[var(--accent)] opacity-30 group-hover:opacity-40 transition-opacity z-10 pointer-events-none"></div>
+
+          <video
+            className="w-full h-auto object-cover rounded-xl aspect-video transform transition-transform duration-700 group-hover:scale-105"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/videos/salon-detail-4.mp4" type="video/mp4" />
+            Il tuo browser non supporta i video HTML5.
+          </video>
+
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 z-30 transform transition-transform duration-500 translate-y-1 group-hover:translate-y-0">
+            <h3 className="text-lg font-bold text-white">Tocchi di Stile</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* CTA Button */}
+    <div className="mt-12 text-center">
+      <Link
+        to={user ? "/booking" : "/guest-booking"}
+        className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-all hover:shadow-lg transform hover:-translate-y-1 relative overflow-hidden group"
+      >
+        <span className="relative z-10">Prenota la tua esperienza</span>
+        <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
+        {/* Effetto shine */}
+        <span className="absolute inset-0 opacity-0 group-hover:opacity-100 shine-effect"></span>
+      </Link>
+    </div>
+  </div>
+</section>
 
       {/* Testimonials Section with Modern Card Design */}
       <section
@@ -964,6 +1212,75 @@ const scrollToDCreativoSection = () => {
                 </div>
                 <div>
                   <h3 className="font-bold">Rossano Mantegazzi</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 4 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 5 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Patrick Cali</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 6 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Fabio De Santis</h3>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
@@ -1055,12 +1372,87 @@ const scrollToDCreativoSection = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Testimonial 4 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 5 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Patrick Cali</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 6 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Fabio De Santis</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Dots navigation for testimonials */}
             <div className="flex justify-center mt-6 space-x-2">
-              {[0, 1, 2].map((index) => (
+              {[0, 1, 2, 3, 4, 5].map((index) => (
                 <button
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
@@ -1254,16 +1646,16 @@ const scrollToDCreativoSection = () => {
             </div>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
-              <div className="space-y-2">
-                <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
-                <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
-                <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
-                <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
-              </div>
-            </div>
+          <div>
+  <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Menu rapido</h3>
+  <div className="space-y-2">
+    <button onClick={() => scrollToSection('services')} className="block hover:text-[var(--accent)] transition-colors">Servizi</button>
+    <button onClick={() => scrollToSection('about')} className="block hover:text-[var(--accent)] transition-colors">Chi siamo</button>
+    <button onClick={() => scrollToSection('videoShowcase')} className="block hover:text-[var(--accent)] transition-colors">Video</button>
+    <button onClick={() => scrollToSection('testimonials')} className="block hover:text-[var(--accent)] transition-colors">Recensioni</button>
+    <button onClick={() => scrollToSection('contact')} className="block hover:text-[var(--accent)] transition-colors">Contatti</button>
+  </div>
+
 
             <div>
               <h3 className="text-lg font-bold mb-4 text-[var(--accent)]">Servizi</h3>
