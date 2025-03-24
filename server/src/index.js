@@ -29,7 +29,7 @@ const app = express();
 
 // Configurazione CORS dinamica basata sull'ambiente
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://barbershop.dcreativo.ch',
+  origin: process.env.FRONTEND_URL || 'https://yourstyle.dcreativo.ch',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
@@ -92,7 +92,7 @@ app.get('/', (req, res) => {
       services: '/api/services',
       contact: '/api/contact'  // Aggiunto nuovo endpoint
     },
-    docs: 'https://docs.barbershop.dcreativo.ch'
+    docs: 'https://docs.yourstyle.dcreativo.ch'
   });
 });
 
@@ -144,18 +144,18 @@ app.use((err, req, res, next) => {
 // Funzione per inizializzare l'admin
 const initializeAdmin = async () => {
   try {
-    const existingAdmin = await User.findOne({ email: 'info@dcreativo.ch' });
+    const existingAdmin = await User.findOne({ email: 'barbershopyourstyle@gmail.com' });
 
     if (!existingAdmin) {
       const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash('Admin123!', salt);
+      const hashedPassword = await bcryptjs.hash('2Gbnt2!3', salt);
 
       const adminUser = new User({
-        email: 'info@dcreativo.ch',
+        email: 'barbershopyourstyle@gmail.com',
         password: hashedPassword,
-        firstName: 'Admin',
-        lastName: 'Administrator',
-        phone: '0767778190',
+        firstName: 'Santiago',
+        lastName: 'Amministratore',
+        phone: '0789301599',
         role: 'admin'
       });
 
