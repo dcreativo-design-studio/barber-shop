@@ -1,4 +1,4 @@
-import { apiRequest } from './api';
+import { apiRequest } from '../config/api';
 
 export const barberApi = {
   // Ottiene i dettagli di un barbiere specifico
