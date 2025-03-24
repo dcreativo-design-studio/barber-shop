@@ -734,13 +734,13 @@ const HomePage = React.memo(() => {
   }, []);
 
   // Auto-rotate testimonials
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
-    }, 5000);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setActiveTestimonial((prev) => (prev + 1) % 6);  // Modifica da % 3 a % 6
+  }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
 
   // Animation classes based on visibility
   const getAnimationClass = (sectionId) => {
@@ -929,7 +929,6 @@ const HomePage = React.memo(() => {
         ref={sectionRefs.services}
         className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('services')}`}
       >
-        {/* Existing services section code... */}
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
             I Nostri Servizi
@@ -971,14 +970,14 @@ const HomePage = React.memo(() => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-  <circle cx="12" cy="6" r="3"></circle>
-  <path d="M12 9v2"></path>
-  <path d="M9 14l3 3 3-3"></path>
-  <path d="M9 18h6"></path>
-  <path d="M8 14h8"></path>
-  <path d="M10 20l-2 2"></path>
-  <path d="M14 20l2 2"></path>
-</svg>
+                <circle cx="12" cy="6" r="3"></circle>
+                <path d="M12 9v2"></path>
+                <path d="M9 14l3 3 3-3"></path>
+                <path d="M9 18h6"></path>
+                <path d="M8 14h8"></path>
+                <path d="M10 20l-2 2"></path>
+                <path d="M14 20l2 2"></path>
+              </svg>
               }
               title="Barba Modellata"
               description="Rifinitura e modellamento della barba con panno caldo, per un look impeccabile."
@@ -990,14 +989,14 @@ const HomePage = React.memo(() => {
             <ServiceCard
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-white">
-  <circle cx="12" cy="8" r="4"></circle>
-  <path d="M12 12v4"></path>
-  <path d="M8 20c0-2 1-4 4-4s4 2 4 4"></path>
-  <path d="M10 16.5L8.5 20"></path>
-  <path d="M14 16.5l1.5 3.5"></path>
-  <path d="M9 17l-2 3"></path>
-  <path d="M15 17l2 3"></path>
-</svg>
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M12 12v4"></path>
+                <path d="M8 20c0-2 1-4 4-4s4 2 4 4"></path>
+                <path d="M10 16.5L8.5 20"></path>
+                <path d="M14 16.5l1.5 3.5"></path>
+                <path d="M9 17l-2 3"></path>
+                <path d="M15 17l2 3"></path>
+              </svg>
               }
               title="Barba Lunga Hipster"
               description="Styling e cura della barba lunga per un look distintivo e alla moda."
@@ -1251,7 +1250,7 @@ const HomePage = React.memo(() => {
       <section
         id="testimonials"
         ref={sectionRefs.testimonials}
-        className={`py-20 px-4 bg-[var(--bg-primary)] transition-all duration-1000 ${getAnimationClass('testimonials')}`}
+        className={`py-20 px-4 bg-[var(--bg-secondary)] transition-all duration-1000 ${getAnimationClass('testimonials')}`}
       >
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[var(--accent)]">
@@ -1324,6 +1323,75 @@ const HomePage = React.memo(() => {
                 </div>
                 <div>
                   <h3 className="font-bold">Rossano Mantegazzi</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 4 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 5 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Patrick Cali</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 6 */}
+            <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                  "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
+                </div>
+                <div>
+                  <h3 className="font-bold">Fabio De Santis</h3>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
@@ -1415,12 +1483,87 @@ const HomePage = React.memo(() => {
                     </div>
                   </div>
                 </div>
+
+                {/* Testimonial 4 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Dopo aver provato tanti barbieri in città, ho finalmente trovato quello di fiducia! Santiago è stato competente, attento e simpatico, lo consiglio a tutti!"
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">GP</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Gianmaria Parigi-Bini</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 5 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Da quando vado da Santi sono sempre stato soddisfatto del mio taglio. Ottima professionalità e cura al dettaglio. In più è una persona accogliente che ti mette a tuo agio e offre sempre un caffè o qualcosa da bere."
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">PC</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Patrick Cali</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 6 */}
+                <div className="w-full flex-shrink-0 p-2">
+                  <div className="bg-[var(--bg-primary)] p-6 rounded-lg shadow-lg">
+                    <div className="relative">
+                      <div className="absolute -top-2 -left-2 text-5xl text-[var(--accent)] opacity-20">"</div>
+                      <p className="italic relative z-10 mb-6 text-[var(--text-primary)] text-opacity-80">
+                        "Locale pulito, personale gentile e preparato. Sono sempre aggiornati sui tagli del momento, il signor Mario è davvero molto bravo!"
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">FD</div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Fabio De Santis</h3>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Dots navigation for testimonials */}
             <div className="flex justify-center mt-6 space-x-2">
-              {[0, 1, 2].map((index) => (
+              {[0, 1, 2, 3, 4, 5].map((index) => (
                 <button
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
