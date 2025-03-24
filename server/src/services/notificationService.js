@@ -200,7 +200,7 @@ export const notificationService = {
 
       return `Your Style Barber: Promemoria appuntamento per ${date} alle ${appointment.time} ` +
              `${barberInfo} per ${appointment.service}. ` +
-             `Indirizzo: Via Example 123, Lugano.`;
+             `Indirizzo: Via Zurigo 2, Lugano.`;
     };
 
     while (attempt < retries) {
@@ -328,7 +328,7 @@ export const notificationService = {
 
       const messageBody = `Your Style Barber: Promemoria appuntamento per ${date} alle ${appointment.time} ` +
                          `${barberInfo} per ${appointment.service}. ` +
-                         `Ti aspettiamo in Via Example 123, Lugano.`;
+                         `Ti aspettiamo in Via Zurigo 2, Lugano.`;
 
       console.log('Contenuto messaggio WhatsApp:', messageBody);
       console.log('Configurazione WhatsApp:', {
@@ -399,7 +399,7 @@ export const notificationService = {
               <p><strong>Barbiere:</strong> ${appointment.barber?.firstName || ''} ${appointment.barber?.lastName || ''}</p>
               <p><strong>Prezzo:</strong> CHF${appointment.price}</p>
             </div>
-            <p style="font-style: italic;">Indirizzo: Via Example 123, Lugano</p>
+            <p style="font-style: italic;">Indirizzo: Via Zurigo 2, Lugano</p>
             <p>Ricorda che puoi modificare o cancellare l'appuntamento fino a 24 ore prima.</p>
           </div>
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">

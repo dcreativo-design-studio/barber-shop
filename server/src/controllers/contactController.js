@@ -354,7 +354,7 @@ const createConfirmationEmailToCustomer = (data) => {
         <p>Nel frattempo, puoi dare un'occhiata alla nostra demo live per farti un'idea delle funzionalità del sistema:</p>
 
         <div style="text-align: center;">
-          <a href="https://barbershop.dcreativo.ch/" class="cta-button">Vedi Demo Live</a>
+          <a href="https://yourstyle.dcreativo.ch/" class="cta-button">Vedi Demo Live</a>
         </div>
 
         <h3 style="margin-top: 30px;">Principali Funzionalità:</h3>

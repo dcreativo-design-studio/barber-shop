@@ -119,23 +119,127 @@ async createBarber(req, res) {
     }
 
     // Invia email con le credenziali al barbiere
-    await sendEmail({
-      to: barber.email,
-      subject: 'Your Style Barber Studio - Credenziali di accesso',
-      html: `
-        <h2>Benvenuto in Your Style Barber Studio!</h2>
-        <p>Ciao ${barber.firstName},</p>
-        <p>Sei stato registrato come barbiere nel nostro sistema.</p>
-        <p>Ecco le tue credenziali di accesso:</p>
-        <ul>
-          <li><strong>Email:</strong> ${barber.email}</li>
-          <li><strong>Password:</strong> ${plainPassword}</li>
-        </ul>
-        <p>Puoi accedere al tuo pannello personale cliccando <a href="${process.env.FRONTEND_URL}/login">qui</a>.</p>
-        <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
-        <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
-      `
-    });
+    // Invia email con le credenziali al barbiere
+await sendEmail({
+  to: barber.email,
+  subject: 'Your Style Barber Studio - Credenziali di accesso',
+  html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Benvenuto in Your Style Barber Studio</title>
+      <style>
+        body {
+          font-family: 'Helvetica Neue', Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .header {
+          background-color: #1a1a1a;
+          color: #fff;
+          padding: 20px;
+          text-align: center;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+          letter-spacing: 1px;
+        }
+        .content {
+          padding: 20px;
+          background-color: #fff;
+        }
+        .credentials {
+          background-color: #f7f7f7;
+          border-left: 4px solid #333;
+          padding: 15px;
+          margin: 20px 0;
+        }
+        .credentials p {
+          margin: 5px 0;
+        }
+        .button {
+          display: inline-block;
+          background-color: #333;
+          color: #fff;
+          text-decoration: none;
+          padding: 12px 25px;
+          border-radius: 4px;
+          margin: 20px 0;
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 14px;
+        }
+        .footer {
+          background-color: #f7f7f7;
+          padding: 20px;
+          text-align: center;
+          font-size: 14px;
+          color: #666;
+        }
+        .social-links {
+          margin: 15px 0;
+        }
+        .social-links a {
+          display: inline-block;
+          margin: 0 10px;
+          text-decoration: none;
+          color: #333;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>YOUR STYLE BARBER STUDIO</h1>
+        </div>
+        <div class="content">
+          <h2>Benvenuto nel nostro team!</h2>
+          <p>Ciao ${barber.firstName},</p>
+          <p>Sei stato registrato come barbiere professionista nel nostro sistema. Siamo entusiasti di averti a bordo!</p>
+
+          <div class="credentials">
+            <h3>Le tue credenziali di accesso</h3>
+            <p><strong>Email:</strong> ${barber.email}</p>
+            <p><strong>Password:</strong> ${plainPassword}</p>
+          </div>
+
+          <p>Per iniziare subito a gestire i tuoi appuntamenti e servizi, accedi al tuo pannello personale.</p>
+
+          <div style="text-align: center;">
+            <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+          </div>
+
+          <p>Ti consigliamo di cambiare la password dopo il primo accesso per garantire la massima sicurezza.</p>
+
+          <p>Se hai domande o hai bisogno di assistenza, non esitare a contattarci.</p>
+
+          <p>Cordiali saluti,<br/>Il team di Your Style Barber Studio</p>
+        </div>
+
+        <div class="footer">
+          <div class="social-links">
+            <a href="https://instagram.com/yourstylebarber" target="_blank">Instagram</a> |
+            <a href="https://facebook.com/yourstylebarber" target="_blank">Facebook</a> |
+            <a href="https://yourstyle.dcreativo.ch" target="_blank">Website</a>
+          </div>
+          <p>&copy; 2025 Your Style Barber Studio. Tutti i diritti riservati.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+});
 
     res.status(201).json({
       ...barber.toObject(),

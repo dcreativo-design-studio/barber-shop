@@ -66,58 +66,69 @@ const createEmailTemplate = (content) => {
         color: #333;
         margin: 0;
         padding: 0;
+        background-color: #f7f7f7;
       }
       .container {
         max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        border: 1px solid #e0e0e0;
+        margin: 20px auto;
+        padding: 0;
         border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
       .header {
         background-color: #1a1a1a;
         color: #fff;
-        padding: 20px;
+        padding: 25px 20px;
         text-align: center;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
-        margin-bottom: 20px;
+        margin-bottom: 0;
       }
       .footer {
-        background-color: #f5f5f5;
-        padding: 15px;
+        background-color: #1a1a1a;
+        padding: 20px;
         text-align: center;
-        font-size: 12px;
-        color: #666;
+        font-size: 14px;
+        color: #eee;
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
-        margin-top: 20px;
+        margin-top: 0;
       }
       h1, h2 {
         color: #1a1a1a;
         margin-top: 0;
       }
+      .header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 1px;
+      }
       .logo {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
         color: #fff;
         text-decoration: none;
+        letter-spacing: 1px;
       }
       .content {
-        padding: 0 20px;
+        padding: 30px;
       }
       .details {
         background-color: #f9f9f9;
-        padding: 15px;
-        border-radius: 5px;
-        margin: 15px 0;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 20px 0;
+        border-left: 4px solid #1a1a1a;
       }
       .details ul {
         list-style-type: none;
         padding: 0;
+        margin: 0;
       }
       .details li {
-        padding: 8px 0;
+        padding: 10px 0;
         border-bottom: 1px solid #eee;
       }
       .details li:last-child {
@@ -127,29 +138,40 @@ const createEmailTemplate = (content) => {
         display: inline-block;
         background-color: #1a1a1a;
         color: #fff;
-        padding: 10px 20px;
+        padding: 12px 25px;
         text-decoration: none;
         border-radius: 5px;
-        margin-top: 15px;
+        margin: 20px 0;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+      }
+      .button:hover {
+        background-color: #333;
       }
       .address {
         margin-top: 15px;
         font-style: italic;
       }
       .social {
-        margin-top: 15px;
+        margin: 20px 0;
       }
       .social a {
         margin: 0 10px;
-        color: #333;
+        color: #fff;
         text-decoration: none;
+        transition: color 0.3s;
+      }
+      .social a:hover {
+        color: #ccc;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Your Style Barber Studio</div>
+        <div class="logo">YOUR STYLE BARBER STUDIO</div>
       </div>
       <div class="content">
         ${content}
@@ -181,7 +203,9 @@ export const sendRegistrationEmail = async ({ to, user }) => {
       </ul>
     </div>
     <p>Accedi per prenotare il tuo appuntamento.</p>
-    <p>Visita il nostro sito web e accedi per iniziare a prenotare i tuoi appuntamenti.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const mailOptions = {
@@ -232,7 +256,9 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
     </div>
-    <p>Puoi visualizzare tutti gli appuntamenti nel pannello di amministrazione.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   // Contenuto email per il cliente
@@ -250,7 +276,10 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
       </ul>
     </div>
     <p class="address">Ti aspettiamo in Via Zurigo 2, Lugano</p>
-    <p>Per cancellare o modificare l'appuntamento, accedi al tuo account e visita la sezione "I miei appuntamenti" nel tuo profilo personale.</p>
+    <p>Per cancellare o modificare l'appuntamento, accedi al tuo account.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   // Contenuto email per il barbiere
@@ -267,7 +296,10 @@ export const sendBookingConfirmation = async ({ appointment, user }) => {
         <li><strong>Prezzo:</strong> CHF${appointment.price}</li>
       </ul>
     </div>
-    <p>Puoi visualizzare tutti i tuoi appuntamenti accedendo al tuo account e consultando la sezione "Agenda" nel tuo pannello personale.</p>
+    <p>Puoi visualizzare tutti i tuoi appuntamenti accedendo al tuo account.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const barberMail = {
@@ -334,13 +366,16 @@ export const sendCancellationEmailToClient = async (appointment, user) => {
       </ul>
     </div>
     <p><strong>Motivo:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
-    <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online accedendo al tuo account.</p>
+    <p>Puoi prenotare un nuovo appuntamento quando vuoi attraverso il nostro sistema di prenotazione online.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Prenota nuovo appuntamento</a>
+    </div>
   `;
 
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
-    subject: 'Cancellazione Appuntamento - Your Style Barbe Studio',
+    subject: 'Cancellazione Appuntamento - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 
@@ -375,6 +410,9 @@ export const sendCancellationEmailToAdmin = async (appointment, user) => {
     </div>
     <p><strong>Motivo cancellazione:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
     <p>Lo slot è ora disponibile per nuove prenotazioni.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const mailOptions = {
@@ -423,6 +461,9 @@ export const sendCancellationNotification = async ({ appointment, user }) => {
         <li><strong>Barbiere:</strong> ${appointment.barber?.firstName} ${appointment.barber?.lastName}</li>
       </ul>
     </div>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const barberMail = {
@@ -461,7 +502,9 @@ export const sendReminderEmail = async (appointment, user) => {
     <p><strong>Indirizzo:</strong> Via Zurigo 2, Lugano</p>
     <p>Se non puoi presentarti, ti preghiamo di cancellare l'appuntamento con almeno 24 ore di anticipo.</p>
     <p>Ti aspettiamo!</p>
-    <a href="${process.env.FRONTEND_URL}/appointments" class="button">Gestisci Appuntamenti</a>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Gestisci Appuntamenti</a>
+    </div>
   `;
 
   const mailOptions = {
@@ -498,7 +541,9 @@ export const sendPasswordChangeEmail = async (user) => {
     <p>Gentile ${user.firstName},</p>
     <p>La tua password è stata modificata con successo il ${new Date().toLocaleDateString('it-IT', dateOptions)}.</p>
     <p>Se non hai effettuato tu questa modifica, contatta immediatamente il nostro supporto.</p>
-    <p>Your Style Barber Studio Team</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const htmlContent = createEmailTemplate(content);
@@ -506,7 +551,7 @@ export const sendPasswordChangeEmail = async (user) => {
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: user.email,
-    subject: 'Conferma Cambio Password - Your Style Barber',
+    subject: 'Conferma Cambio Password - Your Style Barber Studio',
     html: htmlContent
   };
 
@@ -531,7 +576,6 @@ export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
         <li><strong>Password:</strong> ${password}</li>
       </ul>
     </div>
-    <p>Puoi accedere al tuo pannello personale visitando il nostro sito web e cliccando su "Login".</p>
     <p>Ti consigliamo di cambiare la password dopo il primo accesso.</p>
     <p>Nel tuo pannello personale potrai:</p>
     <ul>
@@ -540,8 +584,9 @@ export const sendBarberRegistrationEmail = async ({ to, barber, password }) => {
       <li>Impostare periodi di ferie o vacanza</li>
       <li>Gestire i servizi che offri</li>
     </ul>
-    <p>Per qualsiasi domanda, non esitare a contattarci.</p>
-    <p>Per accedere al tuo pannello personale, visita il nostro sito web e utilizza le credenziali fornite.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const mailOptions = {
@@ -575,13 +620,15 @@ export const sendBarberScheduleUpdateEmail = async (barber) => {
     <h2>Aggiornamento Orari Barbiere</h2>
     <p>Il barbiere ${barber.firstName} ${barber.lastName} ha aggiornato i suoi orari di lavoro o periodi di vacanza.</p>
     <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
-    <p>Accedi al pannello amministrativo per visualizzare i dettagli aggiornati.</p>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Accedi al pannello</a>
+    </div>
   `;
 
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: process.env.ADMIN_EMAIL,
-    subject: 'Aggiornamento Orari Barbiere - Your Style Barber',
+    subject: 'Aggiornamento Orari Barbiere - Your Style Barber Studio',
     html: createEmailTemplate(content)
   };
 
@@ -620,7 +667,9 @@ export const sendBarberCancellationNotification = async (appointment, user) => {
     </div>
     <p><strong>Motivo cancellazione:</strong> ${appointment.cancellationReason || 'Non specificato'}</p>
     <p>Lo slot è ora disponibile per nuove prenotazioni.</p>
-    <a href="${process.env.FRONTEND_URL}/barber/appointments" class="button">Visualizza Agenda</a>
+    <div style="text-align: center;">
+      <a href="https://yourstyle.dcreativo.ch/login" class="button">Visualizza Agenda</a>
+    </div>
   `;
 
   const mailOptions = {
