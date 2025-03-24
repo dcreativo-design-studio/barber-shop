@@ -145,18 +145,18 @@ app.use((err, req, res, next) => {
 // Funzione per inizializzare l'admin
 const initializeAdmin = async () => {
   try {
-    const existingAdmin = await User.findOne({ email: 'barbershopyourstyle@gmail.com' });
+    const existingAdmin = await User.findOne({ email: 'timm81379@gmail.com' });
 
     if (!existingAdmin) {
       const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash('2Gbnt2!3', salt);
+      const hashedPassword = await bcryptjs.hash('Admin123!', salt);
 
       const adminUser = new User({
-        email: 'barbershopyourstyle@gmail.com',
+        email: 'timm81379@gmail.com',
         password: hashedPassword,
-        firstName: 'Santiago',
+        firstName: 'Dome',
         lastName: 'Amministratore',
-        phone: '0789301599',
+        phone: '0767810194',
         role: 'admin'
       });
 
