@@ -55,7 +55,7 @@ function Stats() {
 
   const fetchBarbers = async () => {
     try {
-      const response = await fetch('https://api.barbershop.dcreativo.ch/api/barbers', {
+      const response = await fetch('https://api.yourstyle.dcreativo.ch/api/barbers', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
