@@ -1009,14 +1009,8 @@ useEffect(() => {
                   )}
                 </div>
                  {/* Aggiungi DigitalCardButton nella sezione contatti */}
-  <button
-    onClick={() => setShowDigitalCard(true)}
-    className="inline-block bg-gray-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 transition-all hover:shadow-lg transform hover:-translate-y-1 flex items-center justify-center gap-2"
-  >
-    <User className="w-5 h-5" />
-    Biglietto da Visita
-  </button>
-</div>
+                  <DigitalCardButton />
+                </div>
             ) : (
               <div className="space-y-6">
                 <p className="text-xl mb-6 text-white font-medium">
@@ -1054,6 +1048,7 @@ useEffect(() => {
                     <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
                   </Link>
                 </div>
+                <DigitalCardButton />
               </div>
             )}
           </div>
@@ -1833,13 +1828,21 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link
                   to={user ? "/booking" : "/guest-booking"}
                   className="inline-block bg-[var(--accent)] text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all hover:shadow-lg transform hover:-translate-y-1"
                 >
                   Prenota Ora
                 </Link>
+
+                <button
+                  onClick={() => setShowDigitalCard(true)}
+                  className="inline-block bg-gray-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 transition-all hover:shadow-lg transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                >
+                  <User className="w-5 h-5" />
+                  Biglietto da Visita
+                </button>
               </div>
             </div>
           </div>
