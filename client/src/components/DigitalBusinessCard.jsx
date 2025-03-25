@@ -1,139 +1,123 @@
-import { ChevronLeft, Clock, Instagram, MapPin, MessageCircle, Phone, Scissors, X } from 'lucide-react';
+import { ChevronDown, Clock, Instagram, MapPin, MessageCircle, Phone, Scissors } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const DigitalBusinessCard = ({ user, onClose }) => {
-  const [currentView, setCurrentView] = useState('main'); // 'main', 'services'
+const DigitalBusinessCard = ({ user }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const bookingUrl = "https://yourstyle.dcreativo.ch/";
 
   useEffect(() => {
-    // Animazione all'entrata
-    setAnimationClass('animate-fade-in');
+    // Aggiungi classe di animazione dopo un breve ritardo per garantire la renderizzazione iniziale
+    setTimeout(() => {
+      setAnimationClass('animate-fade-in');
+    }, 100);
   }, []);
 
-  // Gestisci transizione tra viste
-  const handleViewChange = (view) => {
-    setAnimationClass('animate-fade-out');
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
 
-    setTimeout(() => {
-      setCurrentView(view);
-      setAnimationClass('animate-fade-in');
-    }, 300);
+  const handleExpand = () => {
+    setIsExpanded(!isExpanded);
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black bg-opacity-80 backdrop-blur-sm">
-      <div className="absolute inset-0" onClick={onClose}></div>
+    <div className={`w-full max-w-md mx-auto my-6 ${animationClass} relative`}>
+      {/* Background SVG */}
+      <div className="absolute inset-0 z-0 overflow-hidden rounded-xl">
+        <img
+          src="/images/card-background.svg"
+          alt="Background"
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-      <div
-        className={`w-full max-w-md relative rounded-2xl shadow-2xl overflow-hidden ${animationClass}`}
-        style={{ maxHeight: '90vh' }}
-      >
-        {/* Pulsante di chiusura in alto a destra */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-50 bg-black bg-opacity-50 p-2 rounded-full text-white hover:bg-[var(--accent)] transition-all duration-300 shadow-lg"
-          aria-label="Chiudi"
+      {/* Card Container con effetto 3D */}
+      <div className="relative perspective z-10">
+        <div
+          className={`transition-all duration-500 transform-gpu preserve-3d ${
+            isFlipped ? 'rotate-y-180' : ''
+          } ${isExpanded ? 'scale-100' : 'scale-95 hover:scale-97'}`}
+          style={{ maxHeight: '85vh', overflowY: 'auto' }}
         >
-          <X size={18} />
-        </button>
-
-        {/* Background con effetto gradiente */}
-        <div className="absolute inset-0 z-0">
-          <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black">
-            <img
-              src="/images/card-background.svg"
-              alt=""
-              className="w-full h-full object-cover opacity-50 mix-blend-overlay"
-            />
-          </div>
-        </div>
-
-        {/* Contenuto principale */}
-        <div className="relative z-10 h-full overflow-auto">
-          {currentView === 'main' && (
-            <div className="p-6 text-white">
-              {/* Header con logo e brand */}
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center">
-                  <div className="w-14 h-14 bg-[var(--accent)] rounded-full flex items-center justify-center mr-3 shadow-lg">
-                    <Scissors className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-2xl tracking-tight">Your Style</h2>
-                    <p className="text-gray-300">Barber Shop</p>
-                  </div>
+          {/* Front of the card */}
+          <div
+            className={`bg-gradient-to-br from-gray-900 to-black text-white rounded-xl shadow-2xl p-6 backface-hidden ${
+              isFlipped ? 'hidden' : 'block'
+            }`}
+          >
+            {/* Header with logo and brand */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-[var(--accent)] rounded-full flex items-center justify-center mr-3 shadow-lg">
+                  <Scissors className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-xs font-thin opacity-50">LVGA</div>
+                <div>
+                  <h2 className="font-bold text-xl">Your Style</h2>
+                  <p className="text-sm text-gray-300">Barber Shop</p>
+                </div>
               </div>
+              <div className="text-xs font-thin opacity-50">LVGA</div>
+            </div>
 
-              {/* Separatore */}
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent my-6"></div>
+            {/* Divider */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent my-4"></div>
 
-              {/* Informazioni di contatto */}
-              <div className="space-y-5 mb-8">
-                <div className="flex items-start transform transition-all hover:translate-x-1">
-                  <MapPin className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Via Zurigo, 2</p>
-                    <p className="text-sm text-gray-300">CH-6900 Lugano</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start transform transition-all hover:translate-x-1">
-                  <Phone className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
-                  <p>+41 78 930 15 99</p>
-                </div>
-
-                <div className="flex items-start transform transition-all hover:translate-x-1">
-                  <Clock className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
-                  <div>
-                    <p>Lun: 14:00-19:00</p>
-                    <p>Mar-Sab: 9:00-19:00</p>
-                  </div>
+            {/* Main content */}
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start">
+                <MapPin className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Via Zurigo, 2</p>
+                  <p className="text-sm text-gray-300">CH-6900 Lugano</p>
                 </div>
               </div>
 
-              {/* QR Code */}
-              <div className="bg-black bg-opacity-50 rounded-xl p-5 text-center backdrop-blur-sm shadow-inner mb-6">
-                <p className="text-sm mb-3 font-medium">Prenota Online</p>
-                <div className="bg-white rounded-xl p-3 inline-block shadow-lg">
-                  <QRCodeSVG
-                    value={bookingUrl}
-                    size={120}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    level="H"
-                    includeMargin={false}
-                  />
+              <div className="flex items-start">
+                <Phone className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
+                <p>+41 78 930 15 99</p>
+              </div>
+
+              <div className="flex items-start">
+                <Clock className="w-5 h-5 text-[var(--accent)] mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  <p>Lun: 14:00-19:00</p>
+                  <p>Mar-Sab: 9:00-19:00</p>
                 </div>
-                <p className="text-xs mt-3 text-blue-300">{bookingUrl}</p>
               </div>
+            </div>
 
-              {/* Pulsanti d'azione */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Pulsante Servizi */}
-                <button
-                  onClick={() => handleViewChange('services')}
-                  className="bg-[var(--accent)] text-white py-3 px-4 rounded-xl font-medium hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
-                >
-                  <span>Servizi</span>
-                </button>
-
-                {/* Pulsante Prenota */}
-                <Link
-                  to={user ? "/booking" : "/guest-booking"}
-                  className="bg-white text-black py-3 px-4 rounded-xl font-medium hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
-                >
-                  Prenota
-                </Link>
+            {/* QR Code Section */}
+            <div className="bg-gray-800 rounded-lg p-4 text-center shadow-inner">
+              <p className="text-sm mb-2 font-medium">Prenota Online</p>
+              <div className="bg-white rounded-lg p-2 inline-block shadow-lg hover:shadow-xl transition-all">
+                <QRCodeSVG
+                  value={bookingUrl}
+                  size={120}
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                  level="H"
+                  includeMargin={false}
+                />
               </div>
+              <p className="text-xs mt-2 text-blue-300">{bookingUrl}</p>
+            </div>
 
-              {/* Social media */}
-              <div className="flex justify-center space-x-5 mt-6">
+            {/* Action buttons */}
+            <div className="mt-6 flex justify-between">
+              <button
+                onClick={handleFlip}
+                className="text-sm flex items-center bg-gray-800 hover:bg-[var(--accent)] px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                aria-label="Vedi i nostri servizi"
+              >
+                <span>Servizi</span>
+                <ChevronDown className="w-4 h-4 ml-1 transform rotate-90" />
+              </button>
 
+              <div className="flex space-x-3">
                 <a
                   href="https://www.instagram.com/yourstylelugano/?igsh=bzdocHJ5Y2dnbTJz#"
                   target="_blank"
@@ -160,68 +144,112 @@ const DigitalBusinessCard = ({ user, onClose }) => {
                 </a>
               </div>
             </div>
-          )}
+          </div>
 
+          {/* Back of the card (Services) */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-br from-gray-900 to-black text-white rounded-xl shadow-2xl p-6 backface-hidden transform-gpu rotate-y-180 ${
+              isFlipped ? 'block' : 'hidden'
+            }`}
+            style={{ maxHeight: '100%', overflowY: 'auto' }}
+          >
+            {/* Header con pulsante per tornare indietro */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={handleFlip}
+                className="text-sm flex items-center bg-gray-800 hover:bg-[var(--accent)] px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                aria-label="Torna al fronte del biglietto"
+              >
+                <ChevronDown className="w-4 h-4 mr-1 transform -rotate-90" />
+                <span>Indietro</span>
+              </button>
 
-        {currentView === 'services' && (
-            <div className="p-6 text-white">
-              {/* Header con pulsante indietro */}
-              <div className="flex items-center mb-6">
-                <button
-                  onClick={() => handleViewChange('main')}
-                  className="bg-black bg-opacity-50 p-2 rounded-full text-white hover:bg-[var(--accent)] transition-all shadow-md hover:shadow-lg flex items-center mr-4"
-                  aria-label="Torna indietro"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <h2 className="text-2xl font-bold">I Nostri Servizi</h2>
+              <h3 className="text-lg font-bold text-[var(--accent)]">I Nostri Servizi</h3>
+
+              <div className="w-8 h-8 opacity-0">
+                {/* Elemento vuoto per bilanciare il layout */}
+              </div>
+            </div>
+
+            {/* Lista servizi */}
+            <div className="mt-6 space-y-3">
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Taglio Capelli</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 30</span>
+                </div>
               </div>
 
-              {/* Lista servizi con animazioni */}
-              <div className="space-y-4 mb-8">
-                {[
-                  { name: "Taglio Capelli", price: "CHF 30" },
-                  { name: "High Definition", price: "CHF 35" },
-                  { name: "Barba Modellata", price: "CHF 25" },
-                  { name: "Taglio + Barba", price: "CHF 45" },
-                  { name: "Barba Lunga", price: "CHF 30" },
-                  { name: "Barba Express", price: "CHF 15" },
-                  { name: "Taglio Bambino", price: "CHF 20" },
-                  { name: "Universitari", price: "CHF 25" }
-                ].map((service, index) => (
-                  <div
-                    key={index}
-                    className="bg-black bg-opacity-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:translate-x-2 backdrop-blur-sm"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{service.name}</span>
-                      <span className="text-[var(--accent)] font-bold">{service.price}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">High Definition</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 35</span>
+                </div>
               </div>
 
-              {/* Pulsante di prenotazione */}
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Barba Modellata</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 25</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Taglio + Barba</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 45</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Barba Lunga</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 30</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Barba Express</span>
+                  <span className="text-[var(--accent)] font-bold">CHF 15</span>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="mt-6">
               <Link
                 to={user ? "/booking" : "/guest-booking"}
-                className="block w-full bg-[var(--accent)] text-white text-center py-4 rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl"
+                className="block w-full bg-[var(--accent)] text-white text-center py-4 rounded-lg font-bold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Prenota Ora
               </Link>
             </div>
-          )}
+          </div>
         </div>
+      </div>
+
+      {/* Expand/collapse button */}
+      <div className="text-center mt-4 relative z-10">
+        <button
+          onClick={handleExpand}
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all text-sm flex items-center mx-auto"
+        >
+          {isExpanded ? (
+            <>
+              <ChevronDown className="w-4 h-4 mr-1 transform rotate-180" />
+              <span>Riduci</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-4 h-4 mr-1" />
+              <span>Espandi</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
 };
 
-// Gestore della visualizzazione del biglietto da visita digitale
-const DigitalCardModal = ({ isOpen, onClose, user }) => {
-  if (!isOpen) return null;
-
-  return <DigitalBusinessCard user={user} onClose={onClose} />;
-};
-
-export { DigitalBusinessCard, DigitalCardModal };
+export default DigitalBusinessCard;
