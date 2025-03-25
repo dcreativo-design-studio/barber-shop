@@ -643,6 +643,7 @@ a:focus-visible {
     0%, 100% { opacity: 0; transform: scale(1); }
     50% { opacity: 0.6; transform: scale(1.15); }
   }
+
 `;
 // Componente per mostrare il biglietto da visita in un modal
 const DigitalCardModal = ({ isOpen, onClose, user }) => {

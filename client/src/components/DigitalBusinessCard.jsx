@@ -25,34 +25,24 @@ const DigitalBusinessCard = ({ user }) => {
   };
 
   return (
-    <div className={`w-full max-w-md mx-auto my-6 ${animationClass} relative`}>
-      {/* Background SVG */}
-      <div className="absolute inset-0 z-0 overflow-hidden rounded-xl">
-        <img
-          src="/images/card-background.svg"
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
+    <div className={`w-full max-w-md mx-auto my-8 ${animationClass}`}>
       {/* Card Container con effetto 3D */}
-      <div className="relative perspective z-10">
+      <div className="relative perspective">
         <div
           className={`transition-all duration-500 transform-gpu preserve-3d ${
             isFlipped ? 'rotate-y-180' : ''
-          } ${isExpanded ? 'scale-100' : 'scale-95 hover:scale-97'}`}
-          style={{ maxHeight: '85vh', overflowY: 'auto' }}
+          } ${isExpanded ? 'scale-100' : 'scale-90 hover:scale-95'}`}
         >
           {/* Front of the card */}
           <div
-            className={`bg-gradient-to-br from-gray-900 to-black text-white rounded-xl shadow-2xl p-6 backface-hidden ${
+            className={`bg-gradient-to-br from-black to-gray-800 text-white rounded-xl shadow-2xl p-6 backface-hidden ${
               isFlipped ? 'hidden' : 'block'
             }`}
           >
             {/* Header with logo and brand */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-[var(--accent)] rounded-full flex items-center justify-center mr-3 shadow-lg">
+                <div className="w-12 h-12 bg-[var(--accent)] rounded-full flex items-center justify-center mr-3">
                   <Scissors className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -91,9 +81,9 @@ const DigitalBusinessCard = ({ user }) => {
             </div>
 
             {/* QR Code Section */}
-            <div className="bg-gray-800 rounded-lg p-4 text-center shadow-inner">
-              <p className="text-sm mb-2 font-medium">Prenota Online</p>
-              <div className="bg-white rounded-lg p-2 inline-block shadow-lg hover:shadow-xl transition-all">
+            <div className="bg-gray-900 rounded-lg p-4 text-center">
+              <p className="text-sm mb-2">Prenota Online</p>
+              <div className="bg-white rounded-lg p-2 inline-block">
                 <QRCodeSVG
                   value={bookingUrl}
                   size={120}
@@ -226,4 +216,6 @@ const DigitalBusinessCard = ({ user }) => {
     </div>
   );
 };
+
+
 export default DigitalBusinessCard;
