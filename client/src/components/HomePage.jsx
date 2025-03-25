@@ -2,8 +2,8 @@ import { Award, Calendar, ChevronDown, Clock, Facebook, Instagram, Mail, MapPin,
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DCreativoFooterPromo from '../components/DCreativoFooterPromo';
-import DigitalBusinessCard from '../components/DigitalBusinessCard';
 import { useAuth } from '../context/AuthContext';
+import DigitalBusinessCard from './DigitalBusinessCard';
 // CSS Aggiuntivo per il componente DCreativo
 const dCreativoStyles = `
   .service-icon-wrapper {
