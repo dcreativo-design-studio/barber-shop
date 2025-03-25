@@ -171,13 +171,13 @@ const MarketingBarbershopSystem = () => {
                   Richiedi una Demo
                 </button>
                 <a
-                  href="https://barbershop.dcreativo.ch/"
+                  href="https://yourstyle.dcreativo.ch/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3 px-6 bg-blue-500 bg-opacity-30 text-white font-bold rounded-lg border border-white border-opacity-30 hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center"
                 >
                   <ArrowRight className="w-5 h-5 mr-2" />
-                  Vedi Demo Live
+                  Vedi l'App Live
                 </a>
               </div>
             </div>
@@ -497,13 +497,13 @@ const MarketingBarbershopSystem = () => {
 
               <div className="text-center mt-8">
                 <a
-                  href="https://barbershop.dcreativo.ch/"
+                  href="https://yourstyle.dcreativo.ch/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3 px-8 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center"
                 >
                   <ArrowRight className="w-5 h-5 mr-2" />
-                  Prova la Demo Live
+                  Prova l'App Live
                 </a>
               </div>
             </div>
