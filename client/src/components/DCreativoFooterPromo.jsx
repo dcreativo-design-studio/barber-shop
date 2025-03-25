@@ -236,15 +236,7 @@ const DCreativoFooterPromo = forwardRef((props, ref) => {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-            <a
-              href="https://barbershop.dcreativo.ch/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block text-[var(--accent)] hover:underline text-sm flex items-center font-medium"
-            >
-              <span>Vedi la demo del sistema di prenotazioni</span>
-              <ArrowRight className="w-3 h-3 ml-1" />
-            </a>
+
             <span className="hidden sm:block text-[var(--text-primary)] opacity-40">|</span>
             <button
               onClick={handleNavigateToMarketing}
