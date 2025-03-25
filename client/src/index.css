@@ -730,3 +730,202 @@ button,
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes pulse-subtle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.2; } }
+
+.perspective {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Animazioni per le particelle nello sfondo SVG */
+.particle {
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.particle1 {
+  animation-name: float1;
+}
+
+.particle2 {
+  animation-name: float2;
+  animation-delay: 0.5s;
+}
+
+.particle3 {
+  animation-name: float3;
+  animation-delay: 1s;
+}
+
+.particle4 {
+  animation-name: float4;
+  animation-delay: 1.5s;
+}
+
+.particle5 {
+  animation-name: float5;
+  animation-delay: 2s;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -20px); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-15px, 15px); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(15px, 20px); }
+}
+
+@keyframes float4 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, -10px); }
+}
+
+@keyframes float5 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(10px, 10px); }
+}
+
+.logo-elements {
+  animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Stili per il biglietto da visita digitale */
+.digital-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.digital-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.digital-card:hover::after {
+  opacity: 1;
+}
+
+/* Effetto di brillantezza sul bordo al passaggio del mouse */
+.shine-border {
+  position: relative;
+}
+
+.shine-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), transparent);
+  background-size: 200% 100%;
+  animation: shine 3s linear infinite;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.shine-border:hover::before {
+  opacity: 1;
+}
+
+@keyframes shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Effetto di hover sui pulsanti sociali */
+.social-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.social-button:hover::after {
+  transform: scale(2);
+  opacity: 1;
+}
+
+/* Animazione per il QR code */
+.qr-code-container {
+  position: relative;
+}
+
+.qr-code-container::before {
+  content: 'Scansiona!';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(59, 130, 246, 0.9);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.qr-code-container:hover::before {
+  opacity: 1;
+}
+
+/* Ottimizzazioni responsive */
+@media (max-width: 640px) {
+  .card-responsive {
+    padding: 1rem;
+  }
+
+  .text-responsive {
+    font-size: 0.875rem;
+  }
+
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,8 +2,8 @@ import { Award, Calendar, ChevronDown, Clock, Facebook, Instagram, Mail, MapPin,
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DCreativoFooterPromo from '../components/DCreativoFooterPromo';
+import DigitalBusinessCard from '../components/DigitalBusinessCard';
 import { useAuth } from '../context/AuthContext';
-
 // CSS Aggiuntivo per il componente DCreativo
 const dCreativoStyles = `
   .service-icon-wrapper {
@@ -555,7 +555,129 @@ a:focus-visible {
     transition: all 0.3s ease;
   }
 }
+  /* Stili per il biglietto da visita digitale */
+  .digital-card-container {
+    position: relative;
+    z-index: 10;
+  }
+
+  .digital-card-shadow {
+    box-shadow: 0 10px 50px -10px rgba(var(--accent-rgb), 0.5);
+  }
+
+  .digital-card-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    max-width: 90vw;
+    width: 400px;
+  }
+
+  .digital-card-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .digital-card-backdrop.visible {
+    opacity: 1;
+  }
+
+  @keyframes floatCard {
+    0% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+
+  .float-animation {
+    animation: floatCard 3s ease-in-out infinite;
+  }
+
+  /* Pulsante 3D per la prenotazione */
+  .booking-button-3d {
+    position: relative;
+    transition: all 0.3s ease;
+    transform: perspective(800px) rotateX(0) translateZ(0);
+    transform-style: preserve-3d;
+  }
+
+  .booking-button-3d:hover {
+    transform: perspective(800px) rotateX(10deg) translateZ(10px);
+  }
+
+  .booking-button-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.4));
+    transform: translateZ(-10px);
+    border-radius: 0.5rem;
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .booking-button-3d:hover::before {
+    opacity: 1;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 2px solid var(--accent);
+    opacity: 0;
+  }
+
+  .pulse-animation {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.15); }
+  }
 `;
+// Componente per mostrare il biglietto da visita in un modal
+const DigitalCardModal = ({ isOpen, onClose, user }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div
+        className={`digital-card-backdrop ${isOpen ? 'visible' : ''}`}
+        onClick={onClose}
+      ></div>
+      <div className="digital-card-popup">
+        <DigitalBusinessCard user={user} />
+        <button
+          className="mt-4 mx-auto block bg-white text-gray-800 px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+          onClick={onClose}
+        >
+          Chiudi
+        </button>
+      </div>
+    </>
+  );
+};
 // Componente DCreativoPromoLink aggiornato con sticker promozionale
 const DCreativoPromoLink = ({ onClick }) => {
   return (
@@ -655,6 +777,8 @@ const HomePage = React.memo(() => {
   const [isVisible, setIsVisible] = useState({});
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [showDCreativoPromo, setShowDCreativoPromo] = useState(false);
+  const [showDigitalCard, setShowDigitalCard] = useState(false);
+
 
   const sectionRefs = {
     hero: useRef(null),
@@ -665,7 +789,23 @@ const HomePage = React.memo(() => {
     videoGallery: useRef(null) // New reference for the video gallery section
   };
 
-
+  // Aggiungi questo componente nella sezione di Hero, sotto i pulsanti esistenti
+const DigitalCardButton = () => {
+  return (
+    <div className="mt-8">
+      <button
+        onClick={() => setShowDigitalCard(true)}
+        className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3 rounded-full hover:bg-white/20 transition-all shadow-lg hover:shadow-xl group"
+      >
+        <span className="bg-gradient-to-r from-blue-400 to-indigo-400 w-8 h-8 rounded-full flex items-center justify-center">
+          <User className="w-4 h-4 text-white" />
+        </span>
+        <span>Biglietto da Visita Digitale</span>
+        <ChevronDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+      </button>
+    </div>
+  );
+};
 
   // Scroll to section with smooth animation
   const scrollToSection = (id) => {
@@ -909,6 +1049,7 @@ useEffect(() => {
               </div>
             )}
           </div>
+
 
           <div className="mt-16">
             <button
@@ -1819,6 +1960,11 @@ useEffect(() => {
       }`}>
       <DCreativoFooterPromo ref={handleDCreativoSectionRef} />
     </div>
+    <DigitalCardModal
+  isOpen={showDigitalCard}
+  onClose={() => setShowDigitalCard(false)}
+  user={user}
+/>
   </div>
   );
 });
