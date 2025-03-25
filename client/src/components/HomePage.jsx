@@ -805,7 +805,7 @@ useEffect(() => {
             className="hero-image high-quality-image transition-transform duration-700"
             style={{
               backgroundImage: 'url("/shot-img2.png")',
-              backgroundPosition: 'center',
+              backgroundPosition: 'left',
               backgroundSize: 'cover',
               transform: isVisible.hero ? 'scale(1.05)' : 'scale(1)'
             }}
