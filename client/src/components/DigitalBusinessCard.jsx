@@ -110,11 +110,10 @@ const DigitalBusinessCard = ({ user }) => {
             <div className="mt-6 flex justify-between">
               <button
                 onClick={handleFlip}
-                className="text-sm flex items-center bg-gray-800 hover:bg-[var(--accent)] px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-                aria-label="Vedi i nostri servizi"
+                className="text-sm flex items-center text-gray-300 hover:text-white transition-colors"
               >
-                <span>Servizi</span>
-                <ChevronDown className="w-4 h-4 ml-1 transform rotate-90" />
+                Servizi
+                <ChevronDown className="w-4 h-4 ml-1 transform rotate-270" />
               </button>
 
               <div className="flex space-x-3">
@@ -146,104 +145,80 @@ const DigitalBusinessCard = ({ user }) => {
             </div>
           </div>
 
-          {/* Back of the card (Services) */}
+          {/* Back of the card */}
           <div
             className={`absolute inset-0 bg-gradient-to-br from-gray-900 to-black text-white rounded-xl shadow-2xl p-6 backface-hidden transform-gpu rotate-y-180 ${
               isFlipped ? 'block' : 'hidden'
             }`}
-            style={{ maxHeight: '100%', overflowY: 'auto' }}
           >
-            {/* Header con pulsante per tornare indietro */}
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={handleFlip}
-                className="text-sm flex items-center bg-gray-800 hover:bg-[var(--accent)] px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-                aria-label="Torna al fronte del biglietto"
-              >
-                <ChevronDown className="w-4 h-4 mr-1 transform -rotate-90" />
-                <span>Indietro</span>
-              </button>
+            <h3 className="text-xl font-bold mb-4 text-[var(--accent)]">I Nostri Servizi</h3>
 
-              <h3 className="text-lg font-bold text-[var(--accent)]">I Nostri Servizi</h3>
-
-              <div className="w-8 h-8 opacity-0">
-                {/* Elemento vuoto per bilanciare il layout */}
-              </div>
-            </div>
-
-            {/* Lista servizi */}
-            <div className="mt-6 space-y-3">
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="flex justify-between">
                   <span className="font-medium">Taglio Capelli</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 30</span>
+                  <span className="text-[var(--accent)]">CHF 30</span>
                 </div>
               </div>
 
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="flex justify-between">
                   <span className="font-medium">High Definition</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 35</span>
+                  <span className="text-[var(--accent)]">CHF 35</span>
                 </div>
               </div>
 
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="flex justify-between">
                   <span className="font-medium">Barba Modellata</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 25</span>
+                  <span className="text-[var(--accent)]">CHF 25</span>
                 </div>
               </div>
 
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="flex justify-between">
                   <span className="font-medium">Taglio + Barba</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 45</span>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Barba Lunga</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 30</span>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:translate-x-1">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Barba Express</span>
-                  <span className="text-[var(--accent)] font-bold">CHF 15</span>
+                  <span className="text-[var(--accent)]">CHF 45</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Button */}
-            <div className="mt-6">
+            <div className="mt-4 mb-6">
               <Link
                 to={user ? "/booking" : "/guest-booking"}
-                className="block w-full bg-[var(--accent)] text-white text-center py-4 rounded-lg font-bold hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="block w-full bg-[var(--accent)] text-white text-center py-3 rounded-lg font-bold hover:bg-opacity-90 transition-all"
               >
                 Prenota Ora
               </Link>
             </div>
+
+            {/* Back to front button */}
+            <button
+              onClick={handleFlip}
+              className="text-sm flex items-center text-gray-300 hover:text-white transition-colors"
+            >
+              <ChevronDown className="w-4 h-4 mr-1 transform rotate-90" />
+              Indietro
+            </button>
           </div>
         </div>
       </div>
 
       {/* Expand/collapse button */}
-      <div className="text-center mt-4 relative z-10">
+      <div className="text-center mt-4">
         <button
           onClick={handleExpand}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all text-sm flex items-center mx-auto"
+          className="text-[var(--accent)] hover:text-opacity-80 transition-colors text-sm flex items-center mx-auto"
         >
           {isExpanded ? (
             <>
               <ChevronDown className="w-4 h-4 mr-1 transform rotate-180" />
-              <span>Riduci</span>
+              Chiudi
             </>
           ) : (
             <>
               <ChevronDown className="w-4 h-4 mr-1" />
-              <span>Espandi</span>
+              Espandi
             </>
           )}
         </button>
@@ -251,5 +226,4 @@ const DigitalBusinessCard = ({ user }) => {
     </div>
   );
 };
-
 export default DigitalBusinessCard;
